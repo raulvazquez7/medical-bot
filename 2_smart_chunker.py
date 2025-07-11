@@ -167,7 +167,7 @@ def chunk_document_by_structure(file_name, medication_name, sections, full_text)
 if __name__ == '__main__':
     DATA_PATH = 'data/'
     # Prueba con Eutirox, que tiene varios nombres de medicamento
-    test_file_name = 'eutirox.pdf' 
+    test_file_name = 'enantyium_25_comprimidos.pdf' 
     test_file_path = os.path.join(DATA_PATH, test_file_name)
 
     if not os.path.exists(test_file_path):
@@ -192,8 +192,13 @@ if __name__ == '__main__':
             if chunks:
                 print(f"¡Chunking completado! Se han creado {len(chunks)} chunks.")
                 
-                print("\n--- Inspección de TODOS los Chunks ---")
-                for i, chunk in enumerate(chunks):
+                #print("\n--- Inspección de TODOS los Chunks ---")
+                #for i, chunk in enumerate(chunks):
+                
+                # Mostrar solo los primeros N chunks, no los últimos
+                N = 20  # Puedes ajustar este valor según lo que necesites
+                print(f"\n--- Inspección de los primeros {min(N, len(chunks))} Chunks ---")
+                for i, chunk in enumerate(chunks[:N]):
                     print(f"\n==================== CHUNK {i+1}/{len(chunks)} ====================")
                     print(f"METADATOS: {chunk.metadata}")
                     print("-------------------- TEXTO --------------------")
