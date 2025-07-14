@@ -1,30 +1,53 @@
 import os
 import fitz  # PyMuPDF
+import base64
+import logging
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.schema.messages import HumanMessage
+from pydantic import BaseModel, Field
+
+# --- Configuración del Logging ---
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler()  # Imprime logs en la consola
+    ]
+)
 
 # Cargar las variables de entorno (GOOGLE_API_KEY)
 load_dotenv()
 
-def extract_text_from_pdf(pdf_path):
-    """Extrae el texto completo de un archivo PDF."""
+# --- Definición del Esquema de Salida con Pydantic ---
+class ProspectusMarkdown(BaseModel):
+    """El prospecto completo convertido a un formato Markdown limpio y estructurado."""
+    markdown_content: str = Field(
+        description="El contenido completo del documento en formato Markdown, siguiendo todas las reglas de formato y estructura especificadas en el prompt."
+    )
+
+def pdf_to_base64_images(pdf_path):
+    """Convierte cada página de un PDF en una lista de imágenes en base64."""
+    logging.info(f"Convirtiendo PDF '{pdf_path}' a imágenes...")
     try:
         doc = fitz.open(pdf_path)
-        full_text = ""
-        for page in doc:
-            full_text += page.get_text()
+        base64_images = []
+        for page_num, page in enumerate(doc):
+            pix = page.get_pixmap()
+            img_bytes = pix.tobytes("png")
+            base64_image = base64.b64encode(img_bytes).decode('utf-8')
+            base64_images.append(base64_image)
         doc.close()
-        return full_text
+        logging.info(f"PDF convertido a {len(base64_images)} imágenes.")
+        return base64_images
     except Exception as e:
-        print(f"Error al leer el PDF {pdf_path}: {e}")
-        return None
+        logging.error(f"Error al convertir el PDF a imágenes: {e}")
+        return []
 
 def get_llm_prompt():
-    """Retorna el prompt detallado para el LLM."""
-    # Este es el prompt que has diseñado
+    """Retorna el prompt detallado para el LLM, adaptado para recibir imágenes."""
     return """
-Actúa como un experto en procesamiento de documentos (NLP) y análisis de texto estructurado. Tu tarea es analizar el texto de un prospecto de medicamento que te proporcionaré y convertirlo a formato Markdown, identificando y anidando correctamente su estructura jerárquica.
+Actúa como un experto en procesamiento de documentos (NLP) y análisis de texto estructurado. Tu tarea es analizar las IMÁGENES de un prospecto de medicamento que te proporcionaré y convertirlo a formato Markdown, identificando y anidando correctamente su estructura jerárquica basándote en la disposición visual del texto.
 
 El objetivo es preservar las relaciones entre secciones, subsecciones, listas y listas anidadas para que el texto resultante sea semánticamente coherente.
 
@@ -67,59 +90,70 @@ Comunique a su médico...
     - Tranquilizantes mayores (antipsicóticos).
 Lógica a aplicar: El ítem de la lista principal (- Depresores...) contiene una lista secundaria, cuyos ítems (- Tranquilizantes...) deben ir indentados en el Markdown.
 
-Ahora, por favor, procesa el texto completo que te proporcionaré a continuación y genera la salida en formato Markdown siguiendo fielmente estas reglas y ejemplos.
+Ahora, por favor, procesa las imágenes que te proporcionaré a continuación y rellena la estructura de datos requerida con el contenido convertido a formato Markdown, siguiendo fielmente estas reglas y ejemplos.
 """
 
-def generate_markdown_from_pdf(pdf_path, output_path):
+def generate_markdown_from_pdf_images(pdf_path, output_path, model_name):
     """
-    Flujo principal: lee un PDF, extrae su texto, llama al LLM y guarda el
-    resultado en un archivo Markdown.
+    Flujo principal: convierte un PDF a imágenes, llama al LLM con ellas y
+    guarda el resultado en un archivo Markdown.
     """
-    print(f"1. Extrayendo texto de '{pdf_path}'...")
-    pdf_text = extract_text_from_pdf(pdf_path)
-    if not pdf_text:
+    base64_images = pdf_to_base64_images(pdf_path)
+    if not base64_images:
         return
 
-    print("2. Inicializando el modelo LLM (Gemini 1.5 Flash)...")
-    # Usamos Gemini 1.5 Flash, que es rápido, tiene una gran ventana de contexto y es muy capaz.
-    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
-    
-    system_prompt = get_llm_prompt()
-    human_prompt = f"Aquí está el texto del prospecto:\n\n---\n\n{pdf_text}"
-    
-    print("3. Enviando la petición al LLM. Esto puede tardar unos segundos...")
+    logging.info(f"Inicializando el modelo LLM: {model_name}")
+    llm = ChatGoogleGenerativeAI(model=model_name, temperature=0)
+
+    # El método recomendado y más directo de LangChain para forzar la salida estructurada.
+    structured_llm = llm.with_structured_output(ProspectusMarkdown)
+
+    # Construimos el mensaje multimodal
+    prompt_parts = [
+        {"type": "text", "text": get_llm_prompt()},
+    ]
+    for img in base64_images:
+        prompt_parts.append({
+            "type": "image_url",
+            "image_url": f"data:image/png;base64,{img}"
+        })
+
+    message = HumanMessage(content=prompt_parts)
+
+    logging.info("Enviando la petición al LLM. Esto puede tardar varios segundos...")
     try:
-        response = llm.invoke([
-            HumanMessage(content=system_prompt),
-            HumanMessage(content=human_prompt)
-        ])
+        # La respuesta será directamente un objeto Pydantic, no un AIMessage
+        response = structured_llm.invoke([message])
+        markdown_content = response.markdown_content
         
-        markdown_content = response.content
-        
-        print(f"4. Guardando el resultado en '{output_path}'...")
+        logging.info("El LLM ha devuelto una respuesta estructurada con éxito.")
+
+        logging.info(f"Guardando el resultado en '{output_path}'...")
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(markdown_content)
-        print("¡Proceso completado con éxito!")
+        logging.info("¡Proceso completado con éxito!")
 
     except Exception as e:
-        print(f"Error al llamar al LLM: {e}")
+        logging.error(f"Error al llamar al LLM o procesar la respuesta: {e}", exc_info=True)
 
 
 if __name__ == '__main__':
-    # --- Configuración ---
+    # --- Configuración del Experimento ---
     DATA_PATH = 'data/'
-    # Usamos el PDF de Enantyum como en tu prompt de ejemplo
     INPUT_PDF_NAME = 'enantyium_25_comprimidos.pdf'
     
-    # Creamos una carpeta para guardar los Markdowns generados
+    # Modelo a utilizar: 'gemini-1.5-pro-latest' (alta calidad) o 'gemini-1.5-flash-latest' (más rápido)
+    MODEL_TO_USE = 'gemini-2.5-flash'
+
     MARKDOWN_OUTPUT_PATH = 'data_markdown'
     if not os.path.exists(MARKDOWN_OUTPUT_PATH):
         os.makedirs(MARKDOWN_OUTPUT_PATH)
 
     pdf_file_path = os.path.join(DATA_PATH, INPUT_PDF_NAME)
-    md_file_path = os.path.join(MARKDOWN_OUTPUT_PATH, INPUT_PDF_NAME.replace('.pdf', '.md'))
+    md_file_name = f"parsed_by_{MODEL_TO_USE}_{INPUT_PDF_NAME.replace('.pdf', '.md')}"
+    md_file_path = os.path.join(MARKDOWN_OUTPUT_PATH, md_file_name)
 
     if not os.path.exists(pdf_file_path):
-        print(f"Error: El archivo de entrada '{pdf_file_path}' no se encontró.")
+        logging.error(f"El archivo de entrada '{pdf_file_path}' no se encontró.")
     else:
-        generate_markdown_from_pdf(pdf_file_path, md_file_path) 
+        generate_markdown_from_pdf_images(pdf_file_path, md_file_path, MODEL_TO_USE) 
