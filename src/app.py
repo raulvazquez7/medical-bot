@@ -3,14 +3,15 @@ import os
 # Añadimos la ruta raíz para que Python pueda encontrar el módulo 'src'
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+import re
 import logging
 from typing import List
 from collections import defaultdict
 from supabase import Client, create_client
+from pydantic import BaseModel, Field
 from langchain.schema import Document, BaseRetriever
 from langchain_core.runnables import RunnablePassthrough, RunnableParallel
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 
@@ -54,10 +55,21 @@ class SupabaseRetriever(BaseRetriever):
         logging.warning("No se encontraron documentos relevantes.")
         return []
 
-# --- Plantilla de Prompt para el RAG ---
-RAG_PROMPT_TEMPLATE = """
-Eres un asistente experto en farmacología y tu única función es responder preguntas basándote EXCLUSIVAMENTE en el contexto proporcionado de un prospecto de medicamento. Eres preciso, riguroso y nunca inventas información.
+# --- NUEVO: Esquema de Salida Estructurado con Pydantic ---
+class AnswerWithSources(BaseModel):
+    """Estructura de datos para la respuesta del LLM, incluyendo la respuesta y las fuentes."""
+    answer: str = Field(
+        description="La respuesta textual, clara y concisa, a la pregunta del usuario."
+    )
+    cited_sources: List[int] = Field(
+        description="Una lista de los NÚMEROS de las fuentes [Fuente 1], [Fuente 2], etc., que se utilizaron para generar la respuesta."
+    )
 
+# --- Plantilla de Prompt Simplificada para Structured Output ---
+RAG_PROMPT_TEMPLATE = """
+Eres un asistente experto en farmacología y tu única función es responder preguntas basándote EXCLUSIVAMENTE en el contexto proporcionado. Eres preciso, riguroso y nunca inventas información.
+
+A continuación se presenta el contexto, dividido en fuentes numeradas:
 CONTEXTO:
 ---------------------
 {context}
@@ -65,12 +77,17 @@ CONTEXTO:
 
 PREGUNTA: {question}
 
-RESPUESTA (clara y concisa):
+Analiza el contexto y la pregunta y rellena la estructura de datos requerida con tu respuesta y los números de las fuentes que has utilizado.
 """
 
-def format_docs(docs: List[Document]) -> str:
-    """Función auxiliar para formatear los documentos recuperados en un único string."""
-    return "\n\n---\n\n".join(doc.page_content for doc in docs)
+def format_docs_with_sources(docs: List[Document]) -> str:
+    """
+    Función auxiliar para formatear los documentos recuperados,
+    anteponiendo un identificador de fuente a cada uno.
+    """
+    return "\n\n---\n\n".join(
+        f"[Fuente {i+1}]\n{doc.page_content}" for i, doc in enumerate(docs)
+    )
 
 def run_chatbot():
     """Inicializa y ejecuta el bucle principal del chatbot de consola."""
@@ -93,12 +110,13 @@ def run_chatbot():
         retriever = SupabaseRetriever(supabase_client=supabase, embeddings_model=embeddings)
         prompt = ChatPromptTemplate.from_template(RAG_PROMPT_TEMPLATE)
 
-        # --- Cadena RAG con Fuentes ---
+        # --- Cadena RAG con Structured Output ---
+        structured_llm = llm.with_structured_output(AnswerWithSources)
+
         rag_chain_from_docs = (
-            RunnablePassthrough.assign(context=(lambda x: format_docs(x["context"])))
+            RunnablePassthrough.assign(context=(lambda x: format_docs_with_sources(x["context"])))
             | prompt
-            | llm
-            | StrOutputParser()
+            | structured_llm
         )
 
         rag_chain_with_sources = RunnableParallel(
@@ -118,37 +136,24 @@ def run_chatbot():
             print("\nBuscando en la base de datos y generando respuesta...")
             result = rag_chain_with_sources.invoke(question)
             
-            print("\nRespuesta del Bot:")
-            print(result["answer"])
+            # Accedemos a los atributos del objeto Pydantic
+            answer_obj = result["answer"]
+            answer_text = answer_obj.answer
+            cited_indices = answer_obj.cited_sources
             
-            print("\n--- Fuentes Consultadas ---")
-            if result["context"]:
-                sources_by_doc = defaultdict(list)
-                for doc in result["context"]:
-                    source_file = doc.metadata.get('source', 'Fuente desconocida')
-                    sources_by_doc[source_file].append(doc)
-
-                for source_file, docs in sources_by_doc.items():
-                    medicine_name = docs[0].metadata.get('medicine_name', 'Nombre no disponible')
-                    print(f"\n📄 Documento: {medicine_name} (Archivo: {source_file})")
-                    for i, doc in enumerate(docs):
-                        path = doc.metadata.get('path', 'Ruta no disponible')
-                        
-                        # --- LÓGICA DE EXTRACCIÓN CORREGIDA ---
-                        page_content = doc.page_content
-                        # Usamos un separador explícito y robusto que coincide con la estructura.
-                        separator = "\n---\nCONTENIDO:\n"
-                        content_parts = page_content.split(separator, 1)
-                        
-                        # Si el separador se encontró, el texto limpio es la segunda parte.
-                        # Si no, como fallback, usamos el contenido completo (nunca debería pasar).
-                        extract_text = content_parts[1].strip() if len(content_parts) > 1 else page_content
-
-                        print(f"  - Cita {i+1}:")
-                        print(f"    Ruta: {path}")
-                        print(f"    Extracto: \"{extract_text[:250].strip()}...\"")
-            else:
-                print("No se utilizaron fuentes específicas para esta respuesta.")
+            print("\nRespuesta del Bot:")
+            print(answer_text)
+            
+            if cited_indices:
+                print("\n--- Fuentes Citadas ---")
+                unique_cited_docs = {idx: result["context"][idx-1] for idx in sorted(set(cited_indices)) if idx <= len(result["context"])}
+                
+                for idx, doc in unique_cited_docs.items():
+                    medicine_name = doc.metadata.get('medicine_name', 'Nombre no disponible')
+                    path = doc.metadata.get('path', 'Ruta no disponible')
+                    
+                    print(f"\n[Fuente {idx}] La información se encuentra en el prospecto de '{medicine_name}'")
+                    print(f"  Ruta: {path}")
 
     except ValueError as e:
         logging.error(f"Error de configuración: {e}")
