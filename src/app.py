@@ -55,7 +55,7 @@ class SupabaseRetriever(BaseRetriever):
         logging.warning("No se encontraron documentos relevantes.")
         return []
 
-# --- NUEVO: Esquema de Salida Estructurado con Pydantic ---
+# --- Structured Output ---
 class AnswerWithSources(BaseModel):
     """Estructura de datos para la respuesta del LLM, incluyendo la respuesta y las fuentes."""
     answer: str = Field(
@@ -65,11 +65,38 @@ class AnswerWithSources(BaseModel):
         description="Una lista de los NÚMEROS de las fuentes [Fuente 1], [Fuente 2], etc., que se utilizaron para generar la respuesta."
     )
 
-# --- Plantilla de Prompt Simplificada para Structured Output ---
-RAG_PROMPT_TEMPLATE = """
-Eres un asistente experto en farmacología y tu única función es responder preguntas basándote EXCLUSIVAMENTE en el contexto proporcionado. Eres preciso, riguroso y nunca inventas información.
+class QueryAnalysis(BaseModel):
+    """
+    Estructura de datos para el análisis de la pregunta del usuario.
+    Indica si la pregunta es sobre un medicamento conocido.
+    """
+    medicine_name: str = Field(description="El nombre del medicamento extraído de la pregunta. Si no se menciona ninguno, el valor debe ser 'N/A'.")
+    is_known: bool = Field(description="Es 'true' si el medicamento extraído está en la lista de medicamentos conocidos, de lo contrario es 'false'.")
 
+
+# --- Plantillas de Prompt ---
+
+TRIAGE_PROMPT_TEMPLATE = """
+Tu única tarea es analizar la pregunta del usuario para identificar si menciona un medicamento de la lista proporcionada.
+
+LISTA DE MEDICAMENTOS CONOCIDOS:
+{known_medicines}
+
+PREGUNTA DEL USUARIO:
+{question}
+
+Compara el medicamento que identifiques en la pregunta con la lista de medicamentos conocidos. Si no se menciona ningún medicamento o se menciona uno que no está en la lista, considera que no es conocido.
+
+Rellena la estructura de datos requerida con tu análisis.
+"""
+
+RAG_PROMPT_TEMPLATE = """
+**REGLA DE SEGURIDAD CRÍTICA: Eres un asistente informativo, NO un profesional médico. Tu única función es reportar con precisión lo que dice el texto del prospecto proporcionado. Está terminantemente prohibido dar consejos, opiniones personales o recomendaciones de cualquier tipo (p. ej., no digas 'deberías tomar', 'te recomiendo que', 'es seguro para ti'). Tu única tarea es resumir la información de las fuentes.**
+**REGLA DE ALCANCE: Solo puedes responder preguntas sobre la información contenida en el contexto. Si la pregunta es sobre otro tema, o es un saludo, indica amablemente que solo puedes responder sobre la información de los prospectos.**
+
+Eres un asistente experto en farmacología y tu única función es responder preguntas basándote EXCLUSIVAMENTE en el contexto proporcionado. Eres preciso, riguroso y nunca inventas información.
 A continuación se presenta el contexto, dividido en fuentes numeradas:
+
 CONTEXTO:
 ---------------------
 {context}
@@ -89,6 +116,26 @@ def format_docs_with_sources(docs: List[Document]) -> str:
         f"[Fuente {i+1}]\n{doc.page_content}" for i, doc in enumerate(docs)
     )
 
+def get_known_medicines(supabase_client: Client) -> List[str]:
+    """
+    Recupera una lista única de nombres de medicamentos de la base de datos.
+    NOTA: Para una base de datos grande, este enfoque no es eficiente.
+    Una mejor solución sería un endpoint o vista SQL dedicada.
+    """
+    logging.info("Recuperando la lista de medicamentos conocidos de la base de datos...")
+    response = supabase_client.table('documents').select('metadata').execute()
+    
+    if not response.data:
+        return []
+    
+    all_metadata = [item['metadata'] for item in response.data]
+    known_medicines = sorted(list(set(
+        meta['medicine_name'] for meta in all_metadata if meta and 'medicine_name' in meta
+    )))
+    logging.info(f"Medicamentos conocidos encontrados: {known_medicines}")
+    return known_medicines
+
+
 def run_chatbot():
     """Inicializa y ejecuta el bucle principal del chatbot de consola."""
     try:
@@ -107,16 +154,25 @@ def run_chatbot():
         else:
             raise ValueError(f"Modelo de chat no soportado: {config.CHAT_MODEL_TO_USE}. Revisa la configuración en 'src/config.py'.")
 
-        retriever = SupabaseRetriever(supabase_client=supabase, embeddings_model=embeddings)
-        prompt = ChatPromptTemplate.from_template(RAG_PROMPT_TEMPLATE)
+        # --- Paso 0: Obtener la lista de medicamentos conocidos ---
+        known_medicines = get_known_medicines(supabase)
+        if not known_medicines:
+            logging.warning("No se encontraron medicamentos en la base de datos. El guardrail de alcance no podrá funcionar.")
 
-        # --- Cadena RAG con Structured Output ---
-        structured_llm = llm.with_structured_output(AnswerWithSources)
+        # --- Cadena de Triaje (Guardrail 1) ---
+        triage_prompt = ChatPromptTemplate.from_template(TRIAGE_PROMPT_TEMPLATE)
+        triage_llm = llm.with_structured_output(QueryAnalysis)
+        triage_chain = triage_prompt | triage_llm
+
+        # --- Cadena RAG Principal ---
+        retriever = SupabaseRetriever(supabase_client=supabase, embeddings_model=embeddings)
+        rag_prompt = ChatPromptTemplate.from_template(RAG_PROMPT_TEMPLATE)
+        structured_llm_rag = llm.with_structured_output(AnswerWithSources)
 
         rag_chain_from_docs = (
             RunnablePassthrough.assign(context=(lambda x: format_docs_with_sources(x["context"])))
-            | prompt
-            | structured_llm
+            | rag_prompt
+            | structured_llm_rag
         )
 
         rag_chain_with_sources = RunnableParallel(
@@ -133,6 +189,22 @@ def run_chatbot():
                 print("Hasta luego. ¡Cuídate!")
                 break
             
+            # --- Guardrail 1: Ejecución del Triaje ---
+            print("\nAnalizando la pregunta...")
+            analysis_result = triage_chain.invoke({
+                "known_medicines": ", ".join(known_medicines),
+                "question": question
+            })
+
+            if not analysis_result.is_known:
+                print("\nRespuesta del Bot:")
+                if analysis_result.medicine_name != 'N/A':
+                    print(f"Lo siento, no puedo responder sobre '{analysis_result.medicine_name}'.")
+                
+                print(f"Actualmente solo tengo información detallada sobre los siguientes medicamentos: {', '.join(known_medicines)}.")
+                continue # Pasa a la siguiente pregunta sin ejecutar la cadena RAG
+
+            # Si el análisis es correcto, procedemos con la cadena RAG
             print("\nBuscando en la base de datos y generando respuesta...")
             result = rag_chain_with_sources.invoke(question)
             

@@ -1,50 +1,55 @@
 import os
 from dotenv import load_dotenv
 
-# Cargar las variables de entorno desde el archivo .env
+# Cargar las variables de entorno desde .env al inicio
 load_dotenv()
 
-# --- Rutas del Proyecto ---
-# Obtenemos la ruta raíz del proyecto para construir rutas absolutas
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-DATA_PATH = os.path.join(PROJECT_ROOT, 'data')
-MARKDOWN_PATH = os.path.join(PROJECT_ROOT, 'data_markdown')
+# --- Rutas de directorios ---
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_PATH = os.path.join(BASE_DIR, 'data')
+MARKDOWN_PATH = os.path.join(BASE_DIR, 'data_markdown')
 
-# --- Claves de API ---
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
-
-# --- Modelos de IA ---
-# Modelo para parsear los PDFs. 'gemini-1.5-flash-latest' es rápido y coste-efectivo.
+# --- Parámetros de Modelos ---
+# Modelo multimodal para interpretar la estructura de los PDFs
 PDF_PARSE_MODEL = 'gemini-2.5-flash'
-# Modelo de embeddings. 'text-embedding-3-small' es el estándar de OpenAI.
+# Modelo de lenguaje para el chatbot RAG
+CHAT_MODEL_TO_USE = 'gemini-2.5-flash'
+# Modelo de embedding. "text-embedding-3-small" es el más coste-efectivo de OpenAI.
 EMBEDDINGS_MODEL = "text-embedding-3-small"
-
-# --- Modelos de Chat ---
-# Define los modelos que se pueden usar para el chat.
-# Cambia CHAT_MODEL_TO_USE para seleccionar cuál usar.
-OPENAI_CHAT_MODEL = "gpt-4.1"
-GOOGLE_CHAT_MODEL = "gemini-2.5-flash"
-
-# Modelo a utilizar para la generación de respuestas en el chat.
-CHAT_MODEL_TO_USE = GOOGLE_CHAT_MODEL
 
 # --- Parámetros de Chunking ---
 CHUNK_SIZE = 1800
 CHUNK_OVERLAP = 300
 
+# --- Credenciales (leídas desde .env) ---
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+# --- LangSmith ---
+# Para activar, establece LANGCHAIN_TRACING_V2="true" en el archivo .env
+LANGCHAIN_API_KEY = os.getenv("LANGCHAIN_API_KEY")
+LANGCHAIN_PROJECT = os.getenv("LANGCHAIN_PROJECT")
+
 def check_env_vars():
-    """Comprueba que todas las variables de entorno necesarias estén definidas."""
-    required_vars = {
-        "GOOGLE_API_KEY": GOOGLE_API_KEY,
-        "OPENAI_API_KEY": OPENAI_API_KEY,
-        "SUPABASE_URL": SUPABASE_URL,
-        "SUPABASE_SERVICE_KEY": SUPABASE_SERVICE_KEY,
-    }
-    missing_vars = [key for key, value in required_vars.items() if not value]
+    """Comprueba que todas las variables de entorno necesarias para el proyecto estén cargadas."""
+    
+    # Lista de variables requeridas para la arquitectura actual del proyecto
+    required_vars = [
+        "GOOGLE_API_KEY",
+        "OPENAI_API_KEY",
+        "SUPABASE_URL",
+        "SUPABASE_SERVICE_KEY",
+    ]
+    
+    # Si LangSmith está habilitado, sus variables también son obligatorias
+    if os.getenv("LANGCHAIN_TRACING_V2") == "true":
+        required_vars.extend(["LANGCHAIN_API_KEY", "LANGCHAIN_PROJECT", "LANGCHAIN_ENDPOINT"])
+
+    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    
     if missing_vars:
-        raise ValueError(f"Faltan variables de entorno: {', '.join(missing_vars)}")
-    else:
-        print("Todas las variables de entorno necesarias están cargadas.") 
+        raise ValueError(f"Faltan las siguientes variables de entorno en tu archivo .env: {', '.join(missing_vars)}")
+    
+    print("Todas las variables de entorno necesarias están cargadas.") 
