@@ -16,37 +16,43 @@ The core of this project is a Retrieval-Augmented Generation (RAG) pipeline buil
 
 ### Step 1: LLM-Powered PDF-to-Markdown Conversion
 
-**Problem:** PDF documents are designed for visual presentation, not for data extraction. Standard text extraction tools often fail to capture the document's inherent structure (headings, lists, nested lists), leading to a flat, context-poor text file.
+**Problem:** PDF documents are designed for visual presentation, not for data extraction. Standard text extraction tools often fail to capture the document's inherent structure.
 
-**Solution:** The first stage of the pipeline (`scripts/_01_pdf_to_markdown.py`) treats the PDF as a visual document. It converts each page into an image and sends the full sequence to a multimodal LLM (Google's Gemini), prompting it to act as a document analysis expert. The LLM interprets the visual layout to generate a semantically correct and perfectly structured Markdown file.
+**Solution:** The first stage of the pipeline (`scripts/_01_pdf_to_markdown.py`) treats the PDF as a visual document. It converts each page into an image and sends the full sequence to a multimodal LLM (Google's Gemini). Crucially, it uses LangChain's **`with_structured_output`** feature, forcing the LLM to return a valid JSON object containing a single, perfectly structured Markdown string. This completely eliminates the risk of malformed outputs and makes the parsing process extremely reliable.
 
 ### Step 2: Context-Aware Chunking from Markdown
 
-**Problem:** Naive chunking strategies (e.g., splitting by a fixed character count) are a primary source of failure in RAG systems. They can separate a list item from its introductory sentence or a warning from its heading, losing critical context.
+**Problem:** Naive chunking strategies are a primary source of failure in RAG systems, as they can separate a list item from its introductory sentence, losing critical context.
 
 **Solution:** The second stage (`scripts/_02_markdown_to_chunks.py`) implements a sophisticated, structure-aware chunking logic.
-1.  **Semantic Grouping:** It first parses the Markdown file, grouping content into "semantic blocks" based on the hierarchy of headers (`#`, `##`, etc.).
-2.  **Context Injection:** This is the key innovation. When a block is chunked, a metadata header is **injected directly into the content** of every resulting chunk. This header includes the medicine's name and the full hierarchical path to that section, providing maximum context to the LLM during retrieval.
-3.  **Rich Metadata Storage:** Each chunk is also stored with a separate, structured `metadata` field containing the source file, medicine name, and hierarchical path. This is crucial for programmatic filtering and generating accurate citations in the final application.
+1.  **Semantic Grouping:** It parses the Markdown file, grouping content into "semantic blocks" based on the hierarchy of headers (`#`, `##`, etc.).
+2.  **Context Injection:** A metadata header, including the medicine's name and the full hierarchical path, is **injected directly into the content** of every resulting chunk. This provides maximum context to the LLM during retrieval.
+3.  **Rich Metadata Storage:** Each chunk is also stored with a separate, structured `metadata` field, crucial for filtering and generating accurate citations.
 
 ### Step 3: Embedding and Idempotent Vector Storage
 
-The final step is orchestrated by the main ingestion script (`scripts/_03_ingest.py`).
-1.  **Data Cleaning:** Before inserting new data, the script first deletes any existing records in the database that belong to the same source document. This ensures that updating a leaflet always replaces the old information, preventing data duplication and inconsistencies.
+The final ingestion step (`scripts/_03_ingest.py`) is designed for robustness.
+1.  **Data Cleaning:** Before inserting new data, the script first deletes any existing records belonging to the same source document, ensuring data consistency.
 2.  **Embedding:** Each context-rich chunk is converted into a vector embedding using OpenAI's `text-embedding-3-small` model.
-3.  **Storage:** The embeddings, along with their corresponding text and rich metadata, are uploaded to a Supabase PostgreSQL database equipped with the `pgvector` extension for efficient similarity search.
+3.  **Storage:** The embeddings and their metadata are uploaded to a Supabase PostgreSQL database with `pgvector` for efficient similarity search.
 
-## How to Use the Ingestion Pipeline
+### Step 4: Retrieval and Structured Generation
 
-To process a new medication leaflet, place the PDF file in the `/data` directory and run the main ingestion script from the root of the `medical-bot` folder, passing the filename as an argument:
+The user-facing application (`src/app.py`) demonstrates a professional-grade RAG implementation.
+1.  **Custom Retriever:** A custom `SupabaseRetriever` class directly queries the database using our purpose-built SQL function.
+2.  **Reliable Citations:** The final LLM call is the most critical part. Instead of just asking the model to include sources in the text (which is unreliable), we again use **`with_structured_output`**. We force the LLM to return a Pydantic object containing two distinct fields: `answer` (the text) and `cited_sources` (a list of numbers). This makes the citation process deterministic and robust, eliminating any need for fragile text parsing.
 
+## How to Use
+
+### Ingestion Pipeline
+To process a new medication leaflet, place the PDF file in the `/data` directory and run the main ingestion script from the root of the `medical-bot` folder:
 ```bash
 python scripts/_03_ingest.py nombre_del_medicamento.pdf
 ```
 
-## Next Steps: Retrieval and Generation
-
-With the knowledge base now built, the final step is to create the user-facing application. This will involve a LangChain-powered retrieval chain that:
-1.  Takes a user's question.
-2.  Queries the vector database to find the most relevant chunks of text.
-3.  Passes the retrieved chunks and the original question to an LLM to synthesize a final, accurate, and cited answer.
+### Chatbot Application
+To interact with the bot, run the main application script:
+```bash
+python src/app.py
+```
+```
