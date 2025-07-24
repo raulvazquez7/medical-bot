@@ -1,11 +1,14 @@
 import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import fitz  # PyMuPDF
 import base64
 import logging
-from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.schema.messages import HumanMessage
 from pydantic import BaseModel, Field
+from src import config
 
 # --- Configuración del Logging ---
 logging.basicConfig(
@@ -17,7 +20,7 @@ logging.basicConfig(
 )
 
 # Cargar las variables de entorno (GOOGLE_API_KEY)
-load_dotenv()
+# load_dotenv() # Eliminado, ahora se gestiona en config.py
 
 # --- Definición del Esquema de Salida con Pydantic ---
 class ProspectusMarkdown(BaseModel):
@@ -93,7 +96,7 @@ Lógica a aplicar: El ítem de la lista principal (- Depresores...) contiene una
 Ahora, por favor, procesa las imágenes que te proporcionaré a continuación y rellena la estructura de datos requerida con el contenido convertido a formato Markdown, siguiendo fielmente estas reglas y ejemplos.
 """
 
-def generate_markdown_from_pdf_images(pdf_path, output_path, model_name):
+def generate_markdown_from_pdf_images(pdf_path: str, output_path: str):
     """
     Flujo principal: convierte un PDF a imágenes, llama al LLM con ellas y
     guarda el resultado en un archivo Markdown.
@@ -102,8 +105,8 @@ def generate_markdown_from_pdf_images(pdf_path, output_path, model_name):
     if not base64_images:
         return
 
-    logging.info(f"Inicializando el modelo LLM: {model_name}")
-    llm = ChatGoogleGenerativeAI(model=model_name, temperature=0)
+    logging.info(f"Inicializando el modelo LLM: {config.PDF_PARSE_MODEL}")
+    llm = ChatGoogleGenerativeAI(model=config.PDF_PARSE_MODEL, temperature=0)
 
     # El método recomendado y más directo de LangChain para forzar la salida estructurada.
     structured_llm = llm.with_structured_output(ProspectusMarkdown)
@@ -139,21 +142,28 @@ def generate_markdown_from_pdf_images(pdf_path, output_path, model_name):
 
 if __name__ == '__main__':
     # --- Configuración del Experimento ---
-    DATA_PATH = 'data/'
-    INPUT_PDF_NAME = 'enantyium_25_comprimidos.pdf'
+    # Este bloque ahora sirve como una prueba rápida usando la configuración central.
+    # Para procesar un nuevo archivo, el punto de entrada principal es '03_ingest.py'.
+    print("--- Ejecutando prueba de '01_pdf_to_markdown.py' ---")
+    print("Este script no debe ejecutarse directamente para la ingesta. Usar '03_ingest.py'.")
     
-    # Modelo a utilizar: 'gemini-1.5-pro-latest' (alta calidad) o 'gemini-1.5-flash-latest' (más rápido)
-    MODEL_TO_USE = 'gemini-2.5-flash'
+    # Usamos una configuración de prueba
+    INPUT_PDF_NAME = 'espidifen_600.pdf'
+    
+    # Construir rutas usando la configuración central
+    pdf_file_path = os.path.join(config.DATA_PATH, INPUT_PDF_NAME)
+    
+    # Crear nombre de archivo de salida
+    model_name_slug = config.PDF_PARSE_MODEL.replace('.', '-') # Para un nombre de archivo más limpio
+    md_file_name = f"parsed_by_{model_name_slug}_{INPUT_PDF_NAME.replace('.pdf', '.md')}"
+    md_file_path = os.path.join(config.MARKDOWN_PATH, md_file_name)
 
-    MARKDOWN_OUTPUT_PATH = 'data_markdown'
-    if not os.path.exists(MARKDOWN_OUTPUT_PATH):
-        os.makedirs(MARKDOWN_OUTPUT_PATH)
-
-    pdf_file_path = os.path.join(DATA_PATH, INPUT_PDF_NAME)
-    md_file_name = f"parsed_by_{MODEL_TO_USE}_{INPUT_PDF_NAME.replace('.pdf', '.md')}"
-    md_file_path = os.path.join(MARKDOWN_OUTPUT_PATH, md_file_name)
+    # Asegurarse de que el directorio de salida exista
+    if not os.path.exists(config.MARKDOWN_PATH):
+        os.makedirs(config.MARKDOWN_PATH)
 
     if not os.path.exists(pdf_file_path):
         logging.error(f"El archivo de entrada '{pdf_file_path}' no se encontró.")
     else:
-        generate_markdown_from_pdf_images(pdf_file_path, md_file_path, MODEL_TO_USE) 
+        generate_markdown_from_pdf_images(pdf_file_path, md_file_path)
+        print(f"Prueba finalizada. El Markdown se ha guardado en: {md_file_path}") 

@@ -12,38 +12,41 @@ This project will initially be built on a knowledge base of ~20 common Spanish m
 
 ## Tech Stack & Pipeline
 
-The core of this project is a **Retrieval-Augmented Generation (RAG)** pipeline built with Python and LangChain.
+The core of this project is a Retrieval-Augmented Generation (RAG) pipeline built with Python and LangChain. The pipeline is orchestrated by a single script (`scripts/_03_ingest.py`) and is designed to be **idempotent**: re-running the process for a document automatically cleans up old data and replaces it with the updated version.
 
-### Architecture Overview (Preliminary)
+### Step 1: LLM-Powered PDF-to-Markdown Conversion
 
-This project is currently under construction. The planned pipeline is as follows:
+**Problem:** PDF documents are designed for visual presentation, not for data extraction. Standard text extraction tools often fail to capture the document's inherent structure (headings, lists, nested lists), leading to a flat, context-poor text file.
 
-1.  **Data Ingestion & Parsing**:
-    *   PDF leaflets from CIMA (Centro de Información online de Medicamentos de la AEMPS) are ingested.
-    *   A custom parser built with `PyMuPDF` analyzes the document's structure, identifying sections and subsections not just by text, but by formatting cues like **bold fonts**, **text position**, and **layout**.
+**Solution:** The first stage of the pipeline (`scripts/_01_pdf_to_markdown.py`) treats the PDF as a visual document. It converts each page into an image and sends the full sequence to a multimodal LLM (Google's Gemini), prompting it to act as a document analysis expert. The LLM interprets the visual layout to generate a semantically correct and perfectly structured Markdown file.
 
-2.  **Intelligent Chunking Strategy**:
-    *   Moving beyond generic text splitting, we are developing a content-aware chunking strategy.
-    *   The goal is to create semantically coherent chunks based on the document's logical structure (e.g., a chunk containing the entire "Advertencias y precauciones" subsection).
-    *   Each chunk is enriched with detailed, hierarchical metadata, such as:
-        ```json
-        {
-          "source": "eutirox.pdf",
-          "medication_name": "Eutirox 25 microgramos",
-          "main_section": "2. Qué necesita saber antes de empezar...",
-          "subsection": "Advertencias y precauciones" 
-        }
-        ```
-    *   This advanced chunking is key to improving retrieval accuracy and providing contextually aware answers.
+### Step 2: Context-Aware Chunking from Markdown
 
-3.  **Vector Database**:
-    *   The processed chunks are converted into vector embeddings using a sentence-transformer model (e.g., from OpenAI).
-    *   These embeddings are stored in a vector database (Supabase with `pgvector`) for efficient similarity search.
+**Problem:** Naive chunking strategies (e.g., splitting by a fixed character count) are a primary source of failure in RAG systems. They can separate a list item from its introductory sentence or a warning from its heading, losing critical context.
 
-4.  **Retrieval & Generation**:
-    *   When a user asks a question, a LangChain-powered retrieval chain will query the vector database to find the most relevant chunks.
-    *   The retrieved chunks, along with the user's question, will be passed to a Large Language Model (LLM) to generate a precise and helpful answer, with citations to the source document.
+**Solution:** The second stage (`scripts/_02_markdown_to_chunks.py`) implements a sophisticated, structure-aware chunking logic.
+1.  **Semantic Grouping:** It first parses the Markdown file, grouping content into "semantic blocks" based on the hierarchy of headers (`#`, `##`, etc.).
+2.  **Context Injection:** This is the key innovation. When a block is chunked, a metadata header is **injected directly into the content** of every resulting chunk. This header includes the medicine's name and the full hierarchical path to that section, providing maximum context to the LLM during retrieval.
+3.  **Rich Metadata Storage:** Each chunk is also stored with a separate, structured `metadata` field containing the source file, medicine name, and hierarchical path. This is crucial for programmatic filtering and generating accurate citations in the final application.
 
-## Current Status
+### Step 3: Embedding and Idempotent Vector Storage
 
-The project is in the early development phase. The primary focus is currently on perfecting the data ingestion and intelligent chunking pipeline to ensure the highest quality data foundation for the RAG system.
+The final step is orchestrated by the main ingestion script (`scripts/_03_ingest.py`).
+1.  **Data Cleaning:** Before inserting new data, the script first deletes any existing records in the database that belong to the same source document. This ensures that updating a leaflet always replaces the old information, preventing data duplication and inconsistencies.
+2.  **Embedding:** Each context-rich chunk is converted into a vector embedding using OpenAI's `text-embedding-3-small` model.
+3.  **Storage:** The embeddings, along with their corresponding text and rich metadata, are uploaded to a Supabase PostgreSQL database equipped with the `pgvector` extension for efficient similarity search.
+
+## How to Use the Ingestion Pipeline
+
+To process a new medication leaflet, place the PDF file in the `/data` directory and run the main ingestion script from the root of the `medical-bot` folder, passing the filename as an argument:
+
+```bash
+python scripts/_03_ingest.py nombre_del_medicamento.pdf
+```
+
+## Next Steps: Retrieval and Generation
+
+With the knowledge base now built, the final step is to create the user-facing application. This will involve a LangChain-powered retrieval chain that:
+1.  Takes a user's question.
+2.  Queries the vector database to find the most relevant chunks of text.
+3.  Passes the retrieved chunks and the original question to an LLM to synthesize a final, accurate, and cited answer.
