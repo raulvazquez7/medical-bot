@@ -32,3 +32,7 @@
       limit match_count;
     end;
     $$;
+
+-- Crear un índice HNSW en la columna 'embedding'
+CREATE INDEX ON documents
+USING hnsw (embedding vector_cosine_ops);
