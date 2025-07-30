@@ -1,0 +1,195 @@
+[
+    {
+      "question": "¿Para qué dolores se recomienda el uso de Espidifen?",
+      "expected_paths": [
+        "1. Qué es Espidifen y para qué se utiliza"
+      ]
+    },
+    {
+      "question": "Soy alérgico al ibuprofeno, ¿puedo tomar Espidifen?",
+      "expected_paths": [
+        "2. Qué necesita saber antes de empezar a tomar Espidifen > No tome Espidifen:",
+        "2. Qué necesita saber antes de empezar a tomar Espidifen > Precauciones cardiovasculares"
+      ]
+    },
+    {
+      "question": "Estoy en el segundo trimestre de embarazo. ¿Qué precauciones debo tener con Espidifen?",
+      "expected_paths": [
+        "2. Qué necesita saber antes de empezar a tomar Espidifen > No tome Espidifen:",
+        "2. Qué necesita saber antes de empezar a tomar Espidifen > Embarazo, lactancia y fertilidad",
+        "2. Qué necesita saber antes de empezar a tomar Espidifen > Precauciones durante el embarazo y en mujeres en edad fértil"
+      ]
+    },
+    {
+      "question": "¿Cuál es la dosis máxima de Espidifen que puede tomar un adolescente de 16 años?",
+      "expected_paths": [
+        "3. Cómo tomar Espidifen > Adultos y adolescentes"
+      ]
+    },
+    {
+      "question": "Si vomito sangre después de tomar el medicamento, ¿qué debo hacer?",
+      "expected_paths": [
+        "2. Qué necesita saber antes de empezar a tomar Espidifen > No tome Espidifen:",
+        "4. Posibles efectos adversos > Trastornos gastrointestinales",
+        "4. Posibles efectos adversos > Exploraciones complementarias > Si aparece alguno de los efectos adversos citados a continuación, interrumpa el tratamiento y acuda de inmediato a su médico:"
+      ]
+    },
+    {
+      "question": "¿El Espidifen puede afectar los resultados de un análisis de sangre?",
+      "expected_paths": [
+        "2. Qué necesita saber antes de empezar a tomar Espidifen > Interferencias con pruebas analíticas"
+      ]
+    },
+    {
+      "question": "Tengo asma. ¿Hay algún riesgo si tomo Espidifen?",
+      "expected_paths": [
+        "2. Qué necesita saber antes de empezar a tomar Espidifen > Advertencias y precauciones > Consulte a su médico antes de empezar a tomar Espidifen:",
+        "2. Qué necesita saber antes de empezar a tomar Espidifen > Trastornos respiratorios",
+        "4. Posibles efectos adversos > Trastornos del sistema inmunológico",
+        "4. Posibles efectos adversos > Trastornos respiratorios"
+      ]
+    },
+    {
+      "question": "¿Qué componentes tiene Espidifen además de ibuprofeno?",
+      "expected_paths": [
+        "6. Contenido del envase e información adicional > Composición de Espidifen"
+      ]
+    },
+    {
+      "question": "¿Cómo debo tomar el granulado de Espidifen, con o sin comida?",
+      "expected_paths": [
+        "2. Qué necesita saber antes de empezar a tomar Espidifen > Toma de Espidifen con alimentos, bebidas y alcohol",
+        "3. Cómo tomar Espidifen"
+      ]
+    },
+    {
+      "question": "He notado que me han salido ampollas en la piel después de tomar Espidifen. ¿Es normal?",
+      "expected_paths": [
+        "2. Qué necesita saber antes de empezar a tomar Espidifen > Advertencias y precauciones > Tenga especial cuidado con Espidifen:",
+        "4. Posibles efectos adversos > Trastornos de la piel y del tejido subcutáneo",
+        "4. Posibles efectos adversos > Exploraciones complementarias > Interrumpa el tratamiento con Espidifen y busque atención médica inmediatamente si nota alguno de los síntomas siguientes:",
+        "4. Posibles efectos adversos > Exploraciones complementarias > Si aparece alguno de los efectos adversos citados a continuación, interrumpa el tratamiento y acuda de inmediato a su médico:"
+      ]
+    },
+    {
+      "question": "¿Espidifen contiene azúcar? Soy diabético.",
+      "expected_paths": [
+        "2. Qué necesita saber antes de empezar a tomar Espidifen > Espidifen contiene aspartamo, sacarosa y sodio",
+        "2. Qué necesita saber antes de empezar a tomar Espidifen > Precauciones cardiovasculares > Debe comentar su tratamiento con su médico o farmacéutico antes de tomar Espidifen si:"
+      ]
+    },
+    {
+      "question": "Tengo 68 años, ¿debo tomar la misma dosis de Espidifen que un adulto joven?",
+      "expected_paths": [
+        "3. Cómo tomar Espidifen > Uso en pacientes de edad avanzada"
+      ]
+    },
+    {
+      "question": "Si tomo medicamentos para la tensión alta, ¿puedo tomar Espidifen?",
+      "expected_paths": [
+        "2. Qué necesita saber antes de empezar a tomar Espidifen > Precauciones cardiovasculares",
+        "2. Qué necesita saber antes de empezar a tomar Espidifen > Uso de Espidifen con otros medicamentos > Los medicamentos citados a continuación pueden interferir y, por tanto, no deben tomarse junto con Espidifen sin antes consultar a su médico:"
+      ]
+    },
+    {
+      "question": "¿Qué hago si mi hijo de 12 años ha tomado por accidente un sobre de Espidifen 600 mg?",
+      "expected_paths": [
+        "3. Cómo tomar Espidifen > Si toma más Espidifen del que debe",
+        "3. Cómo tomar Espidifen > Uso en niños y adolescentes",
+        "3. Cómo tomar Espidifen > Adultos y adolescentes"
+      ]
+    },
+    {
+      "question": "El médico me ha recetado Espidifen para la artritis, ¿es correcto?",
+      "expected_paths": [
+        "1. Qué es Espidifen y para qué se utiliza"
+      ]
+    },
+    {
+        "question": "¿Para qué tipo de dolor se utiliza el Nolotil?",
+        "expected_paths": [
+          "1. Qué es Nolotil y para qué se utiliza"
+        ]
+      },
+      {
+        "question": "Estoy en mi último mes de embarazo, ¿puedo tomar Nolotil?",
+        "expected_paths": [
+          "2. Qué necesita saber antes de empezar a tomar Nolotil > No tome Nolotil:",
+          "2. Qué necesita saber antes de empezar a tomar Nolotil > Embarazo, lactancia y fertilidad > Embarazo"
+        ]
+      },
+      {
+        "question": "Empecé a tomar Nolotil y ahora tengo fiebre y dolor de garganta, ¿qué debería hacer?",
+        "expected_paths": [
+          "2. Qué necesita saber antes de empezar a tomar Nolotil > Advertencias y precauciones > Recuento de los glóbulos blancos más bajo de lo normal (agranulocitosis).",
+          "2. Qué necesita saber antes de empezar a tomar Nolotil > Advertencias y precauciones > Tenga especial cuidado:",
+          "2. Qué necesita saber antes de empezar a tomar Nolotil > Advertencias y precauciones > Problemas hepáticos:",
+          "4. Posibles efectos adversos"
+        ]
+      },
+      {
+        "question": "¿Cuál es la dosis máxima de Nolotil para un adulto en un solo día?",
+        "expected_paths": [
+          "3. Cómo tomar Nolotil > Adultos y adolescentes de 15 años de edad o mayores",
+          "3. Cómo tomar Nolotil"
+        ]
+      },
+      {
+        "question": "Si he tenido problemas de hígado con el metamizol anteriormente, ¿puedo tomar Nolotil?",
+        "expected_paths": [
+          "2. Qué necesita saber antes de empezar a tomar Nolotil > Advertencias y precauciones > Problemas hepáticos:"
+        ]
+      },
+      {
+        "question": "¿Qué componentes contiene la cápsula de Nolotil además del principio activo?",
+        "expected_paths": [
+          "6. Contenido del envase e información adicional > Composición de Nolotil"
+        ]
+      },
+      {
+        "question": "Estoy tomando un medicamento para la depresión llamado sertralina, ¿hay alguna interacción con Nolotil?",
+        "expected_paths": [
+          "2. Qué necesita saber antes de empezar a tomar Nolotil > Toma de Nolotil con otros medicamentos"
+        ]
+      },
+      {
+        "question": "¿El Nolotil puede afectar a la capacidad de conducir?",
+        "expected_paths": [
+          "2. Qué necesita saber antes de empezar a tomar Nolotil > Conducción y uso de máquinas"
+        ]
+      },
+      {
+        "question": "¿Qué debo hacer si tomo más cápsulas de Nolotil de las que me recetaron?",
+        "expected_paths": [
+          "3. Cómo tomar Nolotil > Si toma más Nolotil del que debe"
+        ]
+      },
+      {
+        "question": "Mi hijo tiene 14 años. ¿Puede tomar Nolotil 575 mg?",
+        "expected_paths": [
+          "3. Cómo tomar Nolotil > Adultos y adolescentes de 15 años de edad o mayores > Niños y adolescentes menores de 15 años de edad"
+        ]
+      },
+      {
+        "question": "Estoy en tratamiento con ciclosporina después de un trasplante, ¿es seguro tomar Nolotil? ¿Qué precauciones debo tener?",
+        "expected_paths": [
+          "2. Qué necesita saber antes de empezar a tomar Nolotil > Toma de Nolotil con otros medicamentos"
+        ]
+      },
+      {
+        "question": "Resume las advertencias y precauciones más importantes del Nolotil.",
+        "expected_paths": [
+          "2. Qué necesita saber antes de empezar a tomar Nolotil > Advertencias y precauciones > Recuento de los glóbulos blancos más bajo de lo normal (agranulocitosis).",
+          "2. Qué necesita saber antes de empezar a tomar Nolotil > Advertencias y precauciones > Problemas hepáticos:",
+          "2. Qué necesita saber antes de empezar a tomar Nolotil > Advertencias y precauciones > Reacciones cutáneas graves:",
+          "2. Qué necesita saber antes de empezar a tomar Nolotil > Advertencias y precauciones > Tenga especial cuidado:",
+          "2. Qué necesita saber antes de empezar a tomar Nolotil > Advertencias y precauciones"
+        ]
+      },
+      {
+        "question": "Se me ha olvidado tomar una dosis de Nolotil, ¿qué hago?",
+        "expected_paths": [
+          "3. Cómo tomar Nolotil > Adultos y adolescentes de 15 años de edad o mayores > Si olvidó tomar Nolotil"
+        ]
+      }
+  ]
