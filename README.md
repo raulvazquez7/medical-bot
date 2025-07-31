@@ -44,6 +44,15 @@ The entire application is integrated with [LangSmith](https://smith.langchain.co
 
 Given the sensitive nature of medical information, the chatbot implements two distinct layers of safety checks: a pre-processing guardrail for scope control and a prompt-level guardrail to ensure safe and factual responses.
 
+### Experimental Research: Advanced Citation with ContextCite
+
+As part of ongoing research to improve the reliability of the chatbot, we have experimented with advanced citation techniques. Specifically, we explored the `ContextCite` library, which provides a more rigorous form of "contributive attribution".
+
+*   **Our Current Method:** The LLM self-reports which documents it used ("corroborative attribution").
+*   **ContextCite's Method:** Uses a scientific approach of ablating (removing) parts of the context to mathematically determine which specific sentences **caused** the model to generate its response ("contributive attribution").
+
+While computationally intensive, this method provides a much more granular and honest view of the model's reasoning process. An experimental script for visual comparison can be found in `evaluation/compare_citations.py`.
+
 ## Robust Evaluation Framework
 
 To guide development and ensure high quality, this project uses a comprehensive, two-layer evaluation framework based on a manually curated "golden dataset" of questions.

@@ -58,8 +58,7 @@
     {
       "question": "¿Cómo debo tomar el granulado de Espidifen, con o sin comida?",
       "expected_paths": [
-        "2. Qué necesita saber antes de empezar a tomar Espidifen > Toma de Espidifen con alimentos, bebidas y alcohol",
-        "3. Cómo tomar Espidifen"
+        "2. Qué necesita saber antes de empezar a tomar Espidifen > Toma de Espidifen con alimentos, bebidas y alcohol"
       ]
     },
     {
@@ -75,7 +74,8 @@
       "question": "¿Espidifen contiene azúcar? Soy diabético.",
       "expected_paths": [
         "2. Qué necesita saber antes de empezar a tomar Espidifen > Espidifen contiene aspartamo, sacarosa y sodio",
-        "2. Qué necesita saber antes de empezar a tomar Espidifen > Precauciones cardiovasculares > Debe comentar su tratamiento con su médico o farmacéutico antes de tomar Espidifen si:"
+        "2. Qué necesita saber antes de empezar a tomar Espidifen > Precauciones cardiovasculares > Debe comentar su tratamiento con su médico o farmacéutico antes de tomar Espidifen si:",
+        "6. Contenido del envase e información adicional > Composición de Espidifen"
       ]
     },
     {
