@@ -26,42 +26,42 @@ The second stage (`scripts/_02_markdown_to_chunks.py`) implements a sophisticate
 
 The final ingestion step (`scripts/_03_ingest.py`) is designed for robustness. It first cleans any old data for the source document in Supabase, then generates embeddings for the new chunks and uploads them.
 
+## The Chatbot Application (`src/app.py`)
+
+The user-facing application demonstrates a professional-grade RAG implementation.
+1.  **Custom Retriever:** A custom `SupabaseRetriever` class directly queries the database using our purpose-built SQL function.
+2.  **Reliable Citations:** The final LLM call is the most critical part. Instead of just asking the model to include sources in the text (which is unreliable), we again use **`with_structured_output`**. We force the LLM to return a Pydantic object containing two distinct fields: `answer` (the text) and `cited_sources` (a list of numbers). This makes the citation process deterministic and robust.
+
 ## Advanced Features: Observability & Safety
 
 To move from a functional prototype to a reliable application, this project incorporates crucial features for monitoring and safety.
 
 ### Observability with LangSmith
 
-The entire application is integrated with [LangSmith](https://smith.langchain.com/) for end-to-end observability.
-
-*   **Full Tracing:** Every time a user asks a question, LangSmith captures a detailed trace of the entire process. This includes the initial query analysis, the documents retrieved from the database, the exact prompt sent to the LLM, and the final structured output.
-*   **Debugging & Monitoring:** This visibility is essential for debugging unexpected behavior, monitoring performance (e.g., latency), and evaluating the quality of the retriever and the LLM's responses over time.
-*   **Setup:** Integration is enabled by simply adding the LangSmith environment variables (`LANGCHAIN_TRACING_V2`, `LANGCHAIN_API_KEY`, etc.) to the `.env` file.
+The entire application is integrated with [LangSmith](https://smith.langchain.com/) for end-to-end observability. Full tracing allows for detailed debugging and performance monitoring of every component in the RAG chain.
 
 ### Multi-Layered Guardrails
 
-Given the sensitive nature of medical information, the chatbot implements two distinct layers of safety checks:
+Given the sensitive nature of medical information, the chatbot implements two distinct layers of safety checks: a pre-processing guardrail for scope control and a prompt-level guardrail to ensure safe and factual responses.
 
-#### 1. Pre-Processing Guardrail: Scope Control
+## Robust Evaluation Framework
 
-Before attempting to answer a question, a "triage" step ensures the query is within the bot's knowledge base.
+To guide development and ensure high quality, this project uses a comprehensive, two-layer evaluation framework based on a manually curated "golden dataset" of questions.
 
-*   **Mechanism:** A lightweight LLM call analyzes the user's question to identify the specific medicine being asked about.
-*   **Validation:** It then checks if this medicine exists in a pre-loaded list of known medicines from our database.
-*   **Action:** If the question is about an unknown medicine, the RAG process is halted, and the bot informs the user about its limitations. This prevents the retriever from fetching irrelevant information and the LLM from attempting to answer out-of-scope questions.
+### 1. Retriever Evaluation
 
-#### 2. Prompt-Level Guardrail: Content & Safety Control
+We measure the performance of our document retrieval system *before* the LLM sees the data. Using our golden dataset, a dedicated script (`evaluation/evaluate_retriever.py`) calculates key metrics:
+*   **Recall@k:** Measures the retriever's ability to find all relevant documents.
+*   **Precision@k:** Measures how much "noise" or irrelevant information is retrieved.
+*   **F1-Score & MRR:** Provide a holistic view of the retriever's overall performance and ranking quality.
 
-The core RAG prompt has been engineered with strict rules to control the LLM's behavior and ensure user safety.
+### 2. Generation Evaluation
 
-*   **Behavioral Rules:** The prompt explicitly forbids the LLM from providing medical advice, personal opinions, or any information beyond summarizing the provided text.
-*   **Mandatory Disclaimer:** The prompt includes an unbreakable rule forcing the LLM to **always** conclude its response with a specific disclaimer: "Este texto es una guía y no sustituye el consejo médico. Consulta siempre a tu médico o farmacéutico." This ensures the user is consistently reminded of the bot's informational role.
+We evaluate the quality of the final, user-facing answer using the **RAGAS** library, which employs an "LLM-as-a-Judge" approach.
+*   **Faithfulness:** Measures the degree of hallucination by checking if the answer is strictly based on the provided context.
+*   **Answer Relevancy:** Assesses if the answer directly addresses the user's question.
 
-## The Chatbot Application (`src/app.py`)
-
-The user-facing application demonstrates a professional-grade RAG implementation.
-1.  **Custom Retriever:** A custom `SupabaseRetriever` class directly queries the database using our purpose-built SQL function.
-2.  **Reliable Citations:** The final LLM call is the most critical part. Instead of just asking the model to include sources in the text (which is unreliable), we again use **`with_structured_output`**. We force the LLM to return a Pydantic object containing two distinct fields: `answer` (the text) and `cited_sources` (a list of numbers). This makes the citation process deterministic and robust.
+This framework allows us to benchmark our system and make data-driven decisions when implementing improvements. In production, this would be complemented by sampling real user interactions for continuous online evaluation.
 
 ## How to Use
 
@@ -76,5 +76,3 @@ To interact with the bot, run the main application script:
 ```bash
 python src/app.py
 ```
-
-
