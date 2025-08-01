@@ -44,15 +44,6 @@ The entire application is integrated with [LangSmith](https://smith.langchain.co
 
 Given the sensitive nature of medical information, the chatbot implements two distinct layers of safety checks: a pre-processing guardrail for scope control and a prompt-level guardrail to ensure safe and factual responses.
 
-### Experimental Research: Advanced Citation with ContextCite
-
-As part of ongoing research to improve the reliability of the chatbot, we have experimented with advanced citation techniques. Specifically, we explored the `ContextCite` library, which provides a more rigorous form of "contributive attribution".
-
-*   **Our Current Method:** The LLM self-reports which documents it used ("corroborative attribution").
-*   **ContextCite's Method:** Uses a scientific approach of ablating (removing) parts of the context to mathematically determine which specific sentences **caused** the model to generate its response ("contributive attribution").
-
-While computationally intensive, this method provides a much more granular and honest view of the model's reasoning process. An experimental script for visual comparison can be found in `evaluation/compare_citations.py`.
-
 ## Robust Evaluation Framework
 
 To guide development and ensure high quality, this project uses a comprehensive, two-layer evaluation framework based on a manually curated "golden dataset" of questions.
@@ -71,6 +62,26 @@ We evaluate the quality of the final, user-facing answer using the **RAGAS** lib
 *   **Answer Relevancy:** Assesses if the answer directly addresses the user's question.
 
 This framework allows us to benchmark our system and make data-driven decisions when implementing improvements. In production, this would be complemented by sampling real user interactions for continuous online evaluation.
+
+## Experimental Research & Data-Driven Decisions
+
+To continuously improve the system, we follow a rigorous process of experimentation. New techniques are tested in isolation and evaluated against our baseline metrics. This data-driven approach ensures that only features with a clear positive impact are integrated.
+
+### Experiment: Query Rewriting for Improved Retrieval
+As part of our efforts to enhance retrieval performance, we tested the "Query Rewriting" technique.
+*   **Hypothesis:** Rephrasing conversational user questions into optimized, keyword-focused queries before sending them to the vector database would improve retrieval scores.
+*   **Implementation:** We added a preliminary LLM call to transform the user's input before the retrieval step.
+*   **Results:** Using our evaluation framework, an A/B test showed a negligible impact on retrieval metrics (F1-Score, Precision, Recall) while adding significant latency (~4 seconds per query) to the user's request.
+*   **Decision:** Based on this data, the feature was discarded. The performance cost far outweighed the minimal benefits, confirming that our base retriever is already robust enough for direct, conversational queries.
+
+### Experiment: Advanced Citation with ContextCite
+
+As part of ongoing research to improve the reliability of the chatbot, we have experimented with advanced citation techniques. Specifically, we explored the `ContextCite` library, which provides a more rigorous form of "contributive attribution".
+
+*   **Our Current Method:** The LLM self-reports which documents it used ("corroborative attribution").
+*   **ContextCite's Method:** Uses a scientific approach of ablating (removing) parts of the context to mathematically determine which specific sentences **caused** the model to generate its response ("contributive attribution").
+
+While computationally intensive, this method provides a much more granular and honest view of the model's reasoning process. An experimental script for visual comparison can be found in `evaluation/compare_citations.py`.
 
 ## How to Use
 
