@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 # Cargar las variables de entorno desde .env al inicio
 load_dotenv()
 
-# --- Rutas de directorios h ---
+# --- Rutas de directorios h
+#  ---
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_PATH = os.path.join(BASE_DIR, 'data')
 MARKDOWN_PATH = os.path.join(BASE_DIR, 'data_markdown')

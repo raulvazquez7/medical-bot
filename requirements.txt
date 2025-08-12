@@ -1,0 +1,21 @@
+# --- LangChain Core ---
+langchain
+langchain-core
+langchain-openai
+langchain-google-genai
+
+# --- Vector Database Client ---
+weaviate-client
+
+# --- PDF & Markdown Processing ---
+PyMuPDF # Para la librería fitz
+markdown-it-py
+
+# --- Evaluation Framework ---
+ragas
+datasets
+tqdm
+
+# --- Environment & Config ---
+python-dotenv
+pydantic 
