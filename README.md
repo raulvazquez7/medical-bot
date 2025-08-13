@@ -72,7 +72,20 @@ As part of our efforts to enhance retrieval performance, we tested the "Query Re
 *   **Hypothesis:** Rephrasing conversational user questions into optimized, keyword-focused queries before sending them to the vector database would improve retrieval scores.
 *   **Implementation:** We added a preliminary LLM call to transform the user's input before the retrieval step.
 *   **Results:** Using our evaluation framework, an A/B test showed a negligible impact on retrieval metrics (F1-Score, Precision, Recall) while adding significant latency (~4 seconds per query) to the user's request.
-*   **Decision:** Based on this data, the feature was discarded. The performance cost far outweighed the minimal benefits, confirming that our base retriever is already robust enough for direct, conversational queries.
+*   **Decision:** Based on this data, a feature that did not improve the user experience was discarded. The performance cost far outweighed the minimal benefits, confirming that our base retriever is already robust enough for direct, conversational queries.
+
+### Experiment: Hybrid Search with Pinecone
+
+To test the hypothesis that hybrid search could improve retrieval for domain-specific terms, a migration from Supabase/pgvector to Pinecone was undertaken.
+
+*   **Hypothesis:** A hybrid approach combining semantic (dense) and keyword (sparse) search would outperform a purely semantic system, especially for technical queries involving specific medication names or chemical compounds.
+*   **Implementation:**
+    1.  The vector database was migrated to Pinecone to leverage its native support for sparse-dense vectors.
+    2.  An advanced retrieval pipeline was built using Pinecone's recommended two-index approach (one for dense vectors, one for sparse) and a custom Reciprocal Rank Fusion (RRF) layer to merge results with a controllable `alpha` weight.
+*   **Results:**
+    *   The purely semantic search on Pinecone (`alpha = 1.0`) performed on-par with the original Supabase baseline, confirming its effectiveness.
+    *   However, any introduction of keyword-based search (`alpha < 1.0`) consistently **degraded performance** across all key metrics (F1-Score, MRR, Precision, Recall) for the existing `golden_dataset`.
+*   **Decision:** For the current, predominantly conceptual question set, the added complexity of a hybrid search system did not provide a net benefit and introduced a risk of performance degradation. The experiment was documented, and the project reverted to the simpler, more robust, and equally performant Supabase/pgvector architecture. This provides a valuable baseline for future work, should the system need to handle more keyword-sensitive queries.
 
 ### Experiment: Advanced Citation with ContextCite
 
