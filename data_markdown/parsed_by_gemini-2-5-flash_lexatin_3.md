@@ -2,9 +2,9 @@
 
 ## Lexatin 3 mg cápsulas duras
 
-### Bromazepam
+Bromazepam
 
-Lea todo el prospecto detenidamente antes de empezar a tomar este medicamento, porque contiene información importante para usted.
+### Lea todo el prospecto detenidamente antes de empezar a tomar este medicamento, porque contiene información importante para usted.
 
 - Conserve este prospecto, ya que puede tener que volver a leerlo.
 - Si tiene alguna duda, consulte a su médico o farmacéutico.
@@ -109,7 +109,7 @@ Si tiene algún trastorno de hígado o riñón, si padece dificultades respirato
 
 Siga estas instrucciones a menos que su médico le haya dado otras indicaciones distintas.
 
-### Las dosis normales son las siguientes:
+Las dosis normales son las siguientes:
 
 La mayoría de los pacientes no necesitan más de tres cápsulas (9 mg) al día, aunque su médico podría prescribir dosis mayores.
 
@@ -189,7 +189,7 @@ La mayoría de los pacientes toleran bien Lexatin pero al principio del tratamie
 
 Si considera que alguno de los efectos adversos que sufre es grave o si aprecia cualquier efecto adverso no mencionado en este prospecto, informe a su médico o farmacéutico.
 
-### El uso de benzodiazepinas puede conducir a una dependencia física, incluso a dosis terapéuticas. Esto ocurre, principalmente, tras la toma de forma ininterrumpida del medicamento durante largo tiempo. Para reducir al máximo el riesgo de dependencia deben tenerse en cuenta estas precauciones:
+### El uso de benzodiazepinas puede conducir a una dependencia física, incluso a dosis terapéuticas. Esto ocurre, principalmente, tras la forma de toma ininterrumpida del medicamento durante largo tiempo. Para reducir al máximo el riesgo de dependencia deben tenerse en cuenta estas precauciones:
 
 - La toma de benzodiazepinas se hará sólo bajo prescripción médica (nunca porque hayan dado resultado en otros pacientes) y nunca se aconsejarán a otras personas.
 - No aumentar en absoluto las dosis prescritas por el médico, ni prolongar el tratamiento más tiempo del recomendado.
@@ -209,7 +209,7 @@ No conservar por encima de 25ºC.
 
 No utilice este medicamento después de la fecha de caducidad que aparece en el envase después de CAD. La fecha de caducidad es el último día del mes que se indica.
 
-Los medicamentos no se deben tirar por los desagües ni a la basura. Deposite los envases y los medicamentos que no necesita en el Punto SIGRE de la farmacia. En caso de duda pregunte a su farmacéutico cómo deshacerse de los envases y de los medicamentos que no necesita. De esta forma, ayudará a proteger el medio ambiente.
+Los medicamentos no se deben tirar por los desagües ni a la basura. Deposite los envases y los medicamentos que no necesita en el Punto SIGRE de la farmacia. En caso de duda pregunte a su farmacéutico cómo deshacerse de los envases y los medicamentos que no necesita. De esta forma, ayudará a proteger el medio ambiente.
 
 # 6. Contenido del envase e información adicional
 
@@ -232,23 +232,36 @@ Lexatin 1,5 mg está disponible en cajas que contienen envases tipo blíster con
 
 ## Titular de la autorización de comercialización y responsable de la fabricación
 
-Titular:
+### Titular:
+
 CHEPLAPHARM Arzneimittel GmbH
+
 Ziegelhof 24
+
 17489 Greifswald
+
 Alemania
 
-Representante local:
+### Representante local:
+
 Laboratorios Rubio, S.A.
+
 C/ Industria, 29 - Pol. Ind. Comte de Sert
+
 08755 Castellbisbal (Barcelona)
+
 España
 
-Responsable de la fabricación:
+### Responsable de la fabricación:
+
 Recipharm Leganés, S.L.U.
+
 Calle Severo Ochoa nº 13,
+
 Leganés,
+
 28914 Madrid
+
 España
 
 ## Fecha de la última revisión de este prospecto: Noviembre 2019

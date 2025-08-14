@@ -5,7 +5,7 @@ Ibuprofeno (arginina) cinfa 600 mg granulado para solución oral EFG
 Lea todo el prospecto detenidamente antes de empezar a tomar este medicamento, porque contiene información importante para usted.
 - Conserve este prospecto, ya que puede tener que volver a leerlo.
 - Si tiene alguna duda, consulte a su médico o farmacéutico.
-- Este medicamento se le ha recetado solamente a usted, y no debe dárselo a otras personas aunque tengan los mismos síntomas que usted, ya que puede perjudicarles.
+- Este medicamento se le ha recetado solamente a usted y no debe dárselo a otras personas aunque tengan los mismos síntomas que usted, ya que puede perjudicarles.
 - Si experimenta efectos adversos, consulte a su médico o farmacéutico, incluso si se trata de efectos adversos que no aparecen en este prospecto. Ver sección 4.
 
 ## Contenido del prospecto
@@ -23,7 +23,7 @@ Este medicamento se usa en adultos y adolescentes a partir de 14 años para el t
 # 2. Qué necesita saber antes de empezar a tomar Ibuprofeno (arginina) cinfa
 ## No tome Ibuprofeno (arginina) cinfa
 - Si es alérgico al ibuprofeno o a alguno de los demás componentes de este medicamento (incluidos en la sección 6). Las reacciones que indican la alergia podrían ser: erupción cutánea con picor, hinchazón de la cara, labios o lengua, secreción nasal, dificultad respiratoria, broncoespasmo o asma.
-- Si padece una enfermedad grave del hígado o los riñones.
+- Si padece alguna enfermedad grave del hígado o los riñones.
 - Si ha tenido una úlcera o hemorragia de estómago o de duodeno, o ha sufrido una perforación del aparato digestivo.
 - Si vomita sangre.
 - Si presenta heces negras o una diarrea con sangre.
@@ -40,7 +40,7 @@ Consulte a su médico o farmacéutico antes de empezar a tomar Ibuprofeno (argin
 - Si tiene edemas (retención de líquidos).
 - Si padece o ha padecido algún trastorno del corazón o tiene tensión arterial alta.
 - Si padece asma o cualquier otro trastorno respiratorio.
-- Si tiene una infección.
+- Si tiene una infección;
 - Ibuprofeno (arginina) cinfa puede ocultar los signos de una infección, como fiebre y dolor. Por consiguiente, es posible que este medicamento retrase el tratamiento adecuado de la infección, lo que puede aumentar el riesgo de complicaciones. Esto se ha observado en la neumonía provocada por bacterias y en las infecciones bacterianas de la piel relacionadas con la varicela. Si toma este medicamento mientras tiene una infección y los síntomas de la infección persisten o empeoran, consulte a un médico sin demora.
 - Si padece una enfermedad de los riñones o del hígado, tiene más de 60 años o necesita tomar el medicamento de forma prolongada (más de 1 a 2 semanas), es posible que su médico deba efectuar controles de forma regular. Su médico le indicará la frecuencia de estos controles.
 - Si presenta síntomas de deshidratación, p.ej. diarrea grave o vómitos tome abundante líquido y contacte inmediatamente con su médico, ya que el ibuprofeno en este caso concreto podría provocar como consecuencia de la deshidratación una insuficiencia renal.
@@ -52,13 +52,13 @@ Consulte a su médico o farmacéutico antes de empezar a tomar Ibuprofeno (argin
 - Si padece porfiria intermitente aguda (enfermedad metabólica que afecta a su sangre y que puede provocar síntomas como coloración rojiza de la orina, sangre en orina o enfermedad en el hígado) para que valore la conveniencia o no del tratamiento con ibuprofeno.
 - Si sufre dolores de cabeza tras un tratamiento prolongado no debe tomar dosis más elevadas del medicamento.
 - Si experimenta alteraciones de la visión durante el tratamiento con ibuprofeno interrumpa el tratamiento y consulte al médico para someterse a un examen oftalmológico.
-- Es posible que se produzcan reacciones alérgicas con este medicamento. Debe suspenderse el tratamiento si aparece cualquier síntoma o inflamación o lesión de la piel.
-- Reacciones cutáneas: Se han notificado reacciones cutáneas graves, como dermatitis exfoliativa, eritema multiforme, síndrome de Stevens-Johnson, necrólisis epidérmica tóxica, reacción a fármacos con eosinofilia y síntomas sistémicos (síndrome DRESS) (pustulosis exantemática generalizada aguda (PEGA), en asociación con el tratamiento con Ibuprofeno (arginina). Interrumpa el tratamiento con Ibuprofeno (arginina) cinfa y busque atención médica inmediatamente si nota alguno de los síntomas relacionados con estas reacciones cutáneas graves descritas en la sección 4.
+- Es posible que se produzcan reacciones alérgicas con este medicamento. Debe suspenderse el tratamiento si aparece enrojecimiento e inflamación o lesión de la piel.
+- Reacciones cutáneas: Se han notificado reacciones cutáneas graves, como dermatitis exfoliativa, eritema multiforme, síndrome de Stevens-Johnson, necrólisis epidérmica tóxica, reacción a fármacos con eosinofilia y síntomas sistémicos (síndrome DRESS) (pustulosis exantemática generalizada aguda (PEGA), en asociación con el tratamiento con Ibuprofeno (arginina). Interrumpa el tratamiento con
+- Ibuprofeno (arginina) cinfa y busque atención médica inmediatamente si nota alguno de los síntomas relacionados con estas reacciones cutáneas graves descritas en la sección 4.
 - Deje de tomar Ibuprofeno (arginina) y acuda al médico inmediatamente si presenta cualquier erupción cutánea, lesiones en las membranas mucosas, ampollas u otros signos de alergia, ya que estos pueden ser los primeros signos de una reacción cutánea muy grave. Ver sección 4.
 - El médico efectuará un control más estricto si recibe Ibuprofeno tras ser sometido a cirugía mayor.
 - Es aconsejable no tomar este medicamento si tiene varicela.
-- Cuando Ibuprofeno se han notificado signos de reacción alérgica a este medicamento, como problemas respiratorios, hinchazón de la cara y de la región del cuello (angioedema), y dolor torácico. Deje de utilizar inmediatamente Ibuprofeno (arginina) cinfa y póngase en contacto inmediatamente con su médico o con el servicio de urgencias médicas si observa alguno de estos signos.
-
+- Con el ibuprofeno se han notificado signos de reacción alérgica a este medicamento, como problemas respiratorios, hinchazón de la cara y de la región del cuello (angioedema), y dolor torácico. Deje de utilizar inmediatamente Ibuprofeno (arginina) cinfa y póngase en contacto inmediatamente con su médico o con el servicio de urgencias médicas si observa alguno de estos signos.
 Es importante que utilice la dosis más pequeña que alivie/controle el dolor y no debe tomar este medicamento más tiempo del necesario para controlar sus síntomas. Evite la administración conjunta con otros AINEs incluidos los denominados inhibidores de la COX-2.
 
 ## Precauciones en pacientes de edad avanzada
@@ -69,8 +69,7 @@ Los medicamentos antiinflamatorios/analgésicos como ibuprofeno se pueden asocia
 
 ### Debe comentar su tratamiento con su médico o farmacéutico antes de tomar ibuprofeno si:
 - tiene problemas de corazón incluida una insuficiencia cardiaca, angina (dolor torácico) o si ha sufrido un ataque al corazón, cirugía de bypass, arteriopatía periférica (problemas de circulación en las piernas o pies debido a un estrechamiento o a un bloqueo de las arterias), o cualquier tipo de ictus (incluido un “mini-ictus” o accidente isquémico transitorio “AIT”).
-- tiene la presión arterial alta, diabetes, el colesterol alto, tiene antecedentes familiares de enfermedad de corazón o ictus, o si es fumador.
-
+- tiene presión arterial alta, diabetes, el colesterol alto, tiene antecedentes familiares de enfermedad de corazón o ictus, o si es fumador.
 Asimismo este tipo de medicamentos pueden producir retención de líquidos, especialmente en pacientes con insuficiencia cardiaca y/o tensión arterial elevada (hipertensión).
 
 ## Trastornos respiratorios
@@ -82,7 +81,8 @@ No se recomienda el uso de este medicamento en niños ni en adolescentes menores
 
 ## Precauciones durante el embarazo y en mujeres en edad fértil
 No tome ibuprofeno si se encuentra en los últimos 3 meses de embarazo, ya que podría perjudicar al feto o provocar problemas durante el parto. Puede provocar problemas renales y cardíacos a su feto.
-Puede afectar a su tendencia y la de su bebé a sangrar y retrasar o alargar el parto más de lo esperado. No debe tomar ibuprofeno durante los primeros 6 meses de embarazo salvo que se considere estrictamente necesario y como le indique su médico. Si necesita tratamiento durante este periodo o mientras trata de quedarse embarazada, deberá tomar la dosis mínima durante el menor tiempo posible.
+Puede afectar a su tendencia y la de su bebé a sangrar y retrasar o alargar el parto más de lo esperado.
+No debe tomar ibuprofeno durante los primeros 6 meses de embarazo salvo que se considere estrictamente necesario y como le indique su médico. Si necesita tratamiento durante este periodo o mientras trata de quedarse embarazada, deberá tomar la dosis mínima durante el menor tiempo posible.
 A partir de la semana 20 de embarazo, ibuprofeno puede provocar problemas renales a su feto si se toma durante más de unos días, lo que puede provocar unos niveles bajos del líquido amniótico que rodea al bebé (oligohidramnios) o el estrechamiento de un vaso sanguíneo (ductus arterioso) del corazón del bebé. Si necesita tratamiento durante un periodo superior a unos días, su médico podría recomendar controles adicionales.
 Para las pacientes en edad fértil se debe tener en cuenta que los medicamentos del tipo ibuprofeno (arginina) se han asociado con una disminución de la capacidad para concebir.
 
@@ -96,7 +96,7 @@ Informe a su médico o farmacéutico si está tomando, ha tomado recientemente o
 - Medicamentos anticoagulantes (p. ej. para tratar problemas de coagulación/evitar la coagulación, p. ej. ácido acetilsalicílico, warfarina, ticlopidina).
 - Medicamentos que bajan la presión arterial alta (inhibidores de la ECA como captopril, betabloqueantes como medicamentos con atenolol y antagonistas de los receptores de angiotensina-II como losartán).
 
-### Los medicamentos citados a continuación pueden interferir y, por tanto, no deben tomarse junto con Ibuprofeno (arginina) sin antes consultar a su médico:
+### Los medicamentos citados a continuación pueden interferir y, por tanto, no deben tomarse junto con Ibuprofeno (arginina) cinfa sin antes consultar a su médico:
 - Ácido acetilsalicílico u otros agentes antiinflamatorios/analgésicos aumentan el riesgo de úlceras gastrointestinales y hemorragias.
 - Antihipertensivos (betabloqueantes, inhibidores de la ECA y antagonistas de la angiotensina II) y diuréticos: los AINEs pueden reducir el efecto de los diuréticos y otras sustancias antihipertensivas. La administración concomitante de ibuprofeno y diuréticos ahorradores de potasio puede provocar hiperpotasemia y aumentar el riesgo de toxicidad renal.
 - Antiagregantes plaquetarios (impiden la formación de trombos o coágulos en los vasos sanguíneos) como ticlopidina.
@@ -112,7 +112,7 @@ Informe a su médico o farmacéutico si está tomando, ha tomado recientemente o
 - Probenecid (utilizado en pacientes con gota o junto con la penicilina en infecciones).
 - Antibióticos del grupo de las quinolonas como el norfloxacino.
 - Sulfinpirazona (para el tratamiento de la gota).
-- Sulfonilureas como la tolbutamida o insulina (para la diabetes), puede ser necesario ajustar la dosis.
+- Sulfonilureas como la tolbutamida o insulina (para la diabetes), ser necesario ajustar la dosis.
 - Algunos antidepresivos (inhibidores de la recaptación de serotonina).
 - Tacrolimus o ciclosporina (utilizado para evitar el rechazo en trasplantes de órganos).
 - Zidovudina (medicamento contra el virus del SIDA).
@@ -120,7 +120,6 @@ Informe a su médico o farmacéutico si está tomando, ha tomado recientemente o
 - Antibióticos aminoglucósidos como la neomicina.
 - Extractos de hierbas del árbol Ginkgo biloba.
 - Inhibidores del CYP2C9 (responsable del metabolismo de numerosos medicamentos en el hígado), como por ejemplo voriconazol y fluconazol (usados para tratar infecciones por hongos).
-
 Otros medicamentos también pueden afectar o ser afectados por el tratamiento con Ibuprofeno (arginina). Por tanto, debe consultar siempre a su médico o farmacéutico antes de utilizar Ibuprofeno (arginina) con otros medicamentos.
 
 ## Toma de Ibuprofeno (arginina) cinfa con alimentos, bebidas y alcohol
@@ -135,7 +134,7 @@ Ibuprofeno (arginina) no se debe tomar durante el embarazo, especialmente durant
 
 ### Lactancia
 En la leche materna se excretan cantidades mínimas de ibuprofeno y sus productos de degradación. Como no se conocen efectos indeseables en el lactante, no suele ser necesario interrumpir la lactancia durante el uso a corto plazo a dosis recomendadas.
-Por ello, si se queda embarazada o está en período de lactancia, consulte a su médico.
+Por ello, si se queda embarazada o está en periodo de lactancia, consulte a su médico.
 
 ## Conducción y uso de máquinas
 Si experimenta mareo, vértigo, alteraciones de la visión u otros síntomas mientras esté tomando este medicamento, no deberá conducir ni utilizar maquinaria peligrosa. Si solamente toma una dosis de ibuprofeno (arginina) o lo toma durante un periodo corto, no es necesario que adopte precauciones especiales.
@@ -158,7 +157,8 @@ Este medicamento se administra por vía oral. Ingerir inmediatamente tras disolv
 Los pacientes con molestias de estómago deben tomar el medicamento con leche o durante/después de las comidas.
 
 ## Adultos y adolescentes de 14 a 18 años
-La posología deberá ajustarse en función de la gravedad del trastorno y de las molestias del paciente. En adultos y adolescentes de 14 a 18 años la dosis recomendada es de un sobre (600 mg de ibuprofeno) cada 6 a 8 horas, dependiendo de la intensidad de los síntomas y de la respuesta al tratamiento.
+La posología deberá ajustarse en función de la gravedad del trastorno y de las molestias del paciente.
+En adultos y adolescentes de 14 a 18 años la dosis recomendada es de un sobre (600 mg de ibuprofeno) cada 6 a 8 horas, dependiendo de la intensidad de los síntomas y de la respuesta al tratamiento.
 En algunos procesos pueden requerirse dosis superiores pero, en cualquier caso, se recomienda no sobrepasar la dosis máxima diaria de 2.400 mg (4 sobres) en adultos y de 1.600 mg de ibuprofeno en adolescentes de 14 a 18 años.
 En la artritis reumatoide, pueden requerirse dosis superiores pero, en cualquier caso, se recomienda no sobrepasar la dosis máxima diaria de 2.400 mg (4 sobres de granulado) de ibuprofeno.
 En la dismenorrea primaria, se recomienda una dosis diaria de 600 mg de ibuprofeno hasta el alivio del dolor, siendo la dosis máxima por toma de 600 mg de ibuprofeno y la dosis máxima diaria de 1.200 mg (2 sobres).
@@ -176,7 +176,7 @@ Si padece una enfermedad de los riñones y/o del hígado, es posible que su méd
 En caso de sobredosis o ingestión accidental consulte inmediatamente a su médico o farmacéutico o llame al Servicio de Información Toxicológica, teléfono 91 562 04 20, indicando el medicamento y la cantidad ingerida.
 Si ha tomado más ibuprofeno (arginina) del que debe, o si un niño ha ingerido el medicamento de forma accidental, consulte inmediatamente con un médico o acuda al hospital más cercano para informarse sobre el riesgo y pedir consejo sobre las medidas que se deben tomar.
 Los síntomas por sobredosis pueden incluir náuseas, dolor de estómago, vómitos (que pueden contener esputos con sangre), diarrea, vértigo, espasmos, hipotensión o cuadros de depresión del sistema nervioso (reducción de la consciencia) dolor de cabeza, zumbido en los oídos, confusión y movimiento involuntario de los ojos. También puede producirse agitación, desorientación o coma. A dosis elevadas se han notificado síntomas de somnolencia, dolor en el pecho, palpitaciones, pérdida de conciencia, convulsiones (principalmente en niños), debilidad y mareo, sangre en la orina, niveles bajos de potasio en la sangre, escalofríos y problemas para respirar.
-Además, el tiempo de protrombina/INR puede prolongarse, posiblemente debido a la interferencia con las acciones de los factores de coagulación circulantes.
+Además, el tiempo de protrombina/INR puede prolongarse, probablemente debido a la interferencia con las acciones de los factores de coagulación circulantes.
 Raramente pueden aparecer síntomas más graves como hemorragia gastrointestinal, bajada de la tensión arterial, convulsiones y alteraciones respiratorias. La exacerbación del asma es posible en los asmáticos. En caso de sobredosis importante, se puede producir insuficiencia renal y daño hepático.
 En caso de ingestión de cantidades importantes deberá administrarse carbón activado. El vaciado de estómago se planteará si ha ingerido cantidades importantes y durante los 60 minutos siguientes a la ingestión.
 
@@ -192,125 +192,82 @@ La incidencia de efectos adversos es menor en tratamientos cortos y si la dosis 
 Se han observado los siguientes efectos adversos:
 
 ## Infecciones e infestaciones
-### Muy raros:
-Exacerbación de inflamaciones relacionadas con la infección (por ejemplo, el desarrollo de la fascitis necrotizante), coincidiendo con el uso de medicamentos antiinflamatorios no esteroideos.
+Muy raros: Exacerbación de inflamaciones relacionadas con la infección (por ejemplo, el desarrollo de la fascitis necrotizante), coincidiendo con el uso de medicamentos antiinflamatorios no esteroideos.
 Nota: Si se observan signos de infección o empeoran durante el tratamiento con ibuprofeno, se recomienda ir al médico inmediatamente, por si es necesario iniciar una terapia antiinfecciosa/antibiótica.
 
 ## Trastornos de la sangre y del sistema linfático
-### Raros:
-Anemia aplásica (insuficiencia de la médula ósea para producir diferentes tipos de células).
-### Muy raros:
-Disminución de plaquetas, disminución de los glóbulos blancos (puede manifestarse por la aparición de infecciones frecuentes con fiebre, escalofríos o dolor de garganta), disminución de los glóbulos rojos (puede manifestarse por dificultad respiratoria o palidez de la piel), disminución de granulocitos (un tipo de glóbulos blancos que puede predisponer a que se contraigan infecciones), pancitopenia (deficiencia de glóbulos rojos, blancos y plaquetas en la sangre), agranulocitosis (disminución muy grande de granulocitos), anemia hemolítica (destrucción prematura de los glóbulos rojos). Los primeros síntomas son: fiebre, dolor de garganta, úlceras superficiales en la boca, síntomas pseudogripales, cansancio extremo, hemorragia nasal y cutánea. Prolongación del tiempo de sangrado.
+Raros: Anemia aplásica (insuficiencia de la médula ósea para producir diferentes tipos de células).
+Muy raros: Disminución de plaquetas, disminución de los glóbulos blancos (puede manifestarse por la aparición de infecciones frecuentes con fiebre, escalofríos o dolor de garganta), disminución de los glóbulos rojos (puede manifestarse por dificultad respiratoria o palidez de la piel), disminución de granulocitos (un tipo de glóbulos blancos que puede predisponer a que se contraigan infecciones), pancitopenia (deficiencia de glóbulos rojos, blancos y plaquetas en la sangre), agranulocitosis (disminución muy grande de granulocitos), anemia hemolítica (destrucción prematura de los glóbulos rojos). Los primeros síntomas son: fiebre, dolor de garganta, úlceras superficiales en la boca, síntomas pseudogripales, cansancio extremo, hemorragia nasal y cutánea. Prolongación del tiempo de sangrado.
 
 ## Trastornos del sistema inmunológico
-### Poco frecuentes:
-Reacción alérgica, reacciones de hipersensibilidad con erupción cutánea y prurito, así como ataques de asma (posiblemente junto con caída de la tensión arterial).
-### Raros:
-Anafilaxia (reacción alérgica generalizada).
-### Muy raros:
-Reacciones de hipersensibilidad graves (éstas pueden caracterizarse por hinchazón de la cara, lengua y laringe con broncoespasmo, disnea, taquicardia e hipotensión que puede incluir un shock potencialmente mortal).
+Poco frecuentes: Reacción alérgica, reacciones de hipersensibilidad con erupción cutánea y prurito, así como ataques de asma (posiblemente junto con caída de la tensión arterial).
+Raros: Anafilaxia (reacción alérgica generalizada).
+Muy raros: Reacciones de hipersensibilidad graves (éstas pueden caracterizarse por hinchazón de la cara, lengua y laringe con broncoespasmo, disnea, taquicardia e hipotensión que puede incluir un shock potencialmente mortal).
 Nota: En la aparición de estos síntomas, que pueden ocurrir con el primer uso, se requiere asistencia inmediata de un médico.
 
 ## Trastornos psiquiátricos
-### Poco frecuentes:
-Insomnio, ansiedad, intranquilidad.
-### Raros:
-Reacción psicótica, nerviosismo, irritabilidad, depresión, confusión, desorientación.
+Poco frecuentes: Insomnio, ansiedad, intranquilidad.
+Raros: Reacción psicótica, nerviosismo, irritabilidad, depresión, confusión, desorientación.
 
 ## Trastornos del sistema nervioso
-### Frecuentes:
-Fatiga o somnolencia, dolor de cabeza y mareos o sensación de inestabilidad.
-### Poco frecuentes:
-Insomnio, excitación, irritabilidad.
-### Raros:
-Parestesia (sensación de adormecimiento, hormigueo, acorchamiento, etc. más frecuente en manos, pies, brazos y piernas).
-### Muy raros:
-Meningitis aséptica. En la mayor parte de los casos en los que se ha comunicado meningitis aséptica con ibuprofeno, el paciente sufría alguna forma de enfermedad autoinmune (como lupus eritematoso sistémico u otras enfermedades del colágeno) lo que suponía un factor de riesgo. Los síntomas de meningitis aséptica observados fueron rigidez en cuello, dolor de cabeza, náuseas, vómitos, fiebre o desorientación.
+Poco frecuentes: Dolor de cabeza, mareo, vértigo, fatiga o somnolencia.
+Raros: Parestesia (sensación de adormecimiento, hormigueo, acorchamiento, etc. más frecuente en manos, pies, brazos y piernas).
+Muy raros: Meningitis aséptica. En la mayor parte de los casos en los que se ha comunicado meningitis aséptica con ibuprofeno, el paciente sufría alguna forma de enfermedad autoinmune (como lupus eritematoso sistémico u otras enfermedades del colágeno) lo que suponía un factor de riesgo. Los síntomas de meningitis aséptica observados fueron rigidez en cuello, dolor de cabeza, náuseas, vómitos, fiebre o desorientación.
 
 ## Trastornos oculares
-### Poco frecuentes:
-Alteraciones de la visión.
-### Raros:
-Visión anormal o borrosa.
-### Frecuencia no conocida:
-Papiledema (inflamación del nervio óptico).
+Poco frecuentes: Alteraciones de la visión.
+Raros: Visión anormal o borrosa.
+Frecuencia no conocida: Papiledema (inflamación del nervio óptico).
 
 ## Trastornos del oído y del laberinto
-### Frecuentes:
-Vértigo.
-### Poco frecuentes:
-Zumbidos o pitidos en los oídos.
-### Raros:
-Dificultad auditiva.
+Frecuentes: Vértigo.
+Poco frecuentes: Zumbidos o pitidos en los oídos.
+Raros: Dificultad auditiva.
 
 ## Trastornos cardiacos
 Los medicamentos como ibuprofeno (arginina), pueden asociarse con un moderado aumento de riesgo de sufrir un ataque de corazón (“infarto de miocardio”) o cerebral.
-### Muy raros:
-Palpitaciones, insuficiencia cardiaca.
-### Frecuencia no conocida:
-Fallo cardiaco, dolor torácico, que puede ser un signo de una reacción alérgica potencialmente grave llamada síndrome de Kounis.
+Muy raros: Palpitaciones, insuficiencia cardiaca.
+Frecuencia no conocida: Fallo cardiaco, dolor torácico, que puede ser un signo de una reacción alérgica potencialmente grave llamada síndrome de Kounis.
 
 ## Trastornos vasculares
 También se han observado edema (retención de líquidos), hipertensión arterial, e insuficiencia cardíaca en asociación con tratamientos con medicamentos del tipo ibuprofeno (arginina).
-### Muy raros:
-Hipertensión arterial.
-### Frecuencia no conocida:
-Trombosis arterial.
+Muy raros: Hipertensión arterial.
+Frecuencia no conocida: Trombosis arterial.
 
 ## Trastornos respiratorios, torácicos y mediastínicos
-### Poco frecuentes:
-Asma, agravamiento del asma, broncoespasmo, disnea (dificultad respiratoria).
-### Frecuencia no conocida:
-Irritación de garganta.
+Poco frecuentes: Asma, agravamiento del asma, broncoespasmo, disnea (dificultad respiratoria).
+Frecuencia no conocida: Irritación de garganta.
 
 ## Trastornos gastrointestinales
-Los efectos adversos más frecuentes que ocurren con los medicamentos como ibuprofeno (arginina) son los gastrointestinales: Úlceras pépticas, hemorragias digestivas, perforaciones (en algunos casos mortales), especialmente en los pacientes de edad avanzada.
-### Frecuentes:
-Molestias gastrointestinales como pirosis (acidez, reflujo), dolor abdominal, náuseas, vómitos, flatulencia, diarrea, estreñimiento y ligeras hemorragias gastrointestinales que pueden provocar anemia en casos excepcionales.
-### Poco frecuentes:
-Úlceras gastrointestinales, potencialmente con hemorragia y perforación, estomatitis ulcerosa, exacerbación de la colitis y de la enfermedad de Crohn, melenas (sangre en heces), gastritis.
-### Raros:
-Vómitos con sangre.
-### Muy raros:
-Inflamación del esófago, pancreatitis, estenosis intestinal.
-### Frecuencia no conocida:
-Anorexia.
+Los efectos adversos más frecuentes que ocurren con los medicamentos como Ibuprofeno (arginina) son los gastrointestinales: Úlceras pépticas, hemorragias digestivas, perforaciones (en algunos casos mortales), especialmente en los pacientes de edad avanzada.
+Frecuentes: Molestias gastrointestinales como pirosis (acidez, reflujo), dolor abdominal, náuseas, vómitos, flatulencia, diarrea, estreñimiento y ligeras hemorragias gastrointestinales que pueden provocar anemia en casos excepcionales.
+Poco frecuentes: Úlceras gastrointestinales, potencialmente con hemorragia y perforación, estomatitis ulcerosa, exacerbación de la colitis y de la enfermedad de Crohn, melenas (sangre en heces), gastritis.
+Raros: Vómitos con sangre.
+Muy raros: Inflamación del esófago, pancreatitis, estenosis intestinal.
+Frecuencia no conocida: Anorexia.
 
 ## Trastornos hepatobiliares
-### Raros:
-Lesión hepática, hepatitis (inflamación del hígado), anomalías de la función hepática e ictericia (coloración amarilla de la piel y ojos).
+Raros: Lesión hepática, hepatitis (inflamación del hígado), anomalías de la función hepática e ictericia (coloración amarilla de la piel y ojos).
 
 ## Trastornos de la piel y del tejido subcutáneo
-### Frecuentes:
-Erupción en la piel.
-### Poco frecuentes:
-Enrojecimiento de la piel, picor o hinchazón de la piel, púrpura (manchas violáceas en la piel).
-### Muy raros:
-Reacciones alérgicas graves (shock anafiláctico).
-### Raros:
-Eritema multiforme, síndrome de Stevens-Johnson, necrólisis epidérmica tóxica (lesiones cutáneas erosivas en mucosas y lesiones dolorosas con necrosis y desprendimiento de la epidermis). Caída del cabello, eritema multiforme (lesión en la piel). Excepcionalmente pueden darse infecciones cutáneas graves y complicaciones en el tejido blando durante la varicela.
-### Frecuencia no conocida:
-La piel se vuelve sensible a la luz (fotosensibilidad), agravamiento de reacciones cutáneas.
-Se puede producir una reacción cutánea grave conocida como síndrome DRESS. Los síntomas del síndrome DRESS incluyen: erupción cutánea, inflamación de los ganglios linfáticos y eosinófilos elevados (un tipo de glóbulos blancos). Erupción generalizada roja escamosa, con bultos debajo de la piel y ampollas localizados principalmente en los pliegues cutáneos, el tronco y las extremidades superiores, que se acompaña de fiebre al inicio del tratamiento (pustulosis exantemática generalizada aguda). Deje de tomar Ibuprofeno (arginina) si presenta estos síntomas y solicite atención médica de inmediato. Ver también la sección 2.
+Frecuentes: Erupción en la piel.
+Poco frecuentes: Enrojecimiento de la piel, picor o hinchazón de la piel, púrpura (manchas violáceas en la piel).
+Muy raros: Reacciones alérgicas graves (shock anafiláctico).
+Muy raros: Reacciones cutáneas graves, como eritema multiforme, síndrome de Stevens-Johnson (lesiones diseminadas que afectan a la piel y a dos o más mucosas y lesiones de color púrpura, preferiblemente en el tronco) y la necrólisis epidérmica tóxica (erosiones en mucosas y lesiones dolorosas con necrosis y desprendimiento de la epidermis). Caída del cabello, eritema multiforme (lesión en la piel). Excepcionalmente pueden darse infecciones cutáneas graves y complicaciones en el tejido blando durante la varicela.
+Frecuencia no conocida: La piel se vuelve sensible a la luz (fotosensibilidad), agravamiento de reacciones cutáneas.
+Se puede producir una reacción cutánea grave conocida como síndrome DRESS. Los síntomas del síndrome DRESS incluyen: erupción cutánea, inflamación de los ganglios linfáticos y eosinófilos elevados (un tipo de glóbulos blancos). Erupción generalizada roja escamosa, con bultos debajo de la piel y ampollas localizados principalmente en los pliegues cutáneos, el tronco y las extremidades superiores, que se acompañan de fiebre al inicio del tratamiento (pustulosis exantemática generalizada aguda). Deje de tomar Ibuprofeno (arginina) si presenta estos síntomas y solicite atención médica de inmediato. Ver también la sección 2.
 
 ## Trastornos renales y urinarios
-### Raros:
-Hematuria (presencia de sangre en la orina).
-### Muy raros:
-Edema (signos que pueden ser indicativos de enfermedad renal, que a veces pueden incluir insuficiencia renal), daño tisular renal (necrosis papilar), aumento de la concentración de ácido úrico sérico. En base a la experiencia con los antiinflamatorios no esteroideos en general, no pueden excluirse casos de nefritis intersticial, síndrome nefrótico e insuficiencia renal.
+Raros: Hematuria (presencia de sangre en la orina).
+Muy raros: Edema (signos que pueden ser indicativos de enfermedad renal, que a veces pueden incluir insuficiencia renal), daño tisular renal (necrosis papilar), aumento de la concentración de ácido úrico sérico. En base a la experiencia con los antiinflamatorios no esteroideos en general, no pueden excluirse casos de nefritis intersticial, síndrome nefrótico e insuficiencia renal.
 
 ## Trastornos generales
-### Muy raros:
-Agravación de inflamaciones durante procesos infecciosos.
-### Frecuencia no conocida:
-Edema.
+Muy raros: Agravación de inflamaciones durante procesos infecciosos.
+Frecuencia no conocida: Edema.
 
 ## Exploraciones complementarias
-### Raros:
-Alteración de las pruebas de función hepática.
-### Frecuencia no conocida:
-Alteración de las pruebas de función renal.
-
+Raros: Alteración de las pruebas de función hepática.
+Frecuencia no conocida: Alteración de las pruebas de función renal.
 Hasta la fecha no se han comunicado reacciones alérgicas graves con Ibuprofeno (arginina), aunque no pueden descartarse. Las manifestaciones de este tipo de efectos podrían ser fiebre, erupción en la piel, dolor abdominal, dolor de cabeza intenso y persistente, náuseas, vómitos, angioedema, hinchazón de la cara, lengua y garganta, dificultad respiratoria, asma, palpitaciones, hipotensión (disminución de la tensión arterial) o shock.
 
 ### Si aparece alguno de los efectos adversos citados a continuación, interrumpa el tratamiento y acuda de inmediato a su médico:

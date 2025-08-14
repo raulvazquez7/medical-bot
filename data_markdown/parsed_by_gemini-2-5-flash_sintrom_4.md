@@ -1,4 +1,4 @@
-Prospecto: información para el usuario
+# Prospecto: información para el usuario
 Sintrom 4 mg comprimidos
 Acenocumarol
 
@@ -8,13 +8,13 @@ Lea todo el prospecto detenidamente antes de empezar a tomar el medicamento, por
 - Este medicamento se le ha recetado solamente a usted y no debe dárselo a otras personas aunque tengan los mismos síntomas que usted, ya que puede perjudicarles.
 - Si experimenta efectos adversos consulte a su médico o farmacéutico, incluso si se trata de efectos adversos que no aparecen en este prospecto. Ver sección 4.
 
-## Contenido del prospecto
-- 1. Qué es Sintrom y para qué se utiliza
-- 2. Qué necesita saber antes de empezar a tomar Sintrom
-- 3. Cómo tomar Sintrom
-- 4. Posibles efectos adversos
-- 5. Conservación de Sintrom
-- 6. Contenido del envase e información adicional
+Contenido del prospecto
+1. Qué es Sintrom y para qué se utiliza
+2. Qué necesita saber antes de empezar a tomar Sintrom
+3. Cómo tomar Sintrom
+4. Posibles efectos adversos
+5. Conservación de Sintrom
+6. Contenido del envase e información adicional
 
 # 1. Qué es Sintrom y para qué se utiliza
 Sintrom es un medicamento que contiene el principio activo acenocumarol. El acenocumarol pertenece al grupo de medicamentos denominados anticoagulantes, que disminuyen la capacidad de coagular de la sangre y por tanto, ayudan a prevenir la formación de coágulos en los vasos sanguíneos.
@@ -24,12 +24,13 @@ Sintrom se utiliza para la prevención y el tratamiento de la coagulación de la
 # 2. Qué necesita saber antes de empezar a tomar Sintrom
 Sólo puede tomar Sintrom bajo supervisión médica. Sintrom no es adecuado para todos los pacientes.
 
-## No tome Sintrom si:
+## No tome Sintrom
 - si es alérgico al acenocumarol, o a alguno de los demás componentes de este medicamento incluidos en la sección 6.
 - si puede tener problemas para seguir el tratamiento (p. ej. pacientes seniles sin asistencia, con alcoholismo o trastornos mentales).
 - si padece trastornos de la sangre con tendencia al sangrado o enfermedades hemorrágicas graves (p. ej. hemofilia).
 - si ha sufrido o va a someterse a intervenciones quirúrgicas mayores como operaciones en los ojos o el cerebro.
-- si ha sufrido intervenciones quirúrgicas (pulmón, próstata, útero, etc.) en las que se sangre mucho, incluidas las intervenciones dentales, por el aumento de la capacidad de disolver coágulos sanguíneos que tiene el medicamento.
+- si ha sufrido intervenciones quirúrgicas (pulmón, próstata, útero, etc.) en las que se sangre mucho.
+- incluidas las intervenciones dentales, por el aumento de la capacidad de disolver coágulos sanguíneos que tiene el medicamento.
 - si padece úlcera de estómago o tiene hemorragias intestinales, cerebrales o pulmonares.
 - si tiene una infección grave o inflamación en el corazón.
 - si tiene la tensión arterial alta no controlada.
@@ -52,62 +53,58 @@ Si presenta cualquiera de las condiciones descritas anteriormente, informe a su 
 
 ## Toma de Sintrom con otros medicamentos:
 Informe a su médico o farmacéutico si está tomando, ha tomado recientemente o pudiera tener que tomar cualquier otro medicamento.
-### Los efectos de Sintrom pueden interferir con los de otros medicamentos, en particular:
-#### Medicamentos que pueden aumentar la actividad de Sintrom:
-- Heparina: medicamento que se usa también para prevenir la coagulación de la sangre;
-- Ácido salicílico y sustancias relacionadas como aspirina, ácido aminosalicílico, diflunisal: medicamentos utilizados para el dolor;
-- Clopidogrel, ticlopidina, fenilbutazona u otros derivados de la pirazolona (por ejemplo, sulfinpirazona);
-- Otros antiinflamatorios no esteroideos, incluidos los llamados inhibidores de la ciclooxigenasa-2 (por ejemplo, celecoxib);
-- Metilprednisolona (corticoesteroide) cuando se inyecta en vena en dosis elevadas.
-
+Los efectos de Sintrom pueden interferir con los de otros medicamentos, en particular:
+- Medicamentos que pueden aumentar la actividad de Sintrom:
+    - Heparina: medicamento que se usa también para prevenir la coagulación de la sangre;
+    - Ácido salicílico y sustancias relacionadas como aspirina, ácido aminosalicílico, diflunisal: medicamentos utilizados para el dolor;
+    - Clopidogrel, ticlopidina, fenilbutazona u otros derivados de la pirazolona (por ejemplo, sulfinpirazona);
+    - Otros antiinflamatorios no esteroideos, incluidos los llamados inhibidores de la ciclooxigenasa-2 (por ejemplo, celecoxib);
+    - Metilprednisolona (corticoesteroide) cuando se inyecta en vena en dosis elevadas.
 Los controles (análisis de sangre) serán más frecuentes en el caso de tomar estos medicamentos con Sintrom.
-
-#### Otros medicamentos que pueden aumentar la actividad de Sintrom, tales como:
-- alopurinol: medicamento utilizado para la gota;
-- esteroides anabolizantes y andrógenos: medicamentos utilizados para el desarrollo muscular;
-- agentes antiarrítmicos como amiodarona, quinidina: medicamentos utilizados para normalizar el ritmo del corazón;
-- antibióticos como eritromicina, tetraciclinas, neomicina, cloranfenicol, amoxicilina, algunas cefalosporinas, fluoroquinolonas y clindamicina: medicamentos utilizados para tratar las infecciones;
-- inhibidores de la recaptación de serotonina como citalopram, fluoxetina, sertralina: grupo de medicamentos antidepresivos;
-- cimetidina: medicamento utilizado para el ardor y la úlcera péptica;
-- clofibrato y otros medicamentos similares que se utilizan para controlar el colesterol;
-- corticoides como metilprednisolona, prednisona: medicamentos utilizados para el tratamiento de la inflamación;
-- disulfiram: medicamento utilizado para el alcoholismo;
-- ácido etacrínico: medicamento para aumentar la producción de orina;
-- glucagón: medicamento utilizado para mantener los niveles de azúcar en sangre;
-- derivados del imidazol como metronidazol y miconazol (incluso aplicado sobre la piel): medicamentos utilizados para tratar las infecciones por hongos;
-- paracetamol: medicamento utilizado para el dolor y la fiebre;
-- sulfonamidas (incluido co-trimoxazol): medicamentos utilizados para tratar las infecciones;
-- tolbustamida, clorpropamida: medicamentos utilizados para la diabetes;
-- hormonas tiroideas (incluida dextrotiroxina): medicamentos utilizados para tratar los problemas de tiroides;
-- estatinas como fluvastatina, atorvastatina, simvastatina: medicamentos para bajar los niveles de colesterol;
-- tamoxifeno: medicamento utilizado en el cáncer de pecho;
-- tramadol: medicamento utilizado para el dolor;
-- omeprazol: medicamento protector gástrico;
-- uroquinasa, estreptoquinasa, alteplasa y argatroban: medicamentos utilizados en el infarto para disolver los coágulos de sangre;
-- cisaprida: medicamento para tratar los problemas gastrointestinales;
-- antiácidos como hidróxido de magnesio;
-- viloxacina: medicamento antidepresivo;
-- neocarpina: medicamento utilizado para la tos;
-- vitamina E;
-- glucosamina (para la osteoartritis) puede aumentar el efecto de Sintrom.
-
-#### Medicamentos que pueden disminuir el efecto de Sintrom tales como:
-- aminoglutetimida, azatioprina, 6-mercaptopurina: medicamentos utilizados en el cáncer;
-- ritonavir, nelfinavir: medicamentos utilizados para el SIDA;
-- barbitúricos, carbamazepina: medicamentos utilizados para la epilepsia y convulsiones;
-- colestiramina: medicamento utilizado para controlar el colesterol;
-- griseofulvina: medicamento utilizado para las infecciones por hongos;
-- anticonceptivos orales: medicamentos utilizados para evitar el embarazo;
-- rifampicina: medicamento utilizado para tratar las infecciones;
-- hierba de San Juan: planta utilizada para el tratamiento de la depresión, también llamada hipérico;
-- diuréticos tiazídicos: medicamentos utilizados para aumentar la producción de orina;
-- alimentos ricos en vitamina K;
-- femaglutida, un medicamento utilizado para reducir los niveles de azúcar en sangre;
-- derivados de la hidantoína tales como fenitoína: medicamentos utilizados para tratar la epilepsia.
-
-#### Efecto de Sintrom sobre otros medicamentos:
-- Sintrom puede aumentar los niveles en sangre de los derivados de la hidantoína (por ejemplo, la fenitoína, a menudo utilizada para tratar la epilepsia).
-- Sintrom puede bajar aún más los niveles de azúcar en sangre en combinación con medicamentos antidiabéticos conocidos como sulfonilureas (por ejemplo, glibenclamida, glimepirida).
+- Otros medicamentos que pueden aumentar la actividad de Sintrom, tales como:
+    - alopurinol: medicamento utilizado para la gota;
+    - esteroides anabolizantes y andrógenos: medicamentos utilizados para el desarrollo muscular;
+    - agentes antiarrítmicos como amiodarona, quinidina: medicamentos utilizados para normalizar el ritmo del corazón;
+    - antibióticos como eritromicina, tetraciclinas, neomicina, cloranfenicol, amoxicilina, algunas cefalosporinas, fluoroquinolonas y clindamicina: medicamentos utilizados para tratar las infecciones;
+    - inhibidores de la recaptación de serotonina como citalopram, fluoxetina, sertralina: grupo de medicamentos antidepresivos;
+    - cimetidina: medicamento utilizado para el ardor y la úlcera péptica;
+    - clofibrato y otros medicamentos similares que se utilizan para controlar el colesterol;
+    - corticoides como metilprednisolona, prednisona: medicamentos utilizados para el tratamiento de la inflamación;
+    - disulfiram: medicamento utilizado para el alcoholismo;
+    - ácido etacrínico: medicamento para aumentar la producción de orina;
+    - glucagón: medicamento utilizado para mantener los niveles de azúcar en sangre;
+    - derivados del imidazol como metronidazol y miconazol (incluso aplicado sobre la piel): medicamentos utilizados para tratar las infecciones por hongos;
+    - paracetamol: medicamento utilizado para el dolor y la fiebre;
+    - sulfonamidas (incluido co-trimoxazol): medicamentos utilizados para tratar las infecciones;
+    - tolbustamida, clorpropamida: medicamentos utilizados para la diabetes;
+    - hormonas tiroideas (incluida dextrotiroxina): medicamentos utilizados para tratar los problemas de tiroides;
+    - estatinas como fluvastatina, atorvastatina, simvastatina: medicamentos para bajar los niveles de colesterol;
+    - tamoxifeno: medicamento utilizado en el cáncer de pecho;
+    - tramadol: medicamento utilizado para el dolor;
+    - omeprazol: medicamento protector gástrico;
+    - uroquinasa, estreptoquinasa, alteplasa y argatroban: medicamentos utilizados en el infarto para disolver los coágulos de sangre;
+    - cisaprida: medicamento para tratar los problemas gastrointestinales;
+    - antiácidos como hidróxido de magnesio;
+    - viloxacina: medicamento antidepresivo;
+    - neocarpina: medicamento utilizado para la tos;
+    - vitamina E;
+    - glucasamina (para la osteoartritis) puede aumentar el efecto de Sintrom.
+- Medicamentos que pueden disminuir el efecto de Sintrom tales como:
+    - aminoglutetimida, azatioprina, 6-mercaptopurina: medicamentos utilizados en el cáncer;
+    - ritonavir, nelfinavir: medicamentos utilizados para el SIDA;
+    - barbitúricos, carbamazepina: medicamentos utilizados para la epilepsia y convulsiones;
+    - colestiramina: medicamento utilizado para controlar el colesterol;
+    - griseofulvina: medicamento utilizado para las infecciones por hongos;
+    - anticonceptivos orales: medicamentos utilizados para evitar el embarazo;
+    - rifampicina: medicamento utilizado para tratar las infecciones;
+    - hierba de San Juan: planta utilizada para el tratamiento de la depresión, también llamada hipérico;
+    - diuréticos tiazídicos: medicamentos utilizados para aumentar la producción de orina;
+    - alimentos ricos en vitamina K;
+    - semaglutida, un medicamento utilizado para reducir los niveles de azúcar en sangre;
+    - derivados de la hidantoína tales como fenitoína: medicamentos utilizados para tratar la epilepsia.
+- Efecto de Sintrom sobre otros medicamentos:
+Sintrom puede aumentar los niveles en sangre de los derivados de la hidantoína (por ejemplo, la fenitoína, a menudo utilizada para tratar la epilepsia).
+Sintrom puede bajar aún más los niveles de azúcar en sangre en combinación con medicamentos antidiabéticos conocidos como sulfonilureas (por ejemplo, glibenclamida, glimepirida).
 
 ## Toma de Sintrom con alimentos, bebidas y alcohol
 Debe evitar el consumo de alcohol o zumo de grosella durante el tratamiento, ya que pueden aumentar el efecto del Sintrom y con ello el riesgo de hemorragias.
@@ -129,7 +126,7 @@ No se dispone de información sobre el posible efecto de Sintrom en la fertilida
 
 ## Conducción y uso de máquinas
 Sintrom no influye sobre la capacidad para conducir vehículos y manejar máquinas.
-Sin embargo, en caso de accidente o resultado herido, el médico o el personal sanitario deberán ser informados inmediatamente de que usted toma Sintrom. Con esta finalidad, es recomendable llevar consigo la tarjeta personal de anticoagulación (una tarjeta identificativa que especifica que usted está tomando este medicamento).
+Sin embargo, en caso de accidente o resultar herido, el médico o el personal sanitario deberán ser informados inmediatamente de que usted toma Sintrom. Con esta finalidad, es recomendable llevar consigo la tarjeta personal de anticoagulación (una tarjeta identificativa que especifica que usted está tomando este medicamento).
 
 ## Sintrom contiene lactosa
 Este medicamento contiene lactosa. Si su médico le ha indicado que padece una intolerancia a ciertos azúcares, consulte con él antes de tomar este medicamento.
@@ -142,7 +139,7 @@ La dosis ha de ser determinada por su médico. Se le hará regularmente un anál
 Su médico le dirá cuántos comprimidos de Sintrom ha de tomar. No exceda la dosis recomendada.
 En función de cómo responda al tratamiento, su médico le recomendará un aumento o una disminución de la dosis.
 
-La sensibilidad a la anticoagulación varía entre personas y puede cambiar durante el tiempo o si se modifica la dieta, especialmente si se incluyen alimentos ricos en vitamina K (p. ej. espinacas y miembros de la familia de las coles). Su médico le controlará en visitas periódicas y le prescribirá la dosis más adecuada en cada caso. Generalmente, los ajustes de dosis se basarán en la dosis total semanal distribuida lo más homogéneamente posible a lo largo de los siete días. Siga estrictamente sus instrucciones.
+La sensibilidad a la anticoagulación varía entre personas y puede cambiar durante el tratamiento o si se modifica la dieta, especialmente si se incluyen alimentos ricos en vitamina K (p. ej. espinacas y miembros de la familia de las coles). Su médico le controlará en visitas periódicas y le prescribirá la dosis más adecuada en cada caso. Generalmente, los ajustes de dosis se basarán en la dosis total semanal distribuida lo más homogéneamente posible a lo largo de los siete días. Siga estrictamente sus instrucciones.
 
 Normalmente debe tomar los comprimidos a la misma hora del día, por ejemplo por la noche con un vaso de agua y separados de las comidas.
 
@@ -166,7 +163,9 @@ Su médico le informará cuanto tiempo debe tomar el medicamento. No interrumpa 
 
 ## Si toma más Sintrom del que debe
 Si toma accidentalmente demasiados comprimidos de Sintrom, acuda inmediatamente a su médico. Los síntomas de sobredosis y su severidad dependen de la sensibilidad individual al Sintrom, la cantidad de comprimidos tomados y la duración del tratamiento.
+
 Si siguiendo la pauta indicada por su médico, con el uso continuado de Sintrom aparecen síntomas de sobredosis, debe acudir a su médico para evaluar su tratamiento.
+
 La sobredosis con Sintrom puede provocar hemorragias. Los síntomas más probables de una sobredosis son hemorragia en la piel, sangre en la orina, hematomas, sangrado del tracto digestivo, vómito de sangre, sangrado de la vagina, sangrado de la nariz, sangrado de las encías, y sangrado en las articulaciones. Si ello ocurre, debe interrumpirse el tratamiento y tratarse la hemorragia. Otros síntomas incluyen un latido cardíaco anormalmente rápido, presión arterial baja, alteraciones en la circulación de la sangre en los órganos y extremidades del cuerpo, sensación de malestar, vómitos, diarrea y dolor de estómago.
 En caso de sobredosis o ingestión accidental consultar al Servicio de Información Toxicológica. Tel.: 91 562 04 20.
 
@@ -178,8 +177,8 @@ Si tiene cualquier otra duda sobre el uso de este producto, pregunte a su médic
 # 4. Posibles efectos adversos
 Al igual que todos los medicamentos, este medicamento puede producir efectos adversos, aunque no todas las personas los sufran.
 
-## Algunos de estos efectos adversos podrían ser graves:
-- Frecuentes (1 o más personas por cada 10): hemorragias (síntomas como: sangrado nasal sin causa aparente o sangrado de las encías al lavarse los dientes; hematomas sin causa aparente; sangrados intensos inusuales o sangrado de cortes o heridas; sangrados menstruales abundantes o inesperados; sangre en orina; heces con sangre o heces negras; sangre al toser o al vomitar; dolor de cabeza
+### Algunos de estos efectos adversos podrían ser graves:
+- Frecuentes (1 o más personas por cada 10): hemorragias (síntomas como: sangrado nasal sin causa aparente o sangrado de las encías al lavarse los dientes; hematomas sin causa aparente; sangrados intensos inusuales o sangrado de cortes o heridas; sangrados menstruales abundantes o inesperados; sangre en orina, heces con sangre o heces negras; sangre al toser o al vomitar; dolor de cabeza
 - repentino, grave o continuado). Si tiene alguno de los síntomas de hemorragia descritos, puede significar que esté tomando más medicamento del que necesita.
 - Raros (menos de 1 por cada 1.000 personas): reacción alérgica en forma de erupción cutánea o picores.
 - Muy raros (menos de 1 por cada 10.000 personas): hematomas con ampollas en la piel con o sin úlceras, normalmente en muslos, nalgas, abdomen, pechos o algunas veces en los dedos de los pies; hematomas o hemorragias bajo la piel (posible signo de vasculitis); color amarillento en los ojos o la piel (posible signo de lesión hepática).
@@ -187,7 +186,7 @@ Al igual que todos los medicamentos, este medicamento puede producir efectos adv
 
 Si sufre alguno de estos efectos adversos, acuda inmediatamente a su médico.
 
-## Otros efectos adversos:
+### Otros efectos adversos:
 - Raros (menos de 1 por cada 1.000 personas): caída inusual del cabello; pérdida de apetito; vómitos; náuseas.
 - Frecuencia no conocida: erupción cutánea dolorosa. En contadas ocasiones, Sintrom puede provocar serios problemas cutáneos, como calcifilaxis que puede empezar con una erupción cutánea dolorosa, y después llevar a complicaciones más graves. Esta reacción adversa se produce con más frecuencia en pacientes que padecen enfermedades renales crónicas. Condición por la que se tiene un número inferior al normal de glóbulos rojos o hemoglobina reducida (anemia).
 
@@ -199,7 +198,7 @@ Mantener fuera de la vista y del alcance de los niños.
 No utilice este medicamento después de la fecha de caducidad que aparece en el envase. La fecha de caducidad es el último día del mes que se indica.
 No utilice este medicamento si observa que el envase está dañado o muestra signos de manipulación.
 Conserve Sintrom en su envase original.
-Los medicamentos no se deben tirar por los desagües ni a la basura. Deposite los envases y los medicamentos que no necesita en el Punto SIGRE de su farmacia habitual. En caso de duda pregunte a su farmacéutico cómo deshacerse de los envases y de los medicamentos que no necesita. De esta forma ayudará a proteger el medio ambiente.
+Los medicamentos no se deben tirar por los desagües ni a la basura. Deposite los envases y los medicamentos que no necesita en el Punto SIGRE ⓥ de su farmacia habitual. En caso de duda pregunte a su farmacéutico cómo deshacerse de los envases y de los medicamentos que no necesita. De esta forma ayudará a proteger el medio ambiente.
 
 # 6. Contenido del envase e información adicional
 ## Composición de Sintrom 4 mg comprimidos
@@ -209,6 +208,7 @@ Lactosa, sílice coloidal anhidra, estearato de magnesio, almidón de maíz, alm
 
 ## Aspecto del producto y contenido del envase
 El comprimido de 4 mg es redondo, de color blanco, con la marca “CG” en una cara y una cruz con una “A” en cada cuadrante, por la otra. La ranura sirve únicamente para fraccionar y facilitar la deglución, pero no para dividir en dosis iguales.
+
 Envases de 20 o 500 comprimidos.
 
 ## Titular de la autorización de comercialización y responsable de la fabricación
@@ -224,7 +224,9 @@ Vía Complutense, 140,
 Alcalá de Henares,
 Madrid, 28805,
 España
+
 o
+
 FAMAR A.V.E
 Anthoussa Avenue 7,
 Anthoussa Attikis,

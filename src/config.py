@@ -32,6 +32,9 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 LANGCHAIN_API_KEY = os.getenv("LANGCHAIN_API_KEY")
 LANGCHAIN_PROJECT = os.getenv("LANGCHAIN_PROJECT")
 
+# --- Cohere API Key ---
+COHERE_API_KEY = os.getenv("COHERE_API_KEY")
+
 def check_env_vars():
     """Comprueba que todas las variables de entorno necesarias para el proyecto estén cargadas."""
     
@@ -41,6 +44,7 @@ def check_env_vars():
         "OPENAI_API_KEY",
         "SUPABASE_URL",
         "SUPABASE_SERVICE_KEY",
+        "COHERE_API_KEY"
     ]
     
     # Si LangSmith está habilitado, sus variables también son obligatorias

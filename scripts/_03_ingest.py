@@ -41,6 +41,35 @@ def extract_medicine_name(markdown_text: str, fallback_filename: str) -> str:
     return name_from_file
 
 
+def standardize_medicine_name(raw_name: str) -> str:
+    """
+    Normaliza el nombre de un medicamento a una versión canónica y simple.
+    Ej: "Espidifen 600 mg granulado..." -> "espidifen"
+        "ibuprofeno_cinfa_600" -> "ibuprofeno cinfa"
+    """
+    name = raw_name.lower()
+    
+    # Casos especiales primero
+    if "espidifen" in name:
+        return "espidifen"
+    if "nolotil" in name:
+        return "nolotil"
+    if "sintrom" in name:
+        return "sintrom"
+    if "lexatin" in name:
+        return "lexatin"
+    
+    # Casos más generales
+    if "ibuprofeno" in name and "cinfa" in name:
+        return "ibuprofeno cinfa"
+    if "ibuprofeno" in name and "kern" in name: # Ejemplo para futura expansión
+        return "ibuprofeno kern"
+
+    # Si no coincide con ningún caso, limpiamos el nombre base del fichero
+    base_name = os.path.splitext(raw_name)[0]
+    return base_name.replace('_', ' ').replace('-', ' ').strip()
+
+
 def run_pipeline(pdf_filename: str, supabase_client: Client, embeddings_model: OpenAIEmbeddings):
     """
     Orquesta el pipeline completo para un único archivo PDF:
@@ -73,8 +102,10 @@ def run_pipeline(pdf_filename: str, supabase_client: Client, embeddings_model: O
     with open(md_file_path, 'r', encoding='utf-8') as f:
         markdown_text = f.read()
 
-    # Extraemos el nombre del medicamento ANTES de hacer el chunking
-    medicine_name = extract_medicine_name(markdown_text, pdf_filename)
+    # Extraemos y luego estandarizamos el nombre del medicamento
+    raw_medicine_name = extract_medicine_name(markdown_text, pdf_filename)
+    medicine_name = standardize_medicine_name(raw_medicine_name)
+    logging.info(f"Nombre del medicamento estandarizado a: '{medicine_name}'")
 
     semantic_blocks = markdown_to_semantic_blocks(markdown_text)
     chunks = create_chunks_from_blocks(

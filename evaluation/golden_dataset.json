@@ -1,15 +1,10 @@
 [
     {
-      "question": "¿Para qué dolores se recomienda el uso de Espidifen?",
-      "expected_paths": [
-        "1. Qué es Espidifen y para qué se utiliza"
-      ]
-    },
-    {
       "question": "Soy alérgico al ibuprofeno, ¿puedo tomar Espidifen?",
       "expected_paths": [
         "2. Qué necesita saber antes de empezar a tomar Espidifen > No tome Espidifen:",
-        "2. Qué necesita saber antes de empezar a tomar Espidifen > Precauciones cardiovasculares"
+        "2. Qué necesita saber antes de empezar a tomar Espidifen > Precauciones cardiovasculares",
+        "2. Qué necesita saber antes de empezar a tomar Ibuprofeno (arginina) cinfa > No tome Ibuprofeno (arginina) cinfa"
       ]
     },
     {
@@ -27,7 +22,7 @@
       ]
     },
     {
-      "question": "Si vomito sangre después de tomar el medicamento, ¿qué debo hacer?",
+      "question": "Si vomito sangre después de tomar espidifen, ¿qué debo hacer?",
       "expected_paths": [
         "2. Qué necesita saber antes de empezar a tomar Espidifen > No tome Espidifen:",
         "4. Posibles efectos adversos > Trastornos gastrointestinales",
@@ -53,12 +48,6 @@
       "question": "¿Qué componentes tiene Espidifen además de ibuprofeno?",
       "expected_paths": [
         "6. Contenido del envase e información adicional > Composición de Espidifen"
-      ]
-    },
-    {
-      "question": "¿Cómo debo tomar el granulado de Espidifen, con o sin comida?",
-      "expected_paths": [
-        "2. Qué necesita saber antes de empezar a tomar Espidifen > Toma de Espidifen con alimentos, bebidas y alcohol"
       ]
     },
     {
@@ -105,12 +94,6 @@
         "1. Qué es Espidifen y para qué se utiliza"
       ]
     },
-    {
-        "question": "¿Para qué tipo de dolor se utiliza el Nolotil?",
-        "expected_paths": [
-          "1. Qué es Nolotil y para qué se utiliza"
-        ]
-      },
       {
         "question": "Estoy en mi último mes de embarazo, ¿puedo tomar Nolotil?",
         "expected_paths": [
@@ -193,14 +176,14 @@
         ]
       },
       {
-        "question": "Mi médico me ha recetado un antibiótico (amoxicilina) y también tomo hierba de San Juan para la ansiedad. ¿Puede esto afectar a mi tratamiento con Sintrom?",
+        "question": "Mi médico me ha recetado un antibiótico (amoxicilina) y también tomo hierba de San Juan para la ansiedad. ¿Puede esto afectar a mi tratamiento con Sintron?",
         "expected_paths": [
           "2. Qué necesita saber antes de empezar a tomar Sintrom > Toma de Sintrom con otros medicamentos: > Los efectos de Sintrom pueden interferir con los de otros medicamentos, en particular: > Otros medicamentos que pueden aumentar la actividad de Sintrom, tales como:",
           "2. Qué necesita saber antes de empezar a tomar Sintrom > Toma de Sintrom con otros medicamentos: > Los efectos de Sintrom pueden interferir con los de otros medicamentos, en particular: > Medicamentos que pueden disminuir el efecto de Sintrom tales como:"
         ]
       },
       {
-        "question": "Estoy considerando empezar una dieta rica en espinacas y col. ¿Debería preocuparme si estoy tomando un anticoagulante como el acenocumarol?",
+        "question": "Estoy considerando empezar una dieta rica en espinacas y col. ¿Debería preocuparme si estoy tomando un anticoagulante como el Sintron?",
         "expected_paths": [
           "3. Cómo tomar Sintrom",
           "2. Qué necesita saber antes de empezar a tomar Sintrom > Toma de Sintrom con alimentos, bebidas y alcohol"

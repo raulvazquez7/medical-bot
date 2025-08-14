@@ -7,11 +7,12 @@
     );
 
     -- 2. Creamos una función para buscar documentos por similitud
-    create function match_documents (
+    create or replace function match_documents (
       query_embedding vector(1536),
       match_count int,
-      filter jsonb DEFAULT '{}'
-    ) returns table (
+      filter_medicines text[] default '{}'
+    )
+    returns table (
       id bigint,
       content text,
       metadata jsonb,
@@ -27,7 +28,8 @@
         documents.metadata,
         1 - (documents.embedding <=> query_embedding) as similarity
       from documents
-      where documents.metadata @> filter
+      where 
+        (array_length(filter_medicines, 1) is null or documents.metadata->>'medicine_name' = any(filter_medicines))
       order by documents.embedding <=> query_embedding
       limit match_count;
     end;

@@ -42,7 +42,11 @@ The entire application is integrated with [LangSmith](https://smith.langchain.co
 
 ### Multi-Layered Guardrails
 
-Given the sensitive nature of medical information, the chatbot implements two distinct layers of safety checks: a pre-processing guardrail for scope control and a prompt-level guardrail to ensure safe and factual responses.
+Given the sensitive nature of medical information, the chatbot implements three distinct layers of safety checks: a pre-processing guardrail for scope control, a prompt-level guardrail to ensure safe and factual responses, and a retrieval-level guardrail.
+
+1.  **Triage Guardrail (Pre-processing):** Before attempting to answer, a preliminary LLM call analyzes the user's query to identify the mentioned medication and checks if it belongs to the knowledge base. If the medication is unknown, the bot refuses to answer and lists the medications it can discuss.
+2.  **Prompt-Level Guardrail:** The final prompt sent to the LLM contains a critical safety rule that strictly forbids providing medical advice and forces it to base its answer exclusively on the provided context.
+3.  **Retrieval-Level Guardrail (Metadata Filtering):** To prevent context contamination between different medication leaflets, the retrieval pipeline is enhanced with strict metadata filtering. When the agent identifies the specific medication(s) relevant to a query, it forces the vector search to consider **only** the chunks belonging to those leaflets. This is a critical safety feature that prevents the model from generating answers based on information from the wrong drug.
 
 ## Robust Evaluation Framework
 
@@ -54,6 +58,8 @@ We measure the performance of our document retrieval system *before* the LLM see
 *   **Recall@k:** Measures the retriever's ability to find all relevant documents.
 *   **Precision@k:** Measures how much "noise" or irrelevant information is retrieved.
 *   **F1-Score & MRR:** Provide a holistic view of the retriever's overall performance and ranking quality.
+
+The evaluation framework is also extensible for testing advanced retrieval strategies. For instance, a **re-ranking step** using the Cohere API (`rerank-v3.0`) was integrated. This allows for a two-stage retrieval process (a broad initial retrieval followed by a precise re-ranking) to rigorously benchmark more complex techniques against the baseline.
 
 ### 2. Generation Evaluation
 

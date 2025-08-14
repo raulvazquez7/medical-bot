@@ -1,7 +1,6 @@
 # Prospecto: Información para el usuario
 
-## Nolotil 575 mg cápsulas duras
-
+Nolotil 575 mg cápsulas duras
 Metamizol magnésico
 
 Nolotil puede causar un recuento de los glóbulos blancos más bajo de lo normal (agranulocitosis), lo que puede producir infecciones graves y potencialmente mortales (ver sección 4).
@@ -58,12 +57,13 @@ Si toma metamizol para la fiebre, algunos síntomas de la agranulocitosis pueden
 
 La agranulocitosis puede aparecer en cualquier momento durante el uso de Nolotil e incluso poco después de haber dejado de tomar metamizol.
 
-Puede presentar agranulocitosis incluso si ha usado metamizol sin problemas en el pasado.
+### Puede presentar agranulocitosis incluso si usted ha usado metamizol sin problemas en el pasado.
 
 ### Tenga especial cuidado:
 
 - Si experimenta malestar general, infección, fiebre persistente, dolor de garganta, inflamación en boca, nariz o garganta, lesiones en la mucosa de la boca o de los genitales, hematomas, sangrado o palidez, debe de suspender el tratamiento y consultar a su médico inmediatamente. Estos trastornos pueden ser debidos a un descenso del número de glóbulos blancos en la sangre (agranulocitosis), de plaquetas (trombocitopenia) o a un fallo en la producción de todas las células de la sangre (anemia aplásica).
-- Si experimenta mareo, dificultad para respirar, rinitis, hinchazón de la cara, descenso de la presión arterial, manchas rojizas en la piel de aparición súbita, suspenda el tratamiento y consulte a su médico. Estos síntomas pueden deberse a una reacción alérgica grave (denominada shock anafiláctico. Esta reacción es más probable si usted padece asma o trastornos de tipo alérgico (atopía).
+- Si experimenta mareo, dificultad para respirar, rinitis, hinchazón de la cara, descenso de la presión arterial, manchas rojizas en la piel de aparición súbita, suspenda el tratamiento y consulte a su médico. Estos síntomas pueden deberse a una reacción alérgica grave (denominada shock anafiláctico).
+- Anafilaxia. Esta reacción es más probable si usted padece asma o trastornos de tipo alérgico (atopía).
 - Si padece asma bronquial (especialmente en presencia de inflamación de la mucosa nasal y pólipos nasales), urticaria crónica o bien si es intolerante a colorantes y/o conservantes o al alcohol, ya que el riesgo de posibles reacciones alérgicas graves es mayor.
 - Si tiene problemas de tensión arterial baja o tiene hipovolemia (disminución del volumen circulante de sangre o cualquier otro líquido corporal), deshidratación o la circulación inestable ya que el riesgo de una caída brusca de la tensión arterial es mayor.
 - Si tiene la función del riñón o del hígado disminuida, ya que puede eliminar el medicamento con mayor dificultad.
@@ -83,7 +83,7 @@ Se han notificado reacciones cutáneas graves, como síndrome de Stevens-Johnson
 
 Si ha sufrido alguna vez reacciones cutáneas graves, no debe reanudar el tratamiento con Nolotil en ningún momento (ver sección 4).
 
-## Toma de Nolotil con otros medicamentos
+## Toma de Nolotil con alimentos, bebidas y alcohol
 
 Junto con alcohol, pueden potenciarse los efectos tanto de éste, como del fármaco.
 
@@ -107,12 +107,12 @@ Aunque no son de esperar efectos adversos sobre la capacidad de concentración y
 
 Informe a su médico o farmacéutico si está utilizando o ha utilizado recientemente o podría tener que utilizar cualquier otro medicamento.
 
-- Si se administra conjuntamente con ciclosporina (medicamento que previene el rechazo de los trasplantes), puede reducir los niveles en sangre de la ciclosporina y por lo tanto éstos se deben medir con regularidad.
-- Si se administra junto con clopromazina (medicamento para el tratamiento de las psicosis) puede provocar un descenso de la temperatura corporal.
-- Si se administra conjuntamente con metotrexato u otros medicamentos para el tratamiento de los tumores (antineoplásicos), puede potenciar los efectos tóxicos en sangre de los antineoplásicos, sobretodo en pacientes de edad avanzada.
-- Si se administra conjuntamente con ácido acetilsalicílico, puede reducir el efecto del ácido acetilsalicílico para disminuir la agregación de las plaquetas (antiplaquetario) y por lo tanto se debe usar con precaución en pacientes que lo estén tomando para proteger el corazón (cardioprotector).
-- Si se administra conjuntamente con bupropión (medicamento utilizado para el tratamiento de la depresión y/o para ayudar a dejar de fumar), efavirenz (medicamento utilizado para el tratamiento del VIH/SIDA), metadona (medicamento utilizado para tratar la dependencia a drogas ilícitas, denominadas opioides), valproato (medicamento utilizado para tratar la epilepsia o el trastorno bipolar), tacrolimus (medicamento utilizado para prevenir el rechazo de órganos en pacientes trasplantados) o sertralina (medicamento utilizado para tratar la depresión), puede reducir los niveles en sangre de estos medicamentos, por lo que se debe utilizar con precaución.
-- Metamizol puede modificar el efecto de los antihipertensivos (medicamentos que reducen la tensión arterial) y diuréticos (medicamentos que aumentan la eliminación de líquidos).
+Si se administra conjuntamente con ciclosporina (medicamento que previene el rechazo de los trasplantes), puede reducir los niveles en sangre de la ciclosporina y por lo tanto éstos se deben medir con regularidad.
+Si se administra junto con clopromazina (medicamento para el tratamiento de las psicosis) puede provocar un descenso de la temperatura corporal.
+Si se administra conjuntamente con metotrexato u otros medicamentos para el tratamiento de los tumores (antineoplásicos), puede potenciar los efectos tóxicos en sangre de los antineoplásicos, sobretodo en pacientes de edad avanzada.
+Si se administra conjuntamente con ácido acetilsalicílico, puede reducir el efecto del ácido acetilsalicílico para disminuir la agregación de las plaquetas (antiplaquetario) y por lo tanto se debe usar con precaución en pacientes que lo estén tomando para proteger el corazón (cardioprotector).
+Si se administra conjuntamente con bupropión (medicamento utilizado para el tratamiento de la depresión y/o para ayudar a dejar de fumar), efavirenz (medicamento utilizado para el tratamiento del VIH/SIDA), metadona (medicamento utilizado para tratar la dependencia a drogas ilícitas, denominadas opioides), valproato (medicamento utilizado para tratar la epilepsia o el trastorno bipolar), tacrolimus (medicamento utilizado para prevenir el rechazo de órganos en pacientes trasplantados) o sertralina (medicamento utilizado para tratar la depresión), puede reducir los niveles en sangre de estos medicamentos, por lo que se debe utilizar con precaución.
+Metamizol puede modificar el efecto de los antihipertensivos (medicamentos que reducen la tensión arterial) y diuréticos (medicamentos que aumentan la eliminación de líquidos).
 
 # 3. Cómo tomar Nolotil
 
@@ -181,24 +181,24 @@ Sensación de enfermedad (náuseas o vómitos), fiebre, sensación de cansancio,
 
 Las reacciones alérgicas más leves (p. ej. reacciones en piel y mucosas como picor, quemazón, enrojecimiento, hinchazón) así como dificultad para respirar y molestias gastrointestinales pueden progresar hasta formas más graves p. ej. urticaria generalizada, hinchazón de pies, manos, labios, garganta y vías respiratorias (angioedema), broncoespasmo grave (estrechamiento de las paredes de los bronquios), alteraciones del ritmo del corazón y disminución de la presión arterial (algunas veces precedida por un aumento de la presión arterial).
 
-Otros efectos adversos que pueden ocurrir con las siguientes frecuencias son:
+### Otros efectos adversos que pueden ocurrir con las siguientes frecuencias son:
 
-### Frecuentes (pueden afectar hasta 1 de cada 10 personas):
+#### Frecuentes (pueden afectar hasta 1 de cada 10 personas):
 
-- Hipotensión (disminución de la presión arterial).
+- hipotensión (disminución de la presión arterial).
 
-### Poco frecuentes (pueden afectar hasta 1 de cada 100 personas):
+#### Poco frecuentes (pueden afectar hasta 1 de cada 100 personas):
 
 - erupciones y reacciones en la piel.
 
-### Raros (pueden afectar hasta 1 de cada 1.000 personas):
+#### Raros (pueden afectar hasta 1 de cada 1.000 personas):
 
 - reacciones alérgicas que suelen presentarse durante o justo después de la administración pero también horas más tarde,
 - erupciones y aparición de habones en la piel,
 - disminución del número de glóbulos blancos en sangre (leucopenia),
 - asma.
 
-### Muy raros (pueden afectar hasta 1 de cada 10.000 personas):
+#### Muy raros (pueden afectar hasta 1 de cada 10.000 personas):
 
 - reacciones cutáneas en las que aparecen vesículas o ampollas (necrólisis epidérmica tóxica, síndrome de Stevens-Johnson),
 - problemas del riñón con disminución o supresión de la orina eliminada,
@@ -208,7 +208,7 @@ Otros efectos adversos que pueden ocurrir con las siguientes frecuencias son:
 - disminución del número de plaquetas en sangre (trombocitopenia), en este caso pueden producirse lesiones inflamatorias en mucosas, dolor de garganta y fiebre,
 - shock (bajada drástica de la presión arterial).
 
-### Frecuencia no conocida (no puede estimarse a partir de los datos disponibles):
+#### Frecuencia no conocida (no puede estimarse a partir de los datos disponibles):
 
 - sepsis (infección grave que implica una reacción inflamatoria de todo el organismo y que puede producir la muerte),
 - anemia aplásica (fallo en la producción de las células de la médula ósea y de la sangre),
@@ -262,7 +262,6 @@ Boehringer Ingelheim España, S.A.
 Prat de la Riba, 50
 08174 Sant Cugat del Vallès (Barcelona)
 España
-
 Delpharm Reims, S.A.S.
 10 Rue Colonel Charbonneaux
 51100 Reims
@@ -270,4 +269,4 @@ Francia
 
 ## Fecha de la última revisión de este prospecto: Noviembre 2024
 
-La información detallada y actualizada de este medicamento está disponible en la página web de la Agencia Española de Medicamentos y Productos Sanitarios (AEMPS) http://www.aemps.gob.es/
+La información detallada y actualizada de este medicamento está disponible en la página web de la Agencia Española de Medicamentos y Productos Sanitarios (AEMPS) http://www.aemps.gob.es/.

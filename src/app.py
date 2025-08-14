@@ -30,23 +30,30 @@ class SupabaseRetriever(BaseRetriever):
     embeddings_model: OpenAIEmbeddings
     top_k: int = 5
 
-    def _get_relevant_documents(self, query: str) -> List[Document]:
+    def _get_relevant_documents(
+        self, query: str, filter_on_medicines: List[str] = None
+    ) -> List[Document]:
         """
         Dada una consulta de usuario, la convierte en un embedding y busca
         en la base de datos los chunks más relevantes.
+        Permite filtrar por una lista de nombres de medicamentos.
         """
         logging.info(f"Generando embedding para la consulta: '{query}'")
         query_embedding = self.embeddings_model.embed_query(query)
         
+        rpc_params = {
+            'query_embedding': query_embedding,
+            'match_count': self.top_k
+        }
+        
+        # Añadimos el filtro solo si se proporciona
+        if filter_on_medicines:
+            logging.info(f"Aplicando filtro por medicamentos: {filter_on_medicines}")
+            rpc_params['filter_medicines'] = filter_on_medicines
+        
         logging.info(f"Buscando los {self.top_k} documentos más relevantes en Supabase...")
         
-        response = self.supabase_client.rpc(
-            'match_documents',
-            {
-                'query_embedding': query_embedding,
-                'match_count': self.top_k
-            }
-        ).execute()
+        response = self.supabase_client.rpc('match_documents', rpc_params).execute()
 
         if response.data:
             logging.info(f"Se encontraron {len(response.data)} documentos.")
