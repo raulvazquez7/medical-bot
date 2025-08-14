@@ -4,8 +4,7 @@ from dotenv import load_dotenv
 # Cargar las variables de entorno desde .env al inicio
 load_dotenv()
 
-# --- Rutas de directorios h
-#  ---
+# --- Rutas de directorios ---
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_PATH = os.path.join(BASE_DIR, 'data')
 MARKDOWN_PATH = os.path.join(BASE_DIR, 'data_markdown')
@@ -26,7 +25,6 @@ CHUNK_OVERLAP = 300
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
-PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # --- LangSmith ---

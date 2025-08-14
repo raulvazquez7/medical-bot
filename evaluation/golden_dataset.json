@@ -191,5 +191,146 @@
         "expected_paths": [
           "3. Cómo tomar Nolotil > Adultos y adolescentes de 15 años de edad o mayores > Si olvidó tomar Nolotil"
         ]
+      },
+      {
+        "question": "Mi médico me ha recetado un antibiótico (amoxicilina) y también tomo hierba de San Juan para la ansiedad. ¿Puede esto afectar a mi tratamiento con Sintrom?",
+        "expected_paths": [
+          "2. Qué necesita saber antes de empezar a tomar Sintrom > Toma de Sintrom con otros medicamentos: > Los efectos de Sintrom pueden interferir con los de otros medicamentos, en particular: > Otros medicamentos que pueden aumentar la actividad de Sintrom, tales como:",
+          "2. Qué necesita saber antes de empezar a tomar Sintrom > Toma de Sintrom con otros medicamentos: > Los efectos de Sintrom pueden interferir con los de otros medicamentos, en particular: > Medicamentos que pueden disminuir el efecto de Sintrom tales como:"
+        ]
+      },
+      {
+        "question": "Estoy considerando empezar una dieta rica en espinacas y col. ¿Debería preocuparme si estoy tomando un anticoagulante como el acenocumarol?",
+        "expected_paths": [
+          "3. Cómo tomar Sintrom",
+          "2. Qué necesita saber antes de empezar a tomar Sintrom > Toma de Sintrom con alimentos, bebidas y alcohol"
+        ]
+      },
+      {
+        "question": "Tengo una cita para una extracción dental la próxima semana. Si estoy en tratamiento con Sintrom, ¿es necesario que avise al dentista?",
+        "expected_paths": [
+          "2. Qué necesita saber antes de empezar a tomar Sintrom > No tome Sintrom si:",
+          "2. Qué necesita saber antes de empezar a tomar Sintrom > Advertencias y precauciones",
+          "3. Cómo tomar Sintrom > Tratamientos odontológicos y cirugía"
+        ]
+      },
+      {
+        "question": "Si sufro un accidente de tráfico, ¿hay alguna recomendación especial en el prospecto para los que tomamos Sintrom?",
+        "expected_paths": [
+          "2. Qué necesita saber antes de empezar a tomar Sintrom > Conducción y uso de máquinas"
+        ]
+      },
+      {
+        "question": "He notado hematomas con ampollas en la piel de los muslos. ¿Podría ser un efecto adverso muy raro del Sintrom?",
+        "expected_paths": [
+          "4. Posibles efectos adversos",
+          "3. Cómo tomar Sintrom > Si toma más Sintrom del que debe",
+          "4. Posibles efectos adversos > Algunos de estos efectos adversos podrían ser graves:",
+          "2. Qué necesita saber antes de empezar a tomar Sintrom > Advertencias y precauciones"
+
+        ]
+      },
+      {
+        "question": "Estoy dando el pecho a mi bebé. ¿Qué medida específica podría tomar el médico para proteger al niño si necesito seguir con el Sintrom?",
+        "expected_paths": [
+          "2. Qué necesita saber antes de empezar a tomar Sintrom > Embarazo, lactancia y fertilidad > Lactancia"
+        ]
+      },
+      {
+        "question": "¿Qué síntomas de sobredosis de acenocumarol se mencionan aparte de las hemorragias, como por ejemplo problemas digestivos o del ritmo cardíaco?",
+        "expected_paths": [
+          "3. Cómo tomar Sintrom > Si toma más Sintrom del que debe"
+        ]
+      },
+      {
+        "question": "Mi médico me ha dicho que el tratamiento con Lexatin será corto. ¿Cuántas semanas suele durar como máximo? Además estoy preocupado por qué tengo cirrosis, esto es un impedimento para tomar este medicamento?",
+        "expected_paths": [
+          "1. Qué es Lexatin y para qué se utiliza",
+          "3. Cómo tomar Lexatin",
+          "2. Qué necesita saber antes de empezar a tomar Lexatin > No tome Lexatin",
+          "2. Qué necesita saber antes de empezar a tomar Lexatin > Advertencias y precauciones > Consulte a su médico o farmacéutico antes de empezar a tomar Lexatin:"
+        ]
+      },
+      {
+        "question": "Sufro de apnea del sueño y mi médico me ha recetado un ansiolítico. ¿Es seguro para mí tomar bromazepam?",
+        "expected_paths": [
+          "2. Qué necesita saber antes de empezar a tomar Lexatin > No tome Lexatin",
+          "2. Qué necesita saber antes de empezar a tomar Lexatin > Advertencias y precauciones > Consulte a su médico o farmacéutico antes de empezar a tomar Lexatin:"
+        ]
+      },
+      {
+        "question": "Tomo medicamentos opioides para el dolor crónico. ¿Qué precauciones debo tener si me recetan también Lexatin?",
+        "expected_paths": [
+          "2. Qué necesita saber antes de empezar a tomar Lexatin > Toma de Lexatin con otros medicamentos"
+        ]
+      },
+      {
+        "question": "Me siento muy somnoliento y he tenido problemas de memoria desde que empecé a tomar esta benzodiazepina. ¿Son efectos secundarios conocidos?",
+        "expected_paths": [
+          "4. Posibles efectos adversos",
+          "2. Qué necesita saber antes de empezar a tomar Lexatin > Conducción y uso de máquinas",
+          "2. Qué necesita saber antes de empezar a tomar Lexatin > Advertencias y precauciones",
+          "3. Cómo tomar Lexatin > Si toma más Lexatin del que debe"
+        ]
+      },
+      {
+        "question": "Para un dolor de muelas muy fuerte, necesito un alivio que actúe lo más rápido posible. ¿Existe alguna diferencia en la velocidad con la que hacen efecto Espidifen e Ibuprofeno Cinfa 600 según sus prospectos?",
+        "expected_paths": [
+          "1. Qué es Espidifen y para qué se utiliza",
+          "1. Qué es Ibuprofeno (arginina) cinfa y para qué se utiliza"
+        ]
+      },
+      {
+        "question": "Soy diabético y he oído que algunos medicamentos llevan azúcares. ¿Qué otros componentes además de los principios activos contienen Espidifen 600 e Ibuprofeno Cinfa 600 que deba conocer?",
+        "expected_paths": [
+          "2. Qué necesita saber antes de empezar a tomar Espidifen > Espidifen contiene aspartamo, sacarosa y sodio",
+          "6. Contenido del envase e información adicional > Composición de Espidifen",
+          "2. Qué necesita saber antes de empezar a tomar Ibuprofeno (arginina) cinfa > Ibuprofeno (arginina) cinfa contiene sacarosa",
+          "6. Contenido del envase e información adicional > Composición de Ibuprofeno (arginina) cinfa"
+        ]
+      },
+      {
+        "question": "Tengo el estómago delicado. ¿Hay alguna diferencia en cómo debo tomar Espidifen 600 e Ibuprofeno Cinfa 600 para minimizar las molestias gástricas?",
+        "expected_paths": [
+          "3. Cómo tomar Espidifen",
+          "2. Qué necesita saber antes de empezar a tomar Espidifen > Toma de Espidifen con alimentos, bebidas y alcohol",
+          "2. Qué necesita saber antes de empezar a tomar Espidifen > No tome Espidifen:",
+          "2. Qué necesita saber antes de empezar a tomar Ibuprofeno (arginina) cinfa > No tome Ibuprofeno (arginina) cinfa",
+          "3. Cómo tomar Ibuprofeno (arginina) cinfa",
+          "2. Qué necesita saber antes de empezar a tomar Ibuprofeno (arginina) cinfa > Toma de Ibuprofeno (arginina) cinfa con alimentos, bebidas y alcohol",
+          "2. Qué necesita saber antes de empezar a tomar Ibuprofeno (arginina) cinfa > Advertencias y precauciones > Informe a su médico",
+          "4. Posibles efectos adversos > Trastornos gastrointestinales"
+        ]
+      },
+      {
+        "question": "Mi hijo tiene 14 años y pesa 50 kg. ¿Puedo darle Espidifen 600 o Ibuprofeno Cinfa 600 para la fiebre? ¿Qué dicen los prospectos sobre el uso en personas de esta edad y cual es su dosis?",
+        "expected_paths": [
+          "2. Qué necesita saber antes de empezar a tomar Espidifen > Niños y adolescentes",
+          "3. Cómo tomar Espidifen > Adultos y adolescentes",
+          "2. Qué necesita saber antes de empezar a tomar Ibuprofeno (arginina) cinfa > Niños y adolescentes",
+          "3. Cómo tomar Ibuprofeno (arginina) cinfa > Adultos y adolescentes de 14 a 18 años"
+        ]
+      },
+      {
+        "question": "Quiero entender las diferencias físicas entre los dos medicamentos. ¿Qué aspecto tienen Espidifen 600 e Ibuprofeno Cinfa 600 y cómo se preparan para su toma?",
+        "expected_paths": [
+          "6. Contenido del envase e información adicional > Aspecto del producto y contenido del envase",
+          "6. Contenido del envase e información adicional > Aspecto de Espidifen y contenido del envase"
+        ]
+      },
+      {
+        "question": "Si tomo litio para el trastorno bipolar, ¿existe alguna interacción específica mencionada en los prospectos de Espidifen 600 o Ibuprofeno Cinfa 600 que deba consultar con mi médico?",
+        "expected_paths": [
+          "2. Qué necesita saber antes de empezar a tomar Ibuprofeno (arginina) cinfa > Otros medicamentos e Ibuprofeno (arginina) cinfa > Los medicamentos citados a continuación pueden interferir y, por tanto, no deben tomarse junto con Ibuprofeno (arginina) sin antes consultar a su médico:",
+          "2. Qué necesita saber antes de empezar a tomar Espidifen > Uso de Espidifen con otros medicamentos > Los medicamentos citados a continuación pueden interferir y, por tanto, no deben tomarse junto con Espidifen sin antes consultar a su médico:"
+        ]
+      },
+      {
+        "question": "Estoy pensando en tomar Ibuprofeno o Espidifen, me interesa saber cuantos mg de sodio contiene cada uno de ellos",
+        "expected_paths": [
+          "2. Qué necesita saber antes de empezar a tomar Espidifen > Espidifen contiene aspartamo, sacarosa y sodio",
+          "2. Qué necesita saber antes de empezar a tomar Ibuprofeno (arginina) cinfa > Ibuprofeno (arginina) cinfa contiene sodio"
+        ]
       }
+
   ]
