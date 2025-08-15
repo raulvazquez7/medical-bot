@@ -24,9 +24,9 @@ logging.basicConfig(
 
 # --- Definición del Esquema de Salida con Pydantic ---
 class ProspectusMarkdown(BaseModel):
-    """El prospecto completo convertido a un formato Markdown limpio y estructurado."""
+    """The complete prospectus converted to a clean and structured Markdown format."""
     markdown_content: str = Field(
-        description="El contenido completo del documento en formato Markdown, siguiendo todas las reglas de formato y estructura especificadas en el prompt."
+        description="The full content of the document in Markdown format, following all formatting and structure rules specified in the prompt."
     )
 
 def pdf_to_base64_images(pdf_path):
@@ -108,7 +108,8 @@ def generate_markdown_from_pdf_images(pdf_path: str, output_path: str):
     logging.info(f"Inicializando el modelo LLM: {config.PDF_PARSE_MODEL}")
     llm = ChatGoogleGenerativeAI(model=config.PDF_PARSE_MODEL, temperature=0)
 
-    # El método recomendado y más directo de LangChain para forzar la salida estructurada.
+    # Usamos .with_structured_output(), el método de alto nivel recomendado por LangChain.
+    # Este método utiliza tool-calling internamente pero simplifica el código.
     structured_llm = llm.with_structured_output(ProspectusMarkdown)
 
     # Construimos el mensaje multimodal
@@ -125,7 +126,7 @@ def generate_markdown_from_pdf_images(pdf_path: str, output_path: str):
 
     logging.info("Enviando la petición al LLM. Esto puede tardar varios segundos...")
     try:
-        # La respuesta será directamente un objeto Pydantic, no un AIMessage
+        # La respuesta ahora es directamente el objeto Pydantic que queremos.
         response = structured_llm.invoke([message])
         markdown_content = response.markdown_content
         

@@ -10,12 +10,14 @@ from collections import defaultdict
 from supabase import Client, create_client
 from pydantic import BaseModel, Field
 from langchain.schema import Document, BaseRetriever
+from langchain_core.embeddings import Embeddings  # <-- Importamos la clase base genérica
 from langchain_core.runnables import RunnablePassthrough, RunnableParallel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 
 from src import config
+from src.models import get_embeddings_model, get_known_medicines
 
 # --- Configuración del Logging ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -27,7 +29,7 @@ class SupabaseRetriever(BaseRetriever):
     usando la función `match_documents` que creamos.
     """
     supabase_client: Client
-    embeddings_model: OpenAIEmbeddings
+    embeddings_model: Embeddings  # <-- Cambiado de OpenAIEmbeddings a Embeddings
     top_k: int = 5
 
     def _get_relevant_documents(
@@ -64,21 +66,21 @@ class SupabaseRetriever(BaseRetriever):
 
 # --- Structured Output ---
 class AnswerWithSources(BaseModel):
-    """Estructura de datos para la respuesta del LLM, incluyendo la respuesta y las fuentes."""
+    """Data structure for the LLM's response, including the answer and its sources."""
     answer: str = Field(
-        description="La respuesta textual, clara y concisa, a la pregunta del usuario."
+        description="The textual, clear, and concise answer to the user's question."
     )
     cited_sources: List[int] = Field(
-        description="Una lista de los NÚMEROS de las fuentes [Fuente 1], [Fuente 2], etc., que se utilizaron para generar la respuesta."
+        description="A list of the NUMBERS of the sources [Source 1], [Source 2], etc., that were used to generate the answer."
     )
 
 class QueryAnalysis(BaseModel):
     """
-    Estructura de datos para el análisis de la pregunta del usuario.
-    Indica si la pregunta es sobre un medicamento conocido.
+    Data structure for the user's question analysis.
+    Indicates if the question is about a known medicine.
     """
-    medicine_name: str = Field(description="El nombre del medicamento extraído de la pregunta. Si no se menciona ninguno, el valor debe ser 'N/A'.")
-    is_known: bool = Field(description="Es 'true' si el medicamento extraído está en la lista de medicamentos conocidos, de lo contrario es 'false'.")
+    medicine_name: str = Field(description="The name of the medicine extracted from the question. If none is mentioned, the value should be 'N/A'.")
+    is_known: bool = Field(description="Is 'true' if the extracted medicine is in the list of known medicines, otherwise it is 'false'.")
 
 
 # --- Plantillas de Prompt ---
@@ -123,25 +125,6 @@ def format_docs_with_sources(docs: List[Document]) -> str:
         f"[Fuente {i+1}]\n{doc.page_content}" for i, doc in enumerate(docs)
     )
 
-def get_known_medicines(supabase_client: Client) -> List[str]:
-    """
-    Recupera una lista única de nombres de medicamentos de la base de datos.
-    NOTA: Para una base de datos grande, este enfoque no es eficiente.
-    Una mejor solución sería un endpoint o vista SQL dedicada.
-    """
-    logging.info("Recuperando la lista de medicamentos conocidos de la base de datos...")
-    response = supabase_client.table('documents').select('metadata').execute()
-    
-    if not response.data:
-        return []
-    
-    all_metadata = [item['metadata'] for item in response.data]
-    known_medicines = sorted(list(set(
-        meta['medicine_name'] for meta in all_metadata if meta and 'medicine_name' in meta
-    )))
-    logging.info(f"Medicamentos conocidos encontrados: {known_medicines}")
-    return known_medicines
-
 
 def run_chatbot():
     """Inicializa y ejecuta el bucle principal del chatbot de consola."""
@@ -151,7 +134,7 @@ def run_chatbot():
         
         logging.info("Inicializando clientes...")
         supabase: Client = create_client(config.SUPABASE_URL, config.SUPABASE_SERVICE_KEY)
-        embeddings = OpenAIEmbeddings(api_key=config.OPENAI_API_KEY, model=config.EMBEDDINGS_MODEL)
+        embeddings = get_embeddings_model()
         
         logging.info(f"Configurando el modelo de chat: {config.CHAT_MODEL_TO_USE}")
         if "gemini" in config.CHAT_MODEL_TO_USE:

@@ -14,12 +14,22 @@ MARKDOWN_PATH = os.path.join(BASE_DIR, 'data_markdown')
 PDF_PARSE_MODEL = 'gemini-2.5-flash'
 # Modelo de lenguaje para el chatbot RAG
 CHAT_MODEL_TO_USE = 'gemini-2.5-flash'
-# Modelo de embedding. "text-embedding-3-small" es el más coste-efectivo de OpenAI.
-EMBEDDINGS_MODEL = "text-embedding-3-small"
+# Proveedor de embeddings ("openai" o "google")
+EMBEDDINGS_PROVIDER = os.getenv("EMBEDDINGS_PROVIDER", "google")
+# Modelo de embedding. "text-embedding-3-small" de OpenAI o "models/gemini-embedding-001" de Google.
+EMBEDDINGS_MODEL = os.getenv("EMBEDDINGS_MODEL", "models/gemini-embedding-001")
 
 # --- Parámetros de Chunking ---
-CHUNK_SIZE = 1800
-CHUNK_OVERLAP = 300
+CHUNK_SIZE = 800
+CHUNK_OVERLAP = 100
+
+# --- Parámetros de Evaluación ---
+# Activar o desactivar el paso de re-ranking durante la evaluación
+EVAL_USE_RERANKER = os.getenv("EVAL_USE_RERANKER", "True").lower() in ('true', '1', 't')
+# Número de documentos a recuperar inicialmente antes del re-ranking
+EVAL_INITIAL_K = int(os.getenv("EVAL_INITIAL_K", "20"))
+# Número final de documentos a considerar después del re-ranking
+EVAL_FINAL_K = int(os.getenv("EVAL_FINAL_K", "5"))
 
 # --- Credenciales (leídas desde .env) ---
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")

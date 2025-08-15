@@ -6,10 +6,14 @@ import argparse
 import re
 import logging  
 from supabase import create_client, Client
+from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from functools import partial
 
 # Importamos la configuración central y las funciones de los otros scripts
 from src import config
+from src.models import get_embeddings_model
 from scripts._01_pdf_to_markdown import generate_markdown_from_pdf_images
 from scripts._02_markdown_to_chunks import markdown_to_semantic_blocks, create_chunks_from_blocks
 
@@ -70,7 +74,7 @@ def standardize_medicine_name(raw_name: str) -> str:
     return base_name.replace('_', ' ').replace('-', ' ').strip()
 
 
-def run_pipeline(pdf_filename: str, supabase_client: Client, embeddings_model: OpenAIEmbeddings):
+def run_pipeline(pdf_filename: str, supabase_client: Client, embeddings_model: Embeddings, force_reparse: bool = False):
     """
     Orquesta el pipeline completo para un único archivo PDF:
     1. Convierte el PDF a Markdown.
@@ -79,8 +83,8 @@ def run_pipeline(pdf_filename: str, supabase_client: Client, embeddings_model: O
     """
     logging.info(f"--- Iniciando pipeline para el archivo: {pdf_filename} ---")
     
-    # --- PASO 1: Conversión de PDF a Markdown ---
-    logging.info("Paso 1: Convirtiendo PDF a Markdown...")
+    # --- PASO 1: Conversión de PDF a Markdown (con caché) ---
+    logging.info("Paso 1: Preparando conversión de PDF a Markdown...")
     pdf_file_path = os.path.join(config.DATA_PATH, pdf_filename)
     if not os.path.exists(pdf_file_path):
         logging.error(f"El archivo PDF '{pdf_file_path}' no se encontró. Abortando.")
@@ -90,12 +94,17 @@ def run_pipeline(pdf_filename: str, supabase_client: Client, embeddings_model: O
     md_filename = f"parsed_by_{model_name_slug}_{pdf_filename.replace('.pdf', '.md')}"
     md_file_path = os.path.join(config.MARKDOWN_PATH, md_filename)
 
-    # Asegurarse de que el directorio de salida para markdown exista
-    if not os.path.exists(config.MARKDOWN_PATH):
-        os.makedirs(config.MARKDOWN_PATH)
+    # Lógica de caché: solo procesar si el archivo no existe o si se fuerza el re-parseo
+    if not force_reparse and os.path.exists(md_file_path):
+        logging.info(f"El archivo Markdown '{md_file_path}' ya existe. Saltando el paso de parsing de PDF.")
+    else:
+        logging.info("Iniciando conversión de PDF a Markdown...")
+        # Asegurarse de que el directorio de salida para markdown exista
+        if not os.path.exists(config.MARKDOWN_PATH):
+            os.makedirs(config.MARKDOWN_PATH)
 
-    generate_markdown_from_pdf_images(pdf_file_path, md_file_path)
-    logging.info(f"PDF convertido a Markdown con éxito. Archivo guardado en: {md_file_path}")
+        generate_markdown_from_pdf_images(pdf_file_path, md_file_path)
+        logging.info(f"PDF convertido a Markdown con éxito. Archivo guardado en: {md_file_path}")
 
     # --- PASO 2: Creación de Chunks ---
     logging.info("Paso 2: Creando chunks semánticos desde el archivo Markdown...")
@@ -168,6 +177,11 @@ if __name__ == '__main__':
         type=str, 
         help="El nombre del archivo PDF a procesar (ej: 'nolotil_575.pdf'). Debe estar en la carpeta 'data'."
     )
+    parser.add_argument(
+        "--force-reparse",
+        action="store_true",
+        help="Fuerza la re-conversión de PDF a Markdown aunque el archivo ya exista."
+    )
     args = parser.parse_args()
 
     try:
@@ -175,12 +189,12 @@ if __name__ == '__main__':
         logging.info("Inicializando y comprobando configuración...")
         config.check_env_vars() # Comprueba que las variables de entorno existan
         
-        logging.info("Inicializando clientes de Supabase y OpenAI...")
+        logging.info("Inicializando clientes de Supabase y Embeddings...")
         supabase: Client = create_client(config.SUPABASE_URL, config.SUPABASE_SERVICE_KEY)
-        embeddings = OpenAIEmbeddings(api_key=config.OPENAI_API_KEY, model=config.EMBEDDINGS_MODEL)
+        embeddings = get_embeddings_model()
         
         # --- Ejecución del Pipeline ---
-        run_pipeline(args.pdf_filename, supabase, embeddings)
+        run_pipeline(args.pdf_filename, supabase, embeddings, args.force_reparse)
 
     except ValueError as e:
         logging.error(f"Error de configuración: {e}")

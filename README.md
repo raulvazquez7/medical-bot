@@ -20,7 +20,7 @@ The first stage of the pipeline (`scripts/_01_pdf_to_markdown.py`) treats the PD
 
 ### Step 2: Context-Aware Chunking from Markdown
 
-The second stage (`scripts/_02_markdown_to_chunks.py`) implements a sophisticated, structure-aware chunking logic. It groups content by semantic headers and injects metadata (like medicine name and document path) directly into each chunk to preserve context.
+The second stage (`scripts/_02_markdown_to_chunks.py`) implements a sophisticated, structure-aware chunking logic. It groups content by semantic headers and injects metadata (like medicine name and document path) directly into each chunk to preserve context. The system is currently configured with a chunk size of **800 tokens** and an overlap of **100 tokens**, parameters that are centralized for easy experimentation.
 
 ### Step 3: Embedding and Idempotent Vector Storage
 
@@ -59,7 +59,7 @@ We measure the performance of our document retrieval system *before* the LLM see
 *   **Precision@k:** Measures how much "noise" or irrelevant information is retrieved.
 *   **F1-Score & MRR:** Provide a holistic view of the retriever's overall performance and ranking quality.
 
-The evaluation framework is also extensible for testing advanced retrieval strategies. For instance, a **re-ranking step** using the Cohere API (`rerank-v3.0`) was integrated. This allows for a two-stage retrieval process (a broad initial retrieval followed by a precise re-ranking) to rigorously benchmark more complex techniques against the baseline.
+The evaluation framework is also extensible for testing advanced retrieval strategies like two-stage retrieval with a re-ranking layer to rigorously benchmark more complex techniques against the baseline.
 
 ### 2. Generation Evaluation
 
@@ -92,6 +92,19 @@ To test the hypothesis that hybrid search could improve retrieval for domain-spe
     *   The purely semantic search on Pinecone (`alpha = 1.0`) performed on-par with the original Supabase baseline, confirming its effectiveness.
     *   However, any introduction of keyword-based search (`alpha < 1.0`) consistently **degraded performance** across all key metrics (F1-Score, MRR, Precision, Recall) for the existing `golden_dataset`.
 *   **Decision:** For the current, predominantly conceptual question set, the added complexity of a hybrid search system did not provide a net benefit and introduced a risk of performance degradation. The experiment was documented, and the project reverted to the simpler, more robust, and equally performant Supabase/pgvector architecture. This provides a valuable baseline for future work, should the system need to handle more keyword-sensitive queries.
+
+### Experiment: Optimizing Embeddings and Re-Ranking
+
+A final experiment was conducted to push the limits of the retrieval pipeline by testing a state-of-the-art embedding model against a powerful re-ranker.
+
+*   **Hypothesis:** Migrating from OpenAI's embeddings to a newer, specialized model (Google's `gemini-embedding-001`) and adding a re-ranking layer (Cohere Rerank) would yield significant improvements.
+*   **Implementation:**
+    1.  The entire data pipeline was migrated to use `gemini-embedding-001`, including optimizations like specifying `task_type` for queries (`retrieval_query`) and documents (`retrieval_document`).
+    2.  A controlled A/B test was performed using the evaluation framework's re-ranking capability.
+*   **Results:**
+    *   **Google Embeddings Baseline:** The migration to `gemini-embedding-001` alone caused a **dramatic performance increase**, with the **F1-Score jumping from 39.65% to 47.87% (+8.2 points)**. This established a new, powerful baseline, validating the quality of the new embedding model.
+    *   **Re-Ranking Impact:** When the Cohere re-ranker was applied on top of this strong baseline, performance metrics consistently **decreased** (F1-Score dropped to 46.20%). The data revealed a "performance ceiling": Google's embedding model's initial ranking is so accurate for this dataset that the secondary re-ranking step introduces noise and degrades the results.
+*   **Decision:** The optimal retrieval architecture was determined to be **`gemini-embedding-001` used standalone**. The re-ranker was disabled from the production configuration, proving that for this use case, a simpler, faster, and cheaper architecture is also the most accurate.
 
 ### Experiment: Advanced Citation with ContextCite
 

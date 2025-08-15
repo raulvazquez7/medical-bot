@@ -5,39 +5,26 @@ import logging
 from tqdm import tqdm
 from typing import List
 import cohere  # <-- Importar cohere
+import time  # <-- Importar la librería time
 
 # Añadimos la ruta raíz para que Python pueda encontrar el módulo 'src'
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from supabase import Client, create_client
 from langchain_openai import OpenAIEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 from src.app import SupabaseRetriever
 from src import config
+from src.models import get_embeddings_model, get_known_medicines
 
 # --- Configuración del Logging ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # --- Constantes de Evaluación ---
+# Movidas a src/config.py para centralizar la configuración
 GOLDEN_DATASET_PATH = "evaluation/golden_dataset.json"
-# Aumentamos el K inicial para darle más candidatos al re-ranker
-INITIAL_K_VALUE = 20
-# El número final de documentos que evaluaremos después del re-ranking
-FINAL_K_VALUE = 5
 
-
-def get_known_medicines(supabase_client: Client) -> List[str]:
-    """Recupera la lista de nombres de medicamentos únicos de la base de datos."""
-    try:
-        response = supabase_client.table('documents').select("metadata->>medicine_name").execute()
-        if response.data:
-            # Usamos un set para obtener nombres únicos y luego lo convertimos a lista
-            unique_medicines = sorted(list(set(item['medicine_name'] for item in response.data)))
-            logging.info(f"Medicamentos conocidos encontrados en la BD: {unique_medicines}")
-            return unique_medicines
-    except Exception as e:
-        logging.error(f"No se pudo recuperar la lista de medicamentos: {e}")
-        return []
 
 def detect_medicines_in_question(question: str, known_medicines: List[str]) -> List[str]:
     """Detecta qué medicamentos conocidos se mencionan en la pregunta."""
@@ -62,10 +49,10 @@ def rerank_with_cohere(query: str, docs: List, cohere_client: cohere.Client) -> 
     try:
         # Hacemos la llamada a la API de rerank
         reranked_results = cohere_client.rerank(
-            model="rerank-v3.5",  # o 'rerank-multilingual-v2.0'
+            model="rerank-v3.5",
             query=query,
             documents=texts_to_rerank,
-            top_n=FINAL_K_VALUE
+            top_n=config.EVAL_FINAL_K
         )
         
         # Mapeamos los resultados re-ordenados de vuelta a nuestros objetos Document
@@ -79,7 +66,7 @@ def rerank_with_cohere(query: str, docs: List, cohere_client: cohere.Client) -> 
     except Exception as e:
         logging.error(f"Error durante el re-ranking con Cohere: {e}")
         # Si falla el re-ranker, devolvemos los 5 primeros originales como fallback
-        return docs[:FINAL_K_VALUE]
+        return docs[:config.EVAL_FINAL_K]
 
 
 def calculate_metrics(retrieved_paths, expected_paths):
@@ -135,9 +122,10 @@ def run_retriever_evaluation():
     try:
         config.check_env_vars()
         supabase: Client = create_client(config.SUPABASE_URL, config.SUPABASE_SERVICE_KEY)
-        embeddings = OpenAIEmbeddings(api_key=config.OPENAI_API_KEY, model=config.EMBEDDINGS_MODEL)
-        # El retriever ahora busca un K inicial más grande
-        retriever = SupabaseRetriever(supabase_client=supabase, embeddings_model=embeddings, top_k=INITIAL_K_VALUE)
+        embeddings = get_embeddings_model()
+
+        # El retriever ahora busca un K inicial más grande, leído desde config
+        retriever = SupabaseRetriever(supabase_client=supabase, embeddings_model=embeddings, top_k=config.EVAL_INITIAL_K)
         # Inicializamos el cliente de Cohere
         cohere_client = cohere.Client(config.COHERE_API_KEY)
     except Exception as e:
@@ -175,11 +163,16 @@ def run_retriever_evaluation():
             filter_on_medicines=medicines_to_filter
         )
         
-        # Aplicamos el re-ranking a los documentos recuperados
-        reranked_docs = rerank_with_cohere(question, retrieved_docs, cohere_client)
+        # Aplicamos el re-ranking solo si está activado en la configuración
+        if config.EVAL_USE_RERANKER:
+            final_docs = rerank_with_cohere(question, retrieved_docs, cohere_client)
+        else:
+            # Si el re-ranker está desactivado, simplemente tomamos los k_final primeros resultados
+            logging.info(f"Re-ranking desactivado. Tomando los primeros {config.EVAL_FINAL_K} documentos.")
+            final_docs = retrieved_docs[:config.EVAL_FINAL_K]
         
-        # Ahora trabajamos con los documentos re-rankeados
-        retrieved_paths = [doc.metadata.get('path', '') for doc in reranked_docs]
+        # Ahora trabajamos con los documentos finales
+        retrieved_paths = [doc.metadata.get('path', '') for doc in final_docs]
         
         # Calculamos las métricas para esta pregunta
         precision, recall, f1 = calculate_metrics(retrieved_paths, expected_paths)
@@ -189,6 +182,10 @@ def run_retriever_evaluation():
         total_recall += recall
         total_f1 += f1
         total_mrr += mrr
+
+        # Pausa condicional: solo esperar si estamos usando el re-ranker y su API de prueba
+        if config.EVAL_USE_RERANKER:
+            time.sleep(6)
 
     # --- 5. Calcular y Mostrar Resultados Finales ---
     num_questions = len(golden_dataset)
@@ -201,14 +198,16 @@ def run_retriever_evaluation():
     print("        Resultados de la Evaluación del Retriever")
     print("="*50)
     print(f" Dataset: {GOLDEN_DATASET_PATH}")
+    print(f" Modelo de Embedding: {config.EMBEDDINGS_MODEL}")
+    print(f" Re-Ranker activado: {'Sí' if config.EVAL_USE_RERANKER else 'No'}")
     print(f" Número de preguntas evaluadas: {num_questions}")
-    print(f" Valor de k inicial (retriever): {INITIAL_K_VALUE}")
-    print(f" Valor de k final (post-reranking): {FINAL_K_VALUE}")
+    print(f" Valor de k inicial (retriever): {config.EVAL_INITIAL_K}")
+    print(f" Valor de k final (evaluado): {config.EVAL_FINAL_K}")
     print("-"*50)
     print(f" F1-Score Promedio:            {avg_f1:.2%}")
     print(f" MRR (Mean Reciprocal Rank):   {avg_mrr:.4f}")
-    print(f" Precisión Promedio @{FINAL_K_VALUE}:      {avg_precision:.2%}")
-    print(f" Recall Promedio @{FINAL_K_VALUE}:         {avg_recall:.2%}")
+    print(f" Precisión Promedio @{config.EVAL_FINAL_K}:      {avg_precision:.2%}")
+    print(f" Recall Promedio @{config.EVAL_FINAL_K}:         {avg_recall:.2%}")
     print("="*50)
     print("\nExplicación de Métricas:")
     print(" - F1-Score: Media armónica de Precisión y Recall. Mide el balance general.")
