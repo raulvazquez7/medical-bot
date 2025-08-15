@@ -28,6 +28,7 @@ from langchain.schema import Document
 # Importamos directamente la implementación del Retriever de nuestra app
 from src.app import SupabaseRetriever, format_docs_with_sources, AnswerWithSources
 from src import config
+from src.models import get_embeddings_model # <-- Importamos nuestra nueva fábrica
 
 # --- Configuración del Logging ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -77,7 +78,8 @@ def run_generation_evaluation():
     try:
         config.check_env_vars()
         supabase: Client = create_client(config.SUPABASE_URL, config.SUPABASE_SERVICE_KEY)
-        embeddings = OpenAIEmbeddings(api_key=config.OPENAI_API_KEY, model=config.EMBEDDINGS_MODEL)
+        # Usamos nuestra fábrica centralizada para obtener el modelo de embeddings
+        embeddings = get_embeddings_model()
         
         if "gemini" in config.CHAT_MODEL_TO_USE:
             llm = ChatGoogleGenerativeAI(google_api_key=config.GOOGLE_API_KEY, model=config.CHAT_MODEL_TO_USE, temperature=0)
