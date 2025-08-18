@@ -8,7 +8,7 @@ The average patient in Spain spends significant time trying to find specific inf
 
 **The promise:** "Ask anything about your medication and receive an answer with an exact quote from the official leaflet in < 3 seconds."
 
-This project will initially be built on a knowledge base of ~20 common Spanish medications.
+This project is built on a knowledge base of common Spanish medications and serves as a case study in building robust, data-driven, and production-ready RAG systems.
 
 ## Tech Stack & Pipeline
 
@@ -18,13 +18,16 @@ The core of this project is a Retrieval-Augmented Generation (RAG) pipeline buil
 
 The first stage of the pipeline (`scripts/_01_pdf_to_markdown.py`) treats the PDF as a visual document. It converts each page into an image and sends the full sequence to a multimodal LLM (Google's Gemini), forcing a structured Markdown output for maximum reliability.
 
-### Step 2: Context-Aware Chunking from Markdown
+### Step 2: Sentence-Window Chunking Strategy
 
-The second stage (`scripts/_02_markdown_to_chunks.py`) implements a sophisticated, structure-aware chunking logic. It groups content by semantic headers and injects metadata (like medicine name and document path) directly into each chunk to preserve context. The system is currently configured with a chunk size of **800 tokens** and an overlap of **100 tokens**, parameters that are centralized for easy experimentation.
+The second stage (`scripts/_02_markdown_to_chunks.py`) implements a state-of-the-art **Sentence-Window Chunking** strategy. This method abandons fixed-size chunks in favor of semantic precision:
+1.  The Markdown is parsed into its constituent sentences and list items, treating each as a single, atomic fact.
+2.  Each sentence is then embedded along with a "window" of N sentences before and after it.
+This provides the embedding model with rich semantic context, allowing the retriever to find the most relevant fact with surgical precision, a method that has proven to dramatically increase retrieval performance in our evaluations.
 
 ### Step 3: Embedding and Idempotent Vector Storage
 
-The final ingestion step (`scripts/_03_ingest.py`) is designed for robustness. It first cleans any old data for the source document in Supabase, then generates embeddings for the new chunks and uploads them.
+The final ingestion step (`scripts/_03_ingest.py`) is designed for robustness. It first cleans any old data for the source document in Supabase, then generates embeddings for the new chunks using a specialized Google model (`gemini-embedding-001`) and uploads them.
 
 ## The Chatbot Application (`src/app.py`)
 
@@ -59,15 +62,11 @@ We measure the performance of our document retrieval system *before* the LLM see
 *   **Precision@k:** Measures how much "noise" or irrelevant information is retrieved.
 *   **F1-Score & MRR:** Provide a holistic view of the retriever's overall performance and ranking quality.
 
-The evaluation framework is also extensible for testing advanced retrieval strategies like two-stage retrieval with a re-ranking layer to rigorously benchmark more complex techniques against the baseline.
-
 ### 2. Generation Evaluation
 
 We evaluate the quality of the final, user-facing answer using the **RAGAS** library, which employs an "LLM-as-a-Judge" approach.
 *   **Faithfulness:** Measures the degree of hallucination by checking if the answer is strictly based on the provided context.
 *   **Answer Relevancy:** Assesses if the answer directly addresses the user's question.
-
-This framework allows us to benchmark our system and make data-driven decisions when implementing improvements. In production, this would be complemented by sampling real user interactions for continuous online evaluation.
 
 ## Experimental Research & Data-Driven Decisions
 
@@ -81,9 +80,7 @@ As part of our efforts to enhance retrieval performance, we tested the "Query Re
 *   **Decision:** Based on this data, a feature that did not improve the user experience was discarded. The performance cost far outweighed the minimal benefits, confirming that our base retriever is already robust enough for direct, conversational queries.
 
 ### Experiment: Hybrid Search with Pinecone
-
 To test the hypothesis that hybrid search could improve retrieval for domain-specific terms, a migration from Supabase/pgvector to Pinecone was undertaken.
-
 *   **Hypothesis:** A hybrid approach combining semantic (dense) and keyword (sparse) search would outperform a purely semantic system, especially for technical queries involving specific medication names or chemical compounds.
 *   **Implementation:**
     1.  The vector database was migrated to Pinecone to leverage its native support for sparse-dense vectors.
@@ -91,37 +88,30 @@ To test the hypothesis that hybrid search could improve retrieval for domain-spe
 *   **Results:**
     *   The purely semantic search on Pinecone (`alpha = 1.0`) performed on-par with the original Supabase baseline, confirming its effectiveness.
     *   However, any introduction of keyword-based search (`alpha < 1.0`) consistently **degraded performance** across all key metrics (F1-Score, MRR, Precision, Recall) for the existing `golden_dataset`.
-*   **Decision:** For the current, predominantly conceptual question set, the added complexity of a hybrid search system did not provide a net benefit and introduced a risk of performance degradation. The experiment was documented, and the project reverted to the simpler, more robust, and equally performant Supabase/pgvector architecture. This provides a valuable baseline for future work, should the system need to handle more keyword-sensitive queries.
+*   **Decision:** For the current, predominantly conceptual question set, the added complexity of a hybrid search system did not provide a net benefit and introduced a risk of performance degradation. The experiment was documented, and the project reverted to the simpler, more robust, and equally performant Supabase/pgvector architecture.
 
 ### Experiment: Optimizing Embeddings and Re-Ranking
-
-A final experiment was conducted to push the limits of the retrieval pipeline by testing a state-of-the-art embedding model against a powerful re-ranker.
-
+A foundational experiment was conducted to find the optimal embedding and ranking architecture.
 *   **Hypothesis:** Migrating from OpenAI's embeddings to a newer, specialized model (Google's `gemini-embedding-001`) and adding a re-ranking layer (Cohere Rerank) would yield significant improvements.
 *   **Implementation:**
     1.  The entire data pipeline was migrated to use `gemini-embedding-001`, including optimizations like specifying `task_type` for queries (`retrieval_query`) and documents (`retrieval_document`).
     2.  A controlled A/B test was performed using the evaluation framework's re-ranking capability.
 *   **Results:**
-    *   **Google Embeddings Baseline:** The migration to `gemini-embedding-001` alone caused a **dramatic performance increase**, with the **F1-Score jumping from 39.65% to 47.87% (+8.2 points)**. This established a new, powerful baseline, validating the quality of the new embedding model.
-    *   **Re-Ranking Impact:** When the Cohere re-ranker was applied on top of this strong baseline, performance metrics consistently **decreased** (F1-Score dropped to 46.20%). The data revealed a "performance ceiling": Google's embedding model's initial ranking is so accurate for this dataset that the secondary re-ranking step introduces noise and degrades the results.
+    *   **Google Embeddings Baseline:** The migration to `gemini-embedding-001` alone caused a **dramatic performance increase**, with the **F1-Score jumping from 39.65% to 47.87% (+8.2 points)**. This established a new, powerful baseline.
+    *   **Re-Ranking Impact:** When the Cohere re-ranker was applied on top of this strong baseline, performance metrics consistently **decreased** (F1-Score dropped to 46.20%), revealing a "performance ceiling".
 *   **Decision:** The optimal retrieval architecture was determined to be **`gemini-embedding-001` used standalone**. The re-ranker was disabled from the production configuration, proving that for this use case, a simpler, faster, and cheaper architecture is also the most accurate.
 
 ### Experiment: Sentence-Window Chunking for Precision Boost
-
 With the embedding model optimized, a final experiment targeted the chunking strategy itself.
-
 *   **Hypothesis:** Migrating from chunking by semantic blocks to a more granular "Sentence-Window" approach would improve retrieval precision by creating more focused, atomic chunks.
-*   **Implementation:** The chunking logic was re-implemented to treat each sentence (and list item) as a distinct unit. Each unit is embedded along with a "window" of surrounding sentences to preserve semantic context for the retriever, but only the core sentence is passed to the generator.
+*   **Implementation:** The chunking logic was re-implemented to treat each sentence (and list item) as a distinct unit. Each unit is embedded along with a "window" of surrounding sentences to preserve semantic context.
 *   **Results:** The experiment was a resounding success. An A/B test showed a massive **+17.63 point increase in Precision@5** (from 40.12% to 57.75%) and a **+8.04 point increase in F1-Score**. This confirmed that the new strategy provides a much more accurate context to the final model.
-*   **Decision:** "Sentence-Window" chunking has been adopted as the new production standard for the ingestion pipeline due to its demonstrated superiority in retrieval precision.
+*   **Decision:** **Sentence-Window Chunking** has been adopted as the new production standard for the ingestion pipeline due to its demonstrated superiority in retrieval precision.
 
 ### Experiment: Advanced Citation with ContextCite
-
 As part of ongoing research to improve the reliability of the chatbot, we have experimented with advanced citation techniques. Specifically, we explored the `ContextCite` library, which provides a more rigorous form of "contributive attribution".
-
 *   **Our Current Method:** The LLM self-reports which documents it used ("corroborative attribution").
 *   **ContextCite's Method:** Uses a scientific approach of ablating (removing) parts of the context to mathematically determine which specific sentences **caused** the model to generate its response ("contributive attribution").
-
 While computationally intensive, this method provides a much more granular and honest view of the model's reasoning process. An experimental script for visual comparison can be found in `evaluation/compare_citations.py`.
 
 ## How to Use
