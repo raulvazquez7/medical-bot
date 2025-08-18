@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Script para ejecutar el pipeline de ingesta para una lista predefinida de medicamentos.
-# Asegúrate de que tu entorno virtual (.venv) está activado antes de ejecutar este script.
 
 # Salir inmediatamente si un comando falla
 set -e
