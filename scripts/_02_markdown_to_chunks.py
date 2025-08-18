@@ -4,9 +4,16 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from markdown_it import MarkdownIt
 from langchain.docstore.document import Document
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.text_splitter import NLTKTextSplitter
 from src import config
 import re # Añadimos re para limpiar el nombre del medicamento
+
+# --- Instalación única de NLTK (si es necesario) ---
+# En algunos entornos, puede ser necesario descargar los datos de NLTK ('punkt').
+# Descomenta las siguientes dos líneas y ejecuta este script directamente una vez si 
+# obtienes un error relacionado con 'punkt' la primera vez que lo uses.
+# import nltk
+# nltk.download('punkt')
 
 def markdown_to_semantic_blocks(markdown_text):
     """
@@ -73,55 +80,81 @@ def markdown_to_semantic_blocks(markdown_text):
 
     return blocks
 
-def create_chunks_from_blocks(blocks, source_file, chunk_size, chunk_overlap, medicine_name):
+def create_sentence_window_chunks(blocks, source_file, medicine_name, window_size=2):
     """
-    Toma los bloques semánticos, los divide en Documentos de LangChain,
-    y antepone los metadatos (incluido el nombre del medicamento) a cada chunk
-    para mantener el contexto.
+    Toma bloques semánticos y crea chunks basados en oraciones individuales,
+    añadiendo un "contexto de ventana" (N oraciones antes y después).
+    Esta versión es más robusta ya que pre-procesa el Markdown para NLTK,
+    manejando correctamente párrafos multi-línea y listas.
     """
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunk_size,
-        chunk_overlap=chunk_overlap,
-        separators=["\n\n", "\n", " ", ""]
-    )
     all_chunks = []
-    
+    sentence_splitter = NLTKTextSplitter(language='spanish')
+
     for block in blocks:
-        # 1. Separar el encabezado del resto del contenido.
-        parts = block['content'].split('\n', 1)
-        header = parts[0]
-        content = parts[1].strip() if len(parts) > 1 else ""
+        sentences_in_block = []
         
-        if not content:
+        # Primero, eliminamos los encabezados del contenido para no procesarlos
+        content_without_headers = "\n".join([line for line in block['content'].strip().split('\n') if not line.strip().startswith('#')])
+        
+        lines = content_without_headers.strip().split('\n')
+        paragraph_buffer = []
+
+        for line in lines:
+            stripped_line = line.strip()
+            # Si es un item de lista, es una unidad semántica por sí misma.
+            if stripped_line.startswith('- '):
+                # Primero, procesamos cualquier párrafo que estuviera en el buffer
+                if paragraph_buffer:
+                    full_paragraph = " ".join(paragraph_buffer)
+                    sentences_in_block.extend(sentence_splitter.split_text(full_paragraph))
+                    paragraph_buffer = [] # Limpiamos el buffer
+                
+                # Añadimos el item de la lista como su propia "oración"
+                sentences_in_block.append(stripped_line.lstrip('- ').strip())
+            # Si es una línea vacía, también indica un salto de párrafo
+            elif not stripped_line:
+                if paragraph_buffer:
+                    full_paragraph = " ".join(paragraph_buffer)
+                    sentences_in_block.extend(sentence_splitter.split_text(full_paragraph))
+                    paragraph_buffer = []
+            # Si no es un item de lista, lo añadimos al buffer del párrafo actual
+            else:
+                paragraph_buffer.append(stripped_line)
+
+        # No olvidar procesar el último párrafo si el bloque no termina con una lista
+        if paragraph_buffer:
+            full_paragraph = " ".join(paragraph_buffer)
+            sentences_in_block.extend(sentence_splitter.split_text(full_paragraph))
+
+        # Filtramos cualquier resultado vacío que pueda haber quedado.
+        sentences = [s for s in sentences_in_block if s]
+
+        if not sentences:
             continue
 
-        # 2. Dividir solo el contenido del bloque.
-        split_texts = text_splitter.split_text(content)
-        
-        for text in split_texts:
-            # 3. Construir los metadatos y el contenido final del chunk
+        # 2. Iterar sobre cada oración para crear un chunk (esta lógica no cambia)
+        for i, sentence in enumerate(sentences):
+            start_index = max(0, i - window_size)
+            end_index = min(len(sentences), i + window_size + 1)
+            context_window = " ".join(sentences[start_index:end_index])
             
-            # Primero, creamos el diccionario de metadatos completo
             metadata = {
                 "source": source_file,
                 "path": block['path'],
-                "medicine_name": medicine_name
+                "medicine_name": medicine_name,
+                "main_sentence": sentence
             }
             
-            # Ahora, creamos el texto que se va a "embeddear"
-            final_content = f"""---
+            final_content_to_embed = f"""---
 METADATOS:
 - Medicamento: {metadata['medicine_name']}
-- Fuente: {metadata['source']}
 - Ruta: {metadata['path']}
 ---
-CONTENIDO:
-{header}
-
-{text}
+CONTEXTO:
+{context_window}
 """.strip()
             
-            all_chunks.append(Document(page_content=final_content, metadata=metadata))
+            all_chunks.append(Document(page_content=final_content_to_embed, metadata=metadata))
             
     return all_chunks
 
@@ -155,11 +188,9 @@ if __name__ == '__main__':
 
         # Añadimos un nombre de medicamento de prueba
         test_medicine_name = "Medicamento de Prueba (Espidifen 600)"
-        chunks = create_chunks_from_blocks(
-            semantic_blocks, 
+        chunks = create_sentence_window_chunks(
+            blocks=semantic_blocks, 
             source_file=INPUT_MD_NAME,
-            chunk_size=config.CHUNK_SIZE,
-            chunk_overlap=config.CHUNK_OVERLAP,
             medicine_name=test_medicine_name
         )
         print(f"Paso 2: Se han creado {len(chunks)} chunks en total.")

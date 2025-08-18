@@ -10,12 +10,14 @@ from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from functools import partial
+from langchain.document_loaders import Document
+from langchain.text_splitter import NLTKTextSplitter
 
 # Importamos la configuración central y las funciones de los otros scripts
 from src import config
 from src.models import get_embeddings_model
 from scripts._01_pdf_to_markdown import generate_markdown_from_pdf_images
-from scripts._02_markdown_to_chunks import markdown_to_semantic_blocks, create_chunks_from_blocks
+from scripts._02_markdown_to_chunks import markdown_to_semantic_blocks, create_sentence_window_chunks
 
 # --- Configuración del Logging ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -117,14 +119,14 @@ def run_pipeline(pdf_filename: str, supabase_client: Client, embeddings_model: E
     logging.info(f"Nombre del medicamento estandarizado a: '{medicine_name}'")
 
     semantic_blocks = markdown_to_semantic_blocks(markdown_text)
-    chunks = create_chunks_from_blocks(
-        semantic_blocks, 
+    
+    # Cambiamos la función de chunking a nuestra nueva implementación de Sentence-Window
+    chunks = create_sentence_window_chunks(
+        blocks=semantic_blocks, 
         source_file=md_filename, 
-        chunk_size=config.CHUNK_SIZE, 
-        chunk_overlap=config.CHUNK_OVERLAP,
-        medicine_name=medicine_name  # <-- Pasamos el nombre extraído
+        medicine_name=medicine_name
     )
-    logging.info(f"Se crearon {len(chunks)} chunks para este documento.")
+    logging.info(f"Se crearon {len(chunks)} chunks (sentence-window) para este documento.")
 
     if not chunks:
         logging.warning("No se generaron chunks. Abortando el proceso de ingesta.")

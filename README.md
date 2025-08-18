@@ -106,6 +106,15 @@ A final experiment was conducted to push the limits of the retrieval pipeline by
     *   **Re-Ranking Impact:** When the Cohere re-ranker was applied on top of this strong baseline, performance metrics consistently **decreased** (F1-Score dropped to 46.20%). The data revealed a "performance ceiling": Google's embedding model's initial ranking is so accurate for this dataset that the secondary re-ranking step introduces noise and degrades the results.
 *   **Decision:** The optimal retrieval architecture was determined to be **`gemini-embedding-001` used standalone**. The re-ranker was disabled from the production configuration, proving that for this use case, a simpler, faster, and cheaper architecture is also the most accurate.
 
+### Experiment: Sentence-Window Chunking for Precision Boost
+
+With the embedding model optimized, a final experiment targeted the chunking strategy itself.
+
+*   **Hypothesis:** Migrating from chunking by semantic blocks to a more granular "Sentence-Window" approach would improve retrieval precision by creating more focused, atomic chunks.
+*   **Implementation:** The chunking logic was re-implemented to treat each sentence (and list item) as a distinct unit. Each unit is embedded along with a "window" of surrounding sentences to preserve semantic context for the retriever, but only the core sentence is passed to the generator.
+*   **Results:** The experiment was a resounding success. An A/B test showed a massive **+17.63 point increase in Precision@5** (from 40.12% to 57.75%) and a **+8.04 point increase in F1-Score**. This confirmed that the new strategy provides a much more accurate context to the final model.
+*   **Decision:** "Sentence-Window" chunking has been adopted as the new production standard for the ingestion pipeline due to its demonstrated superiority in retrieval precision.
+
 ### Experiment: Advanced Citation with ContextCite
 
 As part of ongoing research to improve the reliability of the chatbot, we have experimented with advanced citation techniques. Specifically, we explored the `ContextCite` library, which provides a more rigorous form of "contributive attribution".
