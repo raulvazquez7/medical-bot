@@ -3,7 +3,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from markdown_it import MarkdownIt
-from langchain.docstore.document import Document
+from langchain_core.documents import Document
 from langchain.text_splitter import NLTKTextSplitter
 from src import config
 import re # Añadimos re para limpiar el nombre del medicamento

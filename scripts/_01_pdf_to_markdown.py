@@ -6,7 +6,7 @@ import fitz  # PyMuPDF
 import base64
 import logging
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.schema.messages import HumanMessage
+from langchain_core.messages import HumanMessage
 from pydantic import BaseModel, Field
 from src import config
 

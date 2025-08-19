@@ -108,6 +108,19 @@ With the embedding model optimized, a final experiment targeted the chunking str
 *   **Results:** The experiment was a resounding success. An A/B test showed a massive **+17.63 point increase in Precision@5** (from 40.12% to 57.75%) and a **+8.04 point increase in F1-Score**. This confirmed that the new strategy provides a much more accurate context to the final model.
 *   **Decision:** **Sentence-Window Chunking** has been adopted as the new production standard for the ingestion pipeline due to its demonstrated superiority in retrieval precision.
 
+### Experiment: PDF Parser Optimization with Docling
+To address the primary bottleneck of the ingestion pipeline—the slow, image-based parsing of PDFs—we explored a faster, programmatic alternative recommended for production environments: Docling.
+*   **Hypothesis:** Replacing the multimodal Gemini model with Docling for the initial PDF-to-Markdown conversion would dramatically reduce processing time without a critical loss in data quality.
+*   **Implementation:**
+    1.  A standalone pipeline was built using the `docling` library to convert PDFs directly into Markdown (`_exp_01_docling_parser_hybrid.py`).
+    2.  A qualitative analysis revealed a significant drawback: Docling produced a "flat" document structure, losing the critical hierarchical nesting (e.g., sub-sections within sections) that the visual Gemini model inferred correctly.
+    3.  A **hybrid approach** was then developed, using Docling for the fast initial extraction and a secondary, text-only call to Gemini to intelligently re-introduce the lost hierarchy.
+*   **Results:**
+    *   **Gemini-Visual (Baseline):** ~140 seconds per document. Highest structural quality.
+    *   **Docling-Only:** ~38 seconds. Very fast, but poor structural quality.
+    *   **Hybrid (Docling + Gemini-Text):** ~90 seconds. A significant speed-up (~35%) while recovering most of the structural quality.
+*   **Decision:** For this project, where the primary goal is to build the highest-quality RAG system for learning and evaluation purposes, we decided to **retain the original Gemini-visual pipeline in production**. Although slower, it provides the "gold standard" of data structure, which is fundamental to our current objectives. The successful hybrid experiment is documented as a viable, high-performance alternative for a production scenario where speed and cost would be more critical constraints.
+
 ### Experiment: Advanced Citation with ContextCite
 As part of ongoing research to improve the reliability of the chatbot, we have experimented with advanced citation techniques. Specifically, we explored the `ContextCite` library, which provides a more rigorous form of "contributive attribution".
 *   **Our Current Method:** The LLM self-reports which documents it used ("corroborative attribution").

@@ -54,6 +54,7 @@ Si presenta cualquiera de las condiciones descritas anteriormente, informe a su 
 ## Toma de Sintrom con otros medicamentos:
 Informe a su médico o farmacéutico si está tomando, ha tomado recientemente o pudiera tener que tomar cualquier otro medicamento.
 Los efectos de Sintrom pueden interferir con los de otros medicamentos, en particular:
+
 - Medicamentos que pueden aumentar la actividad de Sintrom:
     - Heparina: medicamento que se usa también para prevenir la coagulación de la sangre;
     - Ácido salicílico y sustancias relacionadas como aspirina, ácido aminosalicílico, diflunisal: medicamentos utilizados para el dolor;
@@ -61,6 +62,7 @@ Los efectos de Sintrom pueden interferir con los de otros medicamentos, en parti
     - Otros antiinflamatorios no esteroideos, incluidos los llamados inhibidores de la ciclooxigenasa-2 (por ejemplo, celecoxib);
     - Metilprednisolona (corticoesteroide) cuando se inyecta en vena en dosis elevadas.
 Los controles (análisis de sangre) serán más frecuentes en el caso de tomar estos medicamentos con Sintrom.
+
 - Otros medicamentos que pueden aumentar la actividad de Sintrom, tales como:
     - alopurinol: medicamento utilizado para la gota;
     - esteroides anabolizantes y andrógenos: medicamentos utilizados para el desarrollo muscular;

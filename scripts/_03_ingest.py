@@ -10,7 +10,7 @@ from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from functools import partial
-from langchain.document_loaders import Document
+from langchain_core.documents import Document
 from langchain.text_splitter import NLTKTextSplitter
 
 # Importamos la configuración central y las funciones de los otros scripts
