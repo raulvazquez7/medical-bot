@@ -4,10 +4,10 @@ import json
 import logging
 from tqdm import tqdm
 from typing import List
-import cohere  # <-- Importar cohere
-import time  # <-- Importar la librería time
+import cohere  # <-- Import cohere
+import time    # <-- Import the time library
 
-# Añadimos la ruta raíz para que Python pueda encontrar el módulo 'src'
+# Add the root path so Python can find the 'src' module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from supabase import Client, create_client
@@ -18,36 +18,36 @@ from src.app import SupabaseRetriever
 from src import config
 from src.models import get_embeddings_model, get_known_medicines
 
-# --- Configuración del Logging ---
+# --- Logging Configuration ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# --- Constantes de Evaluación ---
-# Movidas a src/config.py para centralizar la configuración
+# --- Evaluation Constants ---
+# Moved to src/config.py to centralize configuration
 GOLDEN_DATASET_PATH = "evaluation/golden_dataset.json"
 
 
 def detect_medicines_in_question(question: str, known_medicines: List[str]) -> List[str]:
-    """Detecta qué medicamentos conocidos se mencionan en la pregunta."""
+    """Detects which known medicines are mentioned in the question."""
     detected = []
-    # Comprobamos cada medicamento conocido.
-    # El caso de "sintron" está incluido en "sintron 4", por ejemplo.
+    # We check each known medicine.
+    # The case for "sintron" is included in "sintron 4", for example.
     for med in known_medicines:
-        # Buscamos el nombre base del medicamento en la pregunta (ignorando mayúsculas/minúsculas)
-        # ej. buscar "sintron" en la pregunta.
+        # We search for the base name of the medicine in the question (case-insensitive)
+        # e.g., search for "sintron" in the question.
         if med.split()[0].lower() in question.lower():
             detected.append(med)
     return detected
 
 
 def rerank_with_cohere(query: str, docs: List, cohere_client: cohere.Client) -> List:
-    """Re-ordena los documentos usando Cohere Rerank."""
-    logging.info(f"Re-ranking {len(docs)} documentos con Cohere...")
+    """Re-ranks the documents using Cohere Rerank."""
+    logging.info(f"Re-ranking {len(docs)} documents with Cohere...")
     
-    # El modelo de rerank necesita los textos de los documentos
+    # The rerank model needs the texts of the documents
     texts_to_rerank = [doc.page_content for doc in docs]
     
     try:
-        # Hacemos la llamada a la API de rerank
+        # We make the call to the rerank API
         reranked_results = cohere_client.rerank(
             model="rerank-v3.5",
             query=query,
@@ -55,126 +55,125 @@ def rerank_with_cohere(query: str, docs: List, cohere_client: cohere.Client) -> 
             top_n=config.EVAL_FINAL_K
         )
         
-        # Mapeamos los resultados re-ordenados de vuelta a nuestros objetos Document
+        # We map the re-ranked results back to our Document objects
         reranked_docs = []
         for hit in reranked_results.results:
             reranked_docs.append(docs[hit.index])
             
-        logging.info(f"Re-ranking completado. Devolviendo los {len(reranked_docs)} mejores documentos.")
+        logging.info(f"Re-ranking completed. Returning the top {len(reranked_docs)} documents.")
         return reranked_docs
         
     except Exception as e:
-        logging.error(f"Error durante el re-ranking con Cohere: {e}")
-        # Si falla el re-ranker, devolvemos los 5 primeros originales como fallback
+        logging.error(f"Error during Cohere re-ranking: {e}")
+        # If the re-ranker fails, we return the original top K as a fallback
         return docs[:config.EVAL_FINAL_K]
 
 
 def calculate_metrics(retrieved_paths, expected_paths):
     """
-    Calcula la precisión, el recall y el F1-Score para una sola consulta.
+    Calculates precision, recall, and F1-Score for a single query.
     """
-    # Convertimos las listas a conjuntos para una intersección eficiente
+    # Convert lists to sets for efficient intersection
     retrieved_set = set(retrieved_paths)
     expected_set = set(expected_paths)
 
-    # Documentos correctos que hemos recuperado
+    # Correct documents we have retrieved
     true_positives = len(retrieved_set.intersection(expected_set))
     
-    # Precision@k: ¿Qué proporción de los documentos recuperados eran relevantes?
+    # Precision@k: What proportion of the retrieved documents were relevant?
     precision = true_positives / len(retrieved_set) if retrieved_set else 0
     
-    # Recall@k: ¿Qué proporción de TODOS los documentos relevantes conseguimos recuperar?
+    # Recall@k: What proportion of ALL relevant documents did we manage to retrieve?
     recall = true_positives / len(expected_set) if expected_set else 0
 
-    # F1-Score: La media armónica de precisión y recall.
+    # F1-Score: The harmonic mean of precision and recall.
     f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
     
     return precision, recall, f1
 
 def calculate_mrr(retrieved_paths, expected_paths):
     """
-    Calcula el Reciprocal Rank para una sola consulta.
-    Encuentra el rango de la primera respuesta correcta y devuelve 1/rango.
+    Calculates the Reciprocal Rank for a single query.
+    Finds the rank of the first correct answer and returns 1/rank.
     """
     for i, path in enumerate(retrieved_paths):
         if path in expected_paths:
             return 1 / (i + 1)
-    return 0 # Si no se encuentra ninguna respuesta correcta
-
+    return 0 # If no correct answer is found
 
 def run_retriever_evaluation():
     """
-    Función principal que carga el dataset, ejecuta el retriever y calcula las métricas.
+    Main function that loads the dataset, runs the retriever, and calculates the metrics.
     """
-    logging.info("--- Iniciando Evaluación del Retriever ---")
+    logging.info("--- Starting Retriever Evaluation ---")
 
-    # --- 1. Cargar el Golden Dataset ---
+    # --- 1. Load the Golden Dataset ---
     try:
         with open(GOLDEN_DATASET_PATH, 'r', encoding='utf-8') as f:
             golden_dataset = json.load(f)
-        logging.info(f"Se ha cargado el Golden Dataset con {len(golden_dataset)} preguntas.")
+        logging.info(f"Golden Dataset with {len(golden_dataset)} questions has been loaded.")
     except FileNotFoundError:
-        logging.error(f"Error: No se encontró el archivo '{GOLDEN_DATASET_PATH}'. Asegúrate de que el archivo existe.")
+        logging.error(f"Error: File '{GOLDEN_DATASET_PATH}' not found. Make sure the file exists.")
         return
     
-    # --- 2. Inicializar Componentes ---
-    logging.info("Inicializando clientes y el retriever de Supabase...")
+    # --- 2. Initialize Components ---
+    logging.info("Initializing clients and Supabase retriever...")
     try:
         config.check_env_vars()
         supabase: Client = create_client(config.SUPABASE_URL, config.SUPABASE_SERVICE_KEY)
         embeddings = get_embeddings_model()
 
-        # El retriever ahora busca un K inicial más grande, leído desde config
+        # The retriever now fetches a larger initial K, read from config
         retriever = SupabaseRetriever(supabase_client=supabase, embeddings_model=embeddings, top_k=config.EVAL_INITIAL_K)
-        # Inicializamos el cliente de Cohere
+        # Initialize the Cohere client
         cohere_client = cohere.Client(config.COHERE_API_KEY)
     except Exception as e:
-        logging.error(f"Error al inicializar los componentes: {e}", exc_info=True)
+        logging.error(f"Error initializing components: {e}", exc_info=True)
         return
 
-    # --- 3. Obtener medicamentos conocidos para el filtrado ---
+    # --- 3. Get known medicines for filtering ---
     known_medicines = get_known_medicines(supabase)
     if not known_medicines:
-        logging.warning("No se encontraron medicamentos en la base de datos. La evaluación se ejecutará sin filtros.")
+        logging.warning("No medicines found in the database. The evaluation will run without filters.")
 
-    # --- 4. Ejecutar Evaluación ---
+    # --- 4. Run Evaluation ---
     total_precision = 0
     total_recall = 0
     total_f1 = 0
     total_mrr = 0
     
-    # Usamos tqdm para una bonita barra de progreso
-    for item in tqdm(golden_dataset, desc="Evaluando preguntas"):
+    # Use tqdm for a nice progress bar
+    for item in tqdm(golden_dataset, desc="Evaluating questions"):
         question = item["question"]
         expected_paths = item["expected_paths"]
 
-        # Detectamos los medicamentos en la pregunta para aplicar el filtro
+        # We detect the medicines in the question to apply the filter
         medicines_to_filter = detect_medicines_in_question(question, known_medicines)
         
-        # Log para ver qué filtro se aplica
+        # Log to see which filter is applied
         if medicines_to_filter:
-            logging.info(f"Pregunta: '{question[:80]}...' -> Filtro aplicado: {medicines_to_filter}")
+            logging.info(f"Question: '{question[:80]}...' -> Filter applied: {medicines_to_filter}")
         else:
-            logging.info(f"Pregunta: '{question[:80]}...' -> Sin filtro.")
+            logging.info(f"Question: '{question[:80]}...' -> No filter.")
             
-        # Obtenemos los documentos de nuestro retriever, pasando el filtro
+        # We get the documents from our retriever, passing the filter
         retrieved_docs = retriever._get_relevant_documents(
             question, 
             filter_on_medicines=medicines_to_filter
         )
         
-        # Aplicamos el re-ranking solo si está activado en la configuración
+        # Apply re-ranking only if it is enabled in the configuration
         if config.EVAL_USE_RERANKER:
             final_docs = rerank_with_cohere(question, retrieved_docs, cohere_client)
         else:
-            # Si el re-ranker está desactivado, simplemente tomamos los k_final primeros resultados
-            logging.info(f"Re-ranking desactivado. Tomando los primeros {config.EVAL_FINAL_K} documentos.")
+            # If the re-ranker is disabled, we simply take the first k_final results
+            logging.info(f"Re-ranking disabled. Taking the top {config.EVAL_FINAL_K} documents.")
             final_docs = retrieved_docs[:config.EVAL_FINAL_K]
         
-        # Ahora trabajamos con los documentos finales
+        # Now we work with the final documents
         retrieved_paths = [doc.metadata.get('path', '') for doc in final_docs]
         
-        # Calculamos las métricas para esta pregunta
+        # Calculate the metrics for this question
         precision, recall, f1 = calculate_metrics(retrieved_paths, expected_paths)
         mrr = calculate_mrr(retrieved_paths, expected_paths)
         
@@ -183,11 +182,11 @@ def run_retriever_evaluation():
         total_f1 += f1
         total_mrr += mrr
 
-        # Pausa condicional: solo esperar si estamos usando el re-ranker y su API de prueba
+        # Conditional pause: only wait if we are using the re-ranker and its trial API
         if config.EVAL_USE_RERANKER:
             time.sleep(6)
 
-    # --- 5. Calcular y Mostrar Resultados Finales ---
+    # --- 5. Calculate and Display Final Results ---
     num_questions = len(golden_dataset)
     avg_precision = total_precision / num_questions if num_questions > 0 else 0
     avg_recall = total_recall / num_questions if num_questions > 0 else 0
@@ -195,25 +194,25 @@ def run_retriever_evaluation():
     avg_mrr = total_mrr / num_questions if num_questions > 0 else 0
 
     print("\n" + "="*50)
-    print("        Resultados de la Evaluación del Retriever")
+    print("        Retriever Evaluation Results")
     print("="*50)
     print(f" Dataset: {GOLDEN_DATASET_PATH}")
-    print(f" Modelo de Embedding: {config.EMBEDDINGS_MODEL}")
-    print(f" Re-Ranker activado: {'Sí' if config.EVAL_USE_RERANKER else 'No'}")
-    print(f" Número de preguntas evaluadas: {num_questions}")
-    print(f" Valor de k inicial (retriever): {config.EVAL_INITIAL_K}")
-    print(f" Valor de k final (evaluado): {config.EVAL_FINAL_K}")
+    print(f" Embedding Model: {config.EMBEDDINGS_MODEL}")
+    print(f" Re-Ranker enabled: {'Yes' if config.EVAL_USE_RERANKER else 'No'}")
+    print(f" Number of questions evaluated: {num_questions}")
+    print(f" Initial k value (retriever): {config.EVAL_INITIAL_K}")
+    print(f" Final k value (evaluated): {config.EVAL_FINAL_K}")
     print("-"*50)
-    print(f" F1-Score Promedio:            {avg_f1:.2%}")
+    print(f" Average F1-Score:            {avg_f1:.2%}")
     print(f" MRR (Mean Reciprocal Rank):   {avg_mrr:.4f}")
-    print(f" Precisión Promedio @{config.EVAL_FINAL_K}:      {avg_precision:.2%}")
-    print(f" Recall Promedio @{config.EVAL_FINAL_K}:         {avg_recall:.2%}")
+    print(f" Average Precision @{config.EVAL_FINAL_K}:      {avg_precision:.2%}")
+    print(f" Average Recall @{config.EVAL_FINAL_K}:         {avg_recall:.2%}")
     print("="*50)
-    print("\nExplicación de Métricas:")
-    print(" - F1-Score: Media armónica de Precisión y Recall. Mide el balance general.")
-    print(" - MRR:      Calidad del ranking. Un valor alto significa que la primera respuesta correcta aparece pronto.")
-    print(" - Precisión: De lo que se devuelve, cuánto es correcto. Mide la 'limpieza' de los resultados.")
-    print(" - Recall:    De lo que debería devolverse, cuánto se encuentra. Mide la 'completitud' de los resultados.")
+    print("\nMetric Explanations:")
+    print(" - F1-Score: Harmonic mean of Precision and Recall. Measures the overall balance.")
+    print(" - MRR:      Quality of the ranking. A high value means the first correct answer appears early.")
+    print(" - Precision: Of what is returned, how much is correct. Measures the 'cleanliness' of the results.")
+    print(" - Recall:    Of what should be returned, how much is found. Measures the 'completeness' of the results.")
 
 if __name__ == '__main__':
     run_retriever_evaluation() 

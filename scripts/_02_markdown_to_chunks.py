@@ -6,19 +6,19 @@ from markdown_it import MarkdownIt
 from langchain_core.documents import Document
 from langchain.text_splitter import NLTKTextSplitter
 from src import config
-import re # Añadimos re para limpiar el nombre del medicamento
+import re # Added to clean the medicine name
 
-# --- Instalación única de NLTK (si es necesario) ---
-# En algunos entornos, puede ser necesario descargar los datos de NLTK ('punkt').
-# Descomenta las siguientes dos líneas y ejecuta este script directamente una vez si 
-# obtienes un error relacionado con 'punkt' la primera vez que lo uses.
+# --- One-time NLTK setup (if necessary) ---
+# In some environments, it may be necessary to download the NLTK data ('punkt').
+# Uncomment the following two lines and run this script directly once if
+# you get a 'punkt' related error the first time you use it.
 # import nltk
 # nltk.download('punkt')
 
 def markdown_to_semantic_blocks(markdown_text):
     """
-    Parsea texto Markdown y lo agrupa en bloques semánticos basados en los encabezados.
-    Un bloque contiene un encabezado y todo el contenido hasta el siguiente encabezado.
+    Parses Markdown text and groups it into semantic blocks based on headers.
+    A block contains a header and all the content up to the next header.
     """
     md = MarkdownIt()
     tokens = md.parse(markdown_text)
@@ -27,12 +27,12 @@ def markdown_to_semantic_blocks(markdown_text):
     current_block_content = []
     current_path = []
     
-    # Añadimos un token final "dummy" para asegurar que el último bloque se guarde
+    # Add a final "dummy" token to ensure the last block is saved
     tokens.append(type('Token', (), {'type': 'heading_open', 'tag': 'h0', 'content': 'End of Document', 'level': 0})())
 
     for i, token in enumerate(tokens):
         if token.type == 'heading_open':
-            # Cuando encontramos un nuevo encabezado, guardamos el bloque anterior si tenía contenido.
+            # When we find a new header, save the previous block if it had content.
             if current_block_content:
                 blocks.append({
                     "path": " > ".join(current_path) if current_path else "General Information",
@@ -52,10 +52,10 @@ def markdown_to_semantic_blocks(markdown_text):
                 current_path.pop()
             current_path.append(header_content)
             
-            # El contenido del bloque empieza con su encabezado
+            # The block's content starts with its header
             current_block_content = [f"{'#' * level} {header_content}\n\n"]
 
-        # Se ignora el párrafo si es parte de un item de lista para evitar duplicar texto
+        # The paragraph is ignored if it's part of a list item to avoid duplicating text
         elif token.type == 'paragraph_open':
             if i > 0 and tokens[i-1].type == 'list_item_open':
                 continue
@@ -67,7 +67,7 @@ def markdown_to_semantic_blocks(markdown_text):
 
         elif token.type == 'list_item_open':
             item_content = ""
-            # Busca el contenido del item de lista en los siguientes tokens
+            # Search for the list item's content in the following tokens
             for next_token in tokens[i+1:]:
                 if next_token.type == 'list_item_close' and next_token.level == token.level:
                     break
@@ -82,10 +82,10 @@ def markdown_to_semantic_blocks(markdown_text):
 
 def create_sentence_window_chunks(blocks, source_file, medicine_name, window_size=2):
     """
-    Toma bloques semánticos y crea chunks basados en oraciones individuales,
-    añadiendo un "contexto de ventana" (N oraciones antes y después).
-    Esta versión es más robusta ya que pre-procesa el Markdown para NLTK,
-    manejando correctamente párrafos multi-línea y listas.
+    Takes semantic blocks and creates chunks based on individual sentences,
+    adding a "window context" (N sentences before and after).
+    This version is more robust as it pre-processes the Markdown for NLTK,
+    correctly handling multi-line paragraphs and lists.
     """
     all_chunks = []
     sentence_splitter = NLTKTextSplitter(language='spanish')
@@ -93,7 +93,7 @@ def create_sentence_window_chunks(blocks, source_file, medicine_name, window_siz
     for block in blocks:
         sentences_in_block = []
         
-        # Primero, eliminamos los encabezados del contenido para no procesarlos
+        # First, we remove the headers from the content so they are not processed
         content_without_headers = "\n".join([line for line in block['content'].strip().split('\n') if not line.strip().startswith('#')])
         
         lines = content_without_headers.strip().split('\n')
@@ -101,38 +101,38 @@ def create_sentence_window_chunks(blocks, source_file, medicine_name, window_siz
 
         for line in lines:
             stripped_line = line.strip()
-            # Si es un item de lista, es una unidad semántica por sí misma.
+            # If it's a list item, it's a semantic unit in itself.
             if stripped_line.startswith('- '):
-                # Primero, procesamos cualquier párrafo que estuviera en el buffer
+                # First, we process any paragraph that was in the buffer
                 if paragraph_buffer:
                     full_paragraph = " ".join(paragraph_buffer)
                     sentences_in_block.extend(sentence_splitter.split_text(full_paragraph))
-                    paragraph_buffer = [] # Limpiamos el buffer
+                    paragraph_buffer = [] # Clear the buffer
                 
-                # Añadimos el item de la lista como su propia "oración"
+                # We add the list item as its own "sentence"
                 sentences_in_block.append(stripped_line.lstrip('- ').strip())
-            # Si es una línea vacía, también indica un salto de párrafo
+            # If it's an empty line, it also indicates a paragraph break
             elif not stripped_line:
                 if paragraph_buffer:
                     full_paragraph = " ".join(paragraph_buffer)
                     sentences_in_block.extend(sentence_splitter.split_text(full_paragraph))
                     paragraph_buffer = []
-            # Si no es un item de lista, lo añadimos al buffer del párrafo actual
+            # If it's not a list item, we add it to the current paragraph buffer
             else:
                 paragraph_buffer.append(stripped_line)
 
-        # No olvidar procesar el último párrafo si el bloque no termina con una lista
+        # Don't forget to process the last paragraph if the block doesn't end with a list
         if paragraph_buffer:
             full_paragraph = " ".join(paragraph_buffer)
             sentences_in_block.extend(sentence_splitter.split_text(full_paragraph))
 
-        # Filtramos cualquier resultado vacío que pueda haber quedado.
+        # Filter out any empty results that might remain.
         sentences = [s for s in sentences_in_block if s]
 
         if not sentences:
             continue
 
-        # 2. Iterar sobre cada oración para crear un chunk (esta lógica no cambia)
+        # 2. Iterate over each sentence to create a chunk (this logic doesn't change)
         for i, sentence in enumerate(sentences):
             start_index = max(0, i - window_size)
             end_index = min(len(sentences), i + window_size + 1)
@@ -146,11 +146,11 @@ def create_sentence_window_chunks(blocks, source_file, medicine_name, window_siz
             }
             
             final_content_to_embed = f"""---
-METADATOS:
-- Medicamento: {metadata['medicine_name']}
-- Ruta: {metadata['path']}
+METADATA:
+- Medicine: {metadata['medicine_name']}
+- Path: {metadata['path']}
 ---
-CONTEXTO:
+CONTEXT:
 {context_window}
 """.strip()
             
@@ -159,46 +159,46 @@ CONTEXTO:
     return all_chunks
 
 
-# Este bloque solo se ejecuta si corres "python scripts/_02_markdown_to_chunks.py" directamente.
-# Sirve como una prueba rápida y limpia (smoke test).
+# This block only runs if you execute "python scripts/_02_markdown_to_chunks.py" directly.
+# It serves as a quick and clean smoke test.
 if __name__ == '__main__':
-    # --- Parámetros de prueba, locales a este bloque ---
-    # Este bloque ahora sirve como una prueba rápida usando la configuración central.
-    # Para procesar un nuevo archivo, el punto de entrada principal es '03_ingest.py'.
-    print("--- Ejecutando prueba de '02_markdown_to_chunks.py' ---")
-    print("Este script no debe ejecutarse directamente para la ingesta. Usar 'ingest.py'.")
+    # --- Test parameters, local to this block ---
+    # This block now serves as a quick test using the central configuration.
+    # To process a new file, the main entry point is '03_ingest.py'.
+    print("--- Running test for '02_markdown_to_chunks.py' ---")
+    print("This script should not be run for ingestion. Use 'ingest.py'.")
 
-    # Usamos un archivo de prueba que debería existir
+    # We use a test file that should exist
     model_name_slug = config.PDF_PARSE_MODEL.replace('.', '-')
     INPUT_MD_NAME = f"parsed_by_{model_name_slug}_espidifen_600.md"
     
     md_file_path = os.path.join(config.MARKDOWN_PATH, INPUT_MD_NAME)
 
     if not os.path.exists(md_file_path):
-        print(f"Error: El archivo Markdown de entrada '{md_file_path}' no se encontró.")
-        print("Asegúrate de haber ejecutado primero la prueba de '01_pdf_to_markdown.py'")
+        print(f"Error: The input Markdown file '{md_file_path}' was not found.")
+        print("Make sure you have run the '01_pdf_to_markdown.py' test first.")
     else:
         with open(md_file_path, 'r', encoding='utf-8') as f:
             markdown_text = f.read()
 
-        print("--- Ejecutando prueba de chunking ---")
+        print("--- Running chunking test ---")
         
         semantic_blocks = markdown_to_semantic_blocks(markdown_text)
-        print(f"Paso 1: Se han creado {len(semantic_blocks)} bloques semánticos.")
+        print(f"Step 1: {len(semantic_blocks)} semantic blocks have been created.")
 
-        # Añadimos un nombre de medicamento de prueba
-        test_medicine_name = "Medicamento de Prueba (Espidifen 600)"
+        # Add a test medicine name
+        test_medicine_name = "Test Medicine (Espidifen 600)"
         chunks = create_sentence_window_chunks(
             blocks=semantic_blocks, 
             source_file=INPUT_MD_NAME,
             medicine_name=test_medicine_name
         )
-        print(f"Paso 2: Se han creado {len(chunks)} chunks en total.")
+        print(f"Step 2: {len(chunks)} chunks have been created in total.")
         
         if chunks:
-            print("\nEjemplo de chunk generado:")
+            print("\nExample of a generated chunk:")
             print(chunks[0].page_content)
-            print("\nMetadatos del chunk:")
+            print("\nChunk metadata:")
             print(chunks[0].metadata)
 
-        print("\nPrueba finalizada con éxito.")
+        print("\nTest finished successfully.")

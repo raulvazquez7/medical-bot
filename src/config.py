@@ -1,44 +1,44 @@
 import os
 from dotenv import load_dotenv
 
-# Cargar las variables de entorno desde .env al inicio
+# Load environment variables from .env at the start
 load_dotenv()
 
-# --- Rutas de directorios ---
+# --- Directory Paths ---
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_PATH = os.path.join(BASE_DIR, 'data')
 MARKDOWN_PATH = os.path.join(BASE_DIR, 'data_markdown')
 
-# --- Parámetros de Modelos ---
-# Modelo multimodal para interpretar la estructura de los PDFs
+# --- Model Parameters ---
+# Multimodal model to interpret the structure of the PDFs
 PDF_PARSE_MODEL = 'gemini-2.5-flash'
-# Modelo de lenguaje para el chatbot RAG
+# Language model for the RAG chatbot
 CHAT_MODEL_TO_USE = 'gemini-2.5-flash'
-# Proveedor de embeddings ("openai" o "google")
+# Embeddings provider ("openai" or "google")
 EMBEDDINGS_PROVIDER = os.getenv("EMBEDDINGS_PROVIDER", "google")
-# Modelo de embedding. "text-embedding-3-small" de OpenAI o "models/gemini-embedding-001" de Google.
+# Embedding model. "text-embedding-3-small" for OpenAI or "models/gemini-embedding-001" for Google.
 EMBEDDINGS_MODEL = os.getenv("EMBEDDINGS_MODEL", "models/gemini-embedding-001")
 
-# --- Parámetros de Chunking ---
+# --- Chunking Parameters ---
 CHUNK_SIZE = 800
 CHUNK_OVERLAP = 100
 
-# --- Parámetros de Evaluación ---
-# Activar o desactivar el paso de re-ranking durante la evaluación
+# --- Evaluation Parameters ---
+# Enable or disable the re-ranking step during evaluation
 EVAL_USE_RERANKER = os.getenv("EVAL_USE_RERANKER", "True").lower() in ('true', '1', 't')
-# Número de documentos a recuperar inicialmente antes del re-ranking
+# Number of documents to retrieve initially before re-ranking
 EVAL_INITIAL_K = int(os.getenv("EVAL_INITIAL_K", "20"))
-# Número final de documentos a considerar después del re-ranking
+# Final number of documents to consider after re-ranking
 EVAL_FINAL_K = int(os.getenv("EVAL_FINAL_K", "5"))
 
-# --- Credenciales (leídas desde .env) ---
+# --- Credentials (read from .env) ---
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # --- LangSmith ---
-# Para activar, establece LANGCHAIN_TRACING_V2="true" en el archivo .env
+# To enable, set LANGCHAIN_TRACING_V2="true" in the .env file
 LANGCHAIN_API_KEY = os.getenv("LANGCHAIN_API_KEY")
 LANGCHAIN_PROJECT = os.getenv("LANGCHAIN_PROJECT")
 
@@ -46,9 +46,9 @@ LANGCHAIN_PROJECT = os.getenv("LANGCHAIN_PROJECT")
 COHERE_API_KEY = os.getenv("COHERE_API_KEY")
 
 def check_env_vars():
-    """Comprueba que todas las variables de entorno necesarias para el proyecto estén cargadas."""
+    """Checks that all necessary environment variables for the project are loaded."""
     
-    # Lista de variables requeridas para la arquitectura actual del proyecto
+    # List of required variables for the current project architecture
     required_vars = [
         "GOOGLE_API_KEY",
         "OPENAI_API_KEY",
@@ -57,13 +57,13 @@ def check_env_vars():
         "COHERE_API_KEY"
     ]
     
-    # Si LangSmith está habilitado, sus variables también son obligatorias
+    # If LangSmith is enabled, its variables are also mandatory
     if os.getenv("LANGCHAIN_TRACING_V2") == "true":
         required_vars.extend(["LANGCHAIN_API_KEY", "LANGCHAIN_PROJECT", "LANGCHAIN_ENDPOINT"])
 
     missing_vars = [var for var in required_vars if not os.getenv(var)]
     
     if missing_vars:
-        raise ValueError(f"Faltan las siguientes variables de entorno en tu archivo .env: {', '.join(missing_vars)}")
+        raise ValueError(f"The following environment variables are missing from your .env file: {', '.join(missing_vars)}")
     
-    print("Todas las variables de entorno necesarias están cargadas.") 
+    print("All necessary environment variables are loaded.") 

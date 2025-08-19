@@ -5,80 +5,60 @@ import logging
 from tqdm import tqdm
 from typing import List
 
-# Añadimos la ruta raíz para que Python pueda encontrar el módulo 'src'
+# Add the root path so Python can find the 'src' module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# --- Dependencias de Evaluación ---
+# --- Evaluation Dependencies ---
 from datasets import Dataset
 from ragas import evaluate
 from ragas.metrics import (
     faithfulness,
     answer_relevancy,
-    context_precision,
 )
 
-# --- Componentes de nuestra aplicación ---
+# --- Components from our application ---
 from supabase import Client, create_client
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough
-from langchain_core.prompts import ChatPromptTemplate
 from langchain.schema import Document
 
-# Importamos directamente la implementación del Retriever de nuestra app
-from src.app import SupabaseRetriever, format_docs_with_sources, AnswerWithSources
+# Import the retriever implementation and prompt directly from our app
+from src.app import SupabaseRetriever, format_docs_with_sources, AnswerWithSources, rag_prompt_template
 from src import config
-from src.models import get_embeddings_model # <-- Importamos nuestra nueva fábrica
+from src.models import get_embeddings_model # <-- Import our new factory
 
-# --- Configuración del Logging ---
+# --- Logging Configuration ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# --- Constantes de Evaluación ---
+# --- Evaluation Constants ---
 GOLDEN_DATASET_PATH = "evaluation/golden_dataset.json"
 K_VALUE = 5
-
-# Copiamos la plantilla de prompt de app.py para asegurar que la evaluación es idéntica
-RAG_PROMPT_TEMPLATE = """
-**REGLA DE SEGURIDAD CRÍTICA: Eres un asistente informativo, NO un profesional médico. Tu única función es reportar con precisión lo que dice el texto del prospecto proporcionado. Está terminantemente prohibido dar consejos, opiniones personales o recomendaciones de cualquier tipo (p. ej., no digas 'deberías tomar', 'te recomiendo que', 'es seguro para ti'). Tu única tarea es resumir la información de las fuentes.**
-**REGLA DE ALCANCE: Solo puedes responder preguntas sobre la información contenida en el contexto. Si la pregunta es sobre otro tema, o es un saludo, indica amablemente que solo puedes responder sobre la información de los prospectos.**
-
-Eres un asistente experto en farmacología y tu única función es responder preguntas basándote EXCLUSIVAMENTE en el contexto proporcionado. Eres preciso, riguroso y nunca inventas información.
-A continuación se presenta el contexto, dividido en fuentes numeradas:
-
-CONTEXTO:
----------------------
-{context}
----------------------
-
-PREGUNTA: {question}
-
-Analiza el contexto y la pregunta y rellena la estructura de datos requerida con tu respuesta y los números de las fuentes que has utilizado.
-"""
 
 
 def run_generation_evaluation():
     """
-    Función principal que ejecuta la cadena RAG completa para el golden dataset
-    y la evalúa usando RAGAS.
+    Main function that runs the complete RAG chain for the golden dataset
+    and evaluates it using RAGAS.
     """
-    logging.info("--- Iniciando Evaluación de la Generación (RAGAS) ---")
+    logging.info("--- Starting Generation Evaluation (RAGAS) ---")
 
-    # --- 1. Cargar el Golden Dataset ---
+    # --- 1. Load the Golden Dataset ---
     try:
         with open(GOLDEN_DATASET_PATH, 'r', encoding='utf-8') as f:
-            # Solo necesitamos las preguntas para esta evaluación
+            # We only need the questions for this evaluation
             questions = [item["question"] for item in json.load(f)]
-        logging.info(f"Se han cargado {len(questions)} preguntas del Golden Dataset.")
+        logging.info(f"{len(questions)} questions have been loaded from the Golden Dataset.")
     except FileNotFoundError:
-        logging.error(f"Error: No se encontró el archivo '{GOLDEN_DATASET_PATH}'.")
+        logging.error(f"Error: File '{GOLDEN_DATASET_PATH}' not found.")
         return
 
-    # --- 2. Inicializar la Cadena RAG Completa ---
-    logging.info("Inicializando la cadena RAG completa...")
+    # --- 2. Initialize the Complete RAG Chain ---
+    logging.info("Initializing the complete RAG chain...")
     try:
         config.check_env_vars()
         supabase: Client = create_client(config.SUPABASE_URL, config.SUPABASE_SERVICE_KEY)
-        # Usamos nuestra fábrica centralizada para obtener el modelo de embeddings
+        # Use our centralized factory to get the embeddings model
         embeddings = get_embeddings_model()
         
         if "gemini" in config.CHAT_MODEL_TO_USE:
@@ -86,14 +66,14 @@ def run_generation_evaluation():
         else:
             llm = ChatOpenAI(api_key=config.OPENAI_API_KEY, model=config.CHAT_MODEL_TO_USE, temperature=0)
 
-        # Recreamos la cadena RAG exactamente como en app.py
+        # Recreate the RAG chain exactly as in app.py
         retriever = SupabaseRetriever(supabase_client=supabase, embeddings_model=embeddings, top_k=K_VALUE)
-        rag_prompt = ChatPromptTemplate.from_template(RAG_PROMPT_TEMPLATE)
+        # We now use the imported prompt template
         structured_llm_rag = llm.with_structured_output(AnswerWithSources)
 
         rag_chain_from_docs = (
             RunnablePassthrough.assign(context=(lambda x: format_docs_with_sources(x["context"])))
-            | rag_prompt
+            | rag_prompt_template  # <-- Using the imported template
             | structured_llm_rag
         )
         rag_chain_with_sources = RunnableParallel(
@@ -101,57 +81,56 @@ def run_generation_evaluation():
         ).assign(answer=rag_chain_from_docs)
 
     except Exception as e:
-        logging.error(f"Error al inicializar la cadena RAG: {e}", exc_info=True)
+        logging.error(f"Error initializing the RAG chain: {e}", exc_info=True)
         return
     
-    # --- 3. Generar Respuestas para el Dataset ---
-    logging.info("Generando respuestas para el dataset de evaluación. Esto puede tardar unos minutos...")
+    # --- 3. Generate Answers for the Dataset ---
+    logging.info("Generating answers for the evaluation dataset. This may take a few minutes...")
     results_for_ragas = []
-    for q in tqdm(questions, desc="Generando respuestas RAG"):
+    for q in tqdm(questions, desc="Generating RAG answers"):
         try:
             result = rag_chain_with_sources.invoke(q)
             answer_obj = result["answer"]
             
-            # El formato que RAGAS espera: question, answer, contexts (plural)
+            # The format RAGAS expects: question, answer, contexts (plural)
             results_for_ragas.append({
                 "question": q,
                 "answer": answer_obj.answer,
                 "contexts": [doc.page_content for doc in result["context"]],
             })
         except Exception as e:
-            logging.error(f"Error generando respuesta para la pregunta '{q}': {e}")
+            logging.error(f"Error generating answer for question '{q}': {e}")
             results_for_ragas.append({ "question": q, "answer": "", "contexts": [] })
 
-    # --- 4. Evaluar con RAGAS ---
+    # --- 4. Evaluate with RAGAS ---
     if not results_for_ragas:
-        logging.error("No se generaron resultados, no se puede ejecutar la evaluación RAGAS.")
+        logging.error("No results were generated, cannot run RAGAS evaluation.")
         return
         
-    logging.info("Preparando el dataset para RAGAS...")
+    logging.info("Preparing the dataset for RAGAS...")
     evaluation_dataset = Dataset.from_list(results_for_ragas)
     
-    # Elegimos las métricas con las que evaluamos la generación
+    # We choose the metrics with which to evaluate generation
     metrics_to_evaluate = [
         faithfulness,
         answer_relevancy,
-        # context_precision, <-- Eliminado temporalmente
     ]
     
-    logging.info("Ejecutando la evaluación con RAGAS. Esto puede tardar varios minutos más, ya que hace llamadas a un LLM para cada evaluación...")
+    logging.info("Running evaluation with RAGAS. This may take several more minutes, as it makes LLM calls for each evaluation...")
     score = evaluate(
         dataset=evaluation_dataset,
         metrics=metrics_to_evaluate,
     )
     
-    # --- 5. Mostrar Resultados ---
+    # --- 5. Display Results ---
     print("\n" + "="*50)
-    print("      Resultados de la Evaluación de Generación (RAGAS)")
+    print("      Generation Evaluation Results (RAGAS)")
     print("="*50)
     print(score)
     print("="*50)
-    print("\nExplicación de Métricas:")
-    print(" - faithfulness:      Mide si la respuesta alucina. Un 1.0 es 100% basada en el contexto.")
-    print(" - answer_relevancy:  Mide si la respuesta es relevante para la pregunta.")
+    print("\nMetric Explanations:")
+    print(" - faithfulness:      Measures if the answer hallucinates. 1.0 is 100% based on the context.")
+    print(" - answer_relevancy:  Measures if the answer is relevant to the question.")
 
 
 if __name__ == '__main__':

@@ -8,14 +8,14 @@ from src import config
 
 class CustomGoogleGenerativeAIEmbeddings(GoogleGenerativeAIEmbeddings):
     """
-    Clase envoltorio (wrapper) sobre GoogleGenerativeAIEmbeddings para forzar
-    una dimensionalidad de salida específica y el task_type adecuado en cada llamada.
+    Wrapper class around GoogleGenerativeAIEmbeddings to enforce
+    a specific output dimensionality and the appropriate task_type in each call.
     """
     output_dim: int = 1536
 
     def embed_query(self, text: str, **kwargs) -> List[float]:
-        """Sobrescribe embed_query para añadir parámetros optimizados para búsquedas."""
-        # Eliminamos parámetros para evitar conflictos si se pasan explícitamente.
+        """Overrides embed_query to add parameters optimized for search."""
+        # We remove parameters to avoid conflicts if they are passed explicitly.
         kwargs.pop("output_dimensionality", None)
         kwargs.pop("task_type", None)
         return super().embed_query(
@@ -26,7 +26,7 @@ class CustomGoogleGenerativeAIEmbeddings(GoogleGenerativeAIEmbeddings):
         )
 
     def embed_documents(self, texts: List[str], **kwargs) -> List[List[float]]:
-        """Sobrescribe embed_documents para añadir parámetros optimizados para almacenamiento."""
+        """Overrides embed_documents to add parameters optimized for storage."""
         kwargs.pop("output_dimensionality", None)
         kwargs.pop("task_type", None)
         return super().embed_documents(
@@ -37,27 +37,27 @@ class CustomGoogleGenerativeAIEmbeddings(GoogleGenerativeAIEmbeddings):
         )
 
 def get_known_medicines(supabase_client: Client) -> List[str]:
-    """Recupera la lista de nombres de medicamentos únicos de la base de datos."""
+    """Retrieves the list of unique medicine names from the database."""
     try:
         response = supabase_client.table('documents').select("metadata->>medicine_name").execute()
         if response.data:
-            # Usamos un set para obtener nombres únicos y luego lo convertimos a lista ordenada
+            # We use a set to get unique names and then convert it to a sorted list
             unique_medicines = sorted(list(set(item['medicine_name'] for item in response.data)))
-            logging.info(f"Medicamentos conocidos encontrados en la BD: {unique_medicines}")
+            logging.info(f"Known medicines found in the DB: {unique_medicines}")
             return unique_medicines
     except Exception as e:
-        logging.error(f"No se pudo recuperar la lista de medicamentos: {e}")
+        logging.error(f"Could not retrieve the list of medicines: {e}")
         return []
 
 def get_embeddings_model() -> Embeddings:
     """
-    Fábrica centralizada para obtener el modelo de embeddings configurado.
+    Centralized factory to get the configured embeddings model.
     """
     provider = config.EMBEDDINGS_PROVIDER.lower()
-    logging.info(f"Inicializando modelo de embeddings de: {provider}")
+    logging.info(f"Initializing embeddings model from: {provider}")
     
     if provider == "google":
-        # Ahora usamos nuestra clase envoltorio personalizada.
+        # Now we use our custom wrapper class.
         return CustomGoogleGenerativeAIEmbeddings(
             google_api_key=config.GOOGLE_API_KEY, 
             model=config.EMBEDDINGS_MODEL
@@ -70,4 +70,4 @@ def get_embeddings_model() -> Embeddings:
         )
         
     else:
-        raise ValueError(f"Proveedor de embeddings no soportado: {provider}")
+        raise ValueError(f"Unsupported embeddings provider: {provider}")

@@ -6,7 +6,7 @@ import fitz  # PyMuPDF
 import base64
 import logging
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 from src import config
 
@@ -19,9 +19,6 @@ logging.basicConfig(
     ]
 )
 
-# Cargar las variables de entorno (GOOGLE_API_KEY)
-# load_dotenv() # Eliminado, ahora se gestiona en config.py
-
 # --- Definición del Esquema de Salida con Pydantic ---
 class ProspectusMarkdown(BaseModel):
     """The complete prospectus converted to a clean and structured Markdown format."""
@@ -31,7 +28,7 @@ class ProspectusMarkdown(BaseModel):
 
 def pdf_to_base64_images(pdf_path):
     """Convierte cada página de un PDF en una lista de imágenes en base64."""
-    logging.info(f"Convirtiendo PDF '{pdf_path}' a imágenes...")
+    logging.info(f"Converting PDF '{pdf_path}' to images...")
     try:
         doc = fitz.open(pdf_path)
         base64_images = []
@@ -41,130 +38,129 @@ def pdf_to_base64_images(pdf_path):
             base64_image = base64.b64encode(img_bytes).decode('utf-8')
             base64_images.append(base64_image)
         doc.close()
-        logging.info(f"PDF convertido a {len(base64_images)} imágenes.")
+        logging.info(f"PDF converted to {len(base64_images)} images.")
         return base64_images
     except Exception as e:
-        logging.error(f"Error al convertir el PDF a imágenes: {e}")
+        logging.error(f"Error converting PDF to images: {e}")
         return []
 
-def get_llm_prompt():
-    """Retorna el prompt detallado para el LLM, adaptado para recibir imágenes."""
+def get_system_prompt_for_parsing():
+    """Returns the detailed system prompt for the LLM."""
     return """
-Actúa como un experto en procesamiento de documentos (NLP) y análisis de texto estructurado. Tu tarea es analizar las IMÁGENES de un prospecto de medicamento que te proporcionaré y convertirlo a formato Markdown, identificando y anidando correctamente su estructura jerárquica basándote en la disposición visual del texto.
+You are an expert in document processing (NLP) and structured text analysis. Your task is to analyze the IMAGES of a medication leaflet that I will provide and convert it to Markdown format. You must correctly identify and nest its hierarchical structure based on the visual layout of the text.
 
-El objetivo es preservar las relaciones entre secciones, subsecciones, listas y listas anidadas para que el texto resultante sea semánticamente coherente.
+The goal is to preserve the relationships between sections, subsections, lists, and nested lists so that the resulting text is semantically coherent.
 
-Formato de Salida Esperado:
-Secciones Principales: Encabezado de Nivel 1 (#).
-Subsecciones: Encabezado de Nivel 2 (##).
-Contextos de Lista o Sub-subsecciones: Encabezado de Nivel 3 o 4 (### o ####).
-Ítems de Lista: Guion (-).
-Ítems de Lista Anidada: Guion con indentación (    -).
+Expected Output Format:
+- Main Sections: Level 1 Header (#).
+- Subsections: Level 2 Header (##).
+- List Contexts or Sub-subsections: Level 3 or 4 Header (### or ####).
+- List Items: Dash (-).
+- Nested List Items: Indented dash (    -).
 
-Reglas de Estructura a Seguir:
-1. Secciones Principales:
-Son fáciles de identificar. Siempre empiezan con un número, un punto y un espacio.
-Ejemplo en el texto: 1. Qué es Enantyum y para qué se utiliza
-Salida en Markdown: # 1. Qué es Enantyum y para qué se utiliza
+Structure Rules to Follow:
+1. Main Sections:
+   They are easy to identify. They always start with a number, a period, and a space.
+   Example in text: 1. What Enantyum is and what it is used for
+   Markdown output: # 1. What Enantyum is and what it is used for
 
-2. Subsecciones:
-Son los títulos principales dentro de una sección. No están numerados y en el PDF original suelen estar en negrita.
-Ejemplo en el texto: Advertencias y precauciones
-Salida en Markdown: ## Advertencias y precauciones
+2. Subsections:
+   These are the main headings within a section. They are not numbered and are usually bold in the original PDF.
+   Example in text: Warnings and precautions
+   Markdown output: ## Warnings and precautions
 
-3. Listas y Jerarquías (La parte más importante):
-Las listas pueden ser simples o anidadas. La jerarquía a veces es visual (con sangría) y otras veces es implícita (contextual).
+3. Lists and Hierarchies (The most important part):
+   Lists can be simple or nested. The hierarchy is sometimes visual (with indentation) and sometimes implicit (contextual).
 
-A) Jerarquía Implícita (por Contexto):
-Un párrafo puede actuar como una introducción para un grupo de sub-títulos y sus listas. Debes reconocer esta dependencia.
-Ejemplo en el texto:
-Informe siempre a su médico...
-Asociaciones no recomendadas:
-- Ácido acetilsalicílico...
-Asociaciones que requieren precaución:
-- Inhibidores de la ECA...
-Lógica a aplicar: El párrafo introductorio ("Informe siempre...") debe ser un encabezado (ej. ###). Los subtítulos que le siguen son sus hijos y deben tener un nivel de encabezado inferior (ej. ####).
+   A) Implicit Hierarchy (by Context):
+   A paragraph can act as an introduction for a group of subheadings and their lists. You must recognize this dependency.
+   Example in text:
+   Always tell your doctor...
+   Not recommended combinations:
+   - Acetylsalicylic acid...
+   Combinations requiring precautions:
+   - ACE inhibitors...
+   Logic to apply: The introductory paragraph ("Always tell your doctor...") should be a header (e.g., ###). The subheadings that follow are its children and should have a lower header level (e.g., ####).
 
-B) Jerarquía Explícita (por Indentación):
-Este es el caso de las listas anidadas visualmente. Debes usar la indentación para reflejar la estructura.
-Ejemplo conceptual:
-Comunique a su médico...
-- Depresores del sistema nervioso central:
-    - Tranquilizantes mayores (antipsicóticos).
-Lógica a aplicar: El ítem de la lista principal (- Depresores...) contiene una lista secundaria, cuyos ítems (- Tranquilizantes...) deben ir indentados en el Markdown.
+   B) Explicit Hierarchy (by Indentation):
+   This is the case for visually nested lists. You must use indentation to reflect the structure.
+   Conceptual example:
+   Tell your doctor...
+   - Central nervous system depressants:
+       - Major tranquilizers (antipsychotics).
+   Logic to apply: The main list item (- Central nervous system depressants...) contains a secondary list, whose items (- Major tranquilizers...) must be indented in the Markdown.
 
-Ahora, por favor, procesa las imágenes que te proporcionaré a continuación y rellena la estructura de datos requerida con el contenido convertido a formato Markdown, siguiendo fielmente estas reglas y ejemplos.
+Now, please process the images I will provide below and fill in the required data structure with the content converted to Markdown, faithfully following these rules and examples.
 """
 
 def generate_markdown_from_pdf_images(pdf_path: str, output_path: str):
     """
-    Flujo principal: convierte un PDF a imágenes, llama al LLM con ellas y
-    guarda el resultado en un archivo Markdown.
+    Main flow: converts a PDF to images, calls the LLM with them, and
+    saves the result to a Markdown file.
     """
     base64_images = pdf_to_base64_images(pdf_path)
     if not base64_images:
         return
 
-    logging.info(f"Inicializando el modelo LLM: {config.PDF_PARSE_MODEL}")
+    logging.info(f"Initializing LLM model: {config.PDF_PARSE_MODEL}")
     llm = ChatGoogleGenerativeAI(model=config.PDF_PARSE_MODEL, temperature=0)
 
-    # Usamos .with_structured_output(), el método de alto nivel recomendado por LangChain.
-    # Este método utiliza tool-calling internamente pero simplifica el código.
     structured_llm = llm.with_structured_output(ProspectusMarkdown)
 
-    # Construimos el mensaje multimodal
-    prompt_parts = [
-        {"type": "text", "text": get_llm_prompt()},
-    ]
+    # Build the multimodal message with clear System and Human roles
+    system_message = SystemMessage(content=get_system_prompt_for_parsing())
+    
+    human_message_content = []
     for img in base64_images:
-        prompt_parts.append({
+        human_message_content.append({
             "type": "image_url",
             "image_url": f"data:image/png;base64,{img}"
         })
+    
+    human_message = HumanMessage(content=human_message_content)
 
-    message = HumanMessage(content=prompt_parts)
-
-    logging.info("Enviando la petición al LLM. Esto puede tardar varios segundos...")
+    logging.info("Sending the request to the LLM. This may take several seconds...")
     try:
-        # La respuesta ahora es directamente el objeto Pydantic que queremos.
-        response = structured_llm.invoke([message])
+        # The prompt is now a list of structured messages
+        prompt = [system_message, human_message]
+        response = structured_llm.invoke(prompt)
         markdown_content = response.markdown_content
         
-        logging.info("El LLM ha devuelto una respuesta estructurada con éxito.")
+        logging.info("LLM returned a structured response successfully.")
 
-        logging.info(f"Guardando el resultado en '{output_path}'...")
+        logging.info(f"Saving the result to '{output_path}'...")
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(markdown_content)
-        logging.info("¡Proceso completado con éxito!")
+        logging.info("Process completed successfully!")
 
     except Exception as e:
-        logging.error(f"Error al llamar al LLM o procesar la respuesta: {e}", exc_info=True)
+        logging.error(f"Error calling the LLM or processing the response: {e}", exc_info=True)
 
 
 if __name__ == '__main__':
-    # --- Configuración del Experimento ---
-    # Este bloque ahora sirve como una prueba rápida usando la configuración central.
-    # Para procesar un nuevo archivo, el punto de entrada principal es '03_ingest.py'.
-    print("--- Ejecutando prueba de '01_pdf_to_markdown.py' ---")
-    print("Este script no debe ejecutarse directamente para la ingesta. Usar '03_ingest.py'.")
+    # --- Experiment Configuration ---
+    # This block now serves as a quick test using the central configuration.
+    # To process a new file, the main entry point is '03_ingest.py'.
+    print("--- Running test for '01_pdf_to_markdown.py' ---")
+    print("This script should not be run directly for ingestion. Use '03_ingest.py'.")
     
-    # Usamos una configuración de prueba
+    # Use a test configuration
     INPUT_PDF_NAME = 'espidifen_600.pdf'
     
-    # Construir rutas usando la configuración central
+    # Build paths using the central configuration
     pdf_file_path = os.path.join(config.DATA_PATH, INPUT_PDF_NAME)
     
-    # Crear nombre de archivo de salida
-    model_name_slug = config.PDF_PARSE_MODEL.replace('.', '-') # Para un nombre de archivo más limpio
+    # Create output filename
+    model_name_slug = config.PDF_PARSE_MODEL.replace('.', '-') # For a cleaner filename
     md_file_name = f"parsed_by_{model_name_slug}_{INPUT_PDF_NAME.replace('.pdf', '.md')}"
     md_file_path = os.path.join(config.MARKDOWN_PATH, md_file_name)
 
-    # Asegurarse de que el directorio de salida exista
+    # Ensure the output directory exists
     if not os.path.exists(config.MARKDOWN_PATH):
         os.makedirs(config.MARKDOWN_PATH)
 
     if not os.path.exists(pdf_file_path):
-        logging.error(f"El archivo de entrada '{pdf_file_path}' no se encontró.")
+        logging.error(f"Input file '{pdf_file_path}' not found.")
     else:
         generate_markdown_from_pdf_images(pdf_file_path, md_file_path)
-        print(f"Prueba finalizada. El Markdown se ha guardado en: {md_file_path}") 
+        print(f"Test finished. Markdown has been saved to: {md_file_path}") 

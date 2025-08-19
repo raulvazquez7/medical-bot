@@ -1,4 +1,4 @@
-# Prospecto: información para el paciente
+8# Prospecto: información para el paciente
 
 Espidifen 600 mg granulado para solución oral sabor albaricoque
 Ibuprofeno (arginina)

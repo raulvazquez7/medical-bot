@@ -13,49 +13,49 @@ from functools import partial
 from langchain_core.documents import Document
 from langchain.text_splitter import NLTKTextSplitter
 
-# Importamos la configuración central y las funciones de los otros scripts
+# Import central configuration and functions from other scripts
 from src import config
 from src.models import get_embeddings_model
 from scripts._01_pdf_to_markdown import generate_markdown_from_pdf_images
 from scripts._02_markdown_to_chunks import markdown_to_semantic_blocks, create_sentence_window_chunks
 
-# --- Configuración del Logging ---
+# --- Logging Configuration ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 def extract_medicine_name(markdown_text: str, fallback_filename: str) -> str:
     """
-    Extrae el nombre del medicamento del texto Markdown.
-    Busca el texto entre 'Prospecto: información para el paciente' y 'Lea todo el prospecto...'.
-    Si no lo encuentra, usa el nombre del archivo como alternativa.
+    Extracts the medicine name from the Markdown text.
+    It looks for the text between 'Prospecto: información para el paciente' and 'Lea todo el prospecto...'.
+    If not found, it uses the filename as a fallback.
     """
     try:
-        # Usamos una expresión regular para encontrar el nombre del medicamento
+        # Use a regular expression to find the medicine name
         pattern = r"Prospecto: información para el paciente\s*\n\s*(.*?)\s*\n\s*Lea todo el prospecto"
         match = re.search(pattern, markdown_text, re.DOTALL | re.IGNORECASE)
         if match:
-            # Limpiamos el resultado de posibles saltos de línea y espacios extra
+            # Clean up the result from potential newlines and extra spaces
             medicine_name = ' '.join(match.group(1).split()).strip()
-            logging.info(f"Nombre del medicamento extraído: '{medicine_name}'")
+            logging.info(f"Extracted medicine name: '{medicine_name}'")
             return medicine_name
     except Exception:
-        pass  # Si hay cualquier error en la regex, usamos el fallback
+        pass  # If there is any error in the regex, use the fallback
 
-    # Si no se encuentra el patrón, usamos el nombre del archivo como fallback
+    # If the pattern is not found, use the filename as a fallback
     name_from_file = os.path.splitext(fallback_filename)[0].replace('_', ' ').replace('-', ' ')
-    logging.warning(f"No se pudo extraer el nombre del prospecto. Usando fallback: '{name_from_file}'")
+    logging.warning(f"Could not extract medicine name from prospectus. Using fallback: '{name_from_file}'")
     return name_from_file
 
 
 def standardize_medicine_name(raw_name: str) -> str:
     """
-    Normaliza el nombre de un medicamento a una versión canónica y simple.
-    Ej: "Espidifen 600 mg granulado..." -> "espidifen"
-        "ibuprofeno_cinfa_600" -> "ibuprofeno cinfa"
+    Normalizes a medicine name to a simple, canonical version.
+    E.g., "Espidifen 600 mg granulado..." -> "espidifen"
+          "ibuprofeno_cinfa_600" -> "ibuprofeno cinfa"
     """
     name = raw_name.lower()
     
-    # Casos especiales primero
+    # Special cases first
     if "espidifen" in name:
         return "espidifen"
     if "nolotil" in name:
@@ -65,96 +65,96 @@ def standardize_medicine_name(raw_name: str) -> str:
     if "lexatin" in name:
         return "lexatin"
     
-    # Casos más generales
+    # More general cases
     if "ibuprofeno" in name and "cinfa" in name:
         return "ibuprofeno cinfa"
-    if "ibuprofeno" in name and "kern" in name: # Ejemplo para futura expansión
+    if "ibuprofeno" in name and "kern" in name: # Example for future expansion
         return "ibuprofeno kern"
 
-    # Si no coincide con ningún caso, limpiamos el nombre base del fichero
+    # If it doesn't match any case, clean the base name from the file
     base_name = os.path.splitext(raw_name)[0]
     return base_name.replace('_', ' ').replace('-', ' ').strip()
 
 
 def run_pipeline(pdf_filename: str, supabase_client: Client, embeddings_model: Embeddings, force_reparse: bool = False):
     """
-    Orquesta el pipeline completo para un único archivo PDF:
-    1. Convierte el PDF a Markdown.
-    2. Crea chunks semánticos desde el Markdown.
-    3. Genera embeddings y los ingesta en Supabase.
+    Orchestrates the complete pipeline for a single PDF file:
+    1. Converts the PDF to Markdown.
+    2. Creates semantic chunks from the Markdown.
+    3. Generates embeddings and ingests them into Supabase.
     """
-    logging.info(f"--- Iniciando pipeline para el archivo: {pdf_filename} ---")
+    logging.info(f"--- Starting pipeline for file: {pdf_filename} ---")
     
-    # --- PASO 1: Conversión de PDF a Markdown (con caché) ---
-    logging.info("Paso 1: Preparando conversión de PDF a Markdown...")
+    # --- STEP 1: PDF to Markdown Conversion (with cache) ---
+    logging.info("Step 1: Preparing PDF to Markdown conversion...")
     pdf_file_path = os.path.join(config.DATA_PATH, pdf_filename)
     if not os.path.exists(pdf_file_path):
-        logging.error(f"El archivo PDF '{pdf_file_path}' no se encontró. Abortando.")
+        logging.error(f"PDF file '{pdf_file_path}' not found. Aborting.")
         return
 
     model_name_slug = config.PDF_PARSE_MODEL.replace('.', '-')
     md_filename = f"parsed_by_{model_name_slug}_{pdf_filename.replace('.pdf', '.md')}"
     md_file_path = os.path.join(config.MARKDOWN_PATH, md_filename)
 
-    # Lógica de caché: solo procesar si el archivo no existe o si se fuerza el re-parseo
+    # Cache logic: only process if the file does not exist or if re-parsing is forced
     if not force_reparse and os.path.exists(md_file_path):
-        logging.info(f"El archivo Markdown '{md_file_path}' ya existe. Saltando el paso de parsing de PDF.")
+        logging.info(f"Markdown file '{md_file_path}' already exists. Skipping PDF parsing step.")
     else:
-        logging.info("Iniciando conversión de PDF a Markdown...")
-        # Asegurarse de que el directorio de salida para markdown exista
+        logging.info("Starting PDF to Markdown conversion...")
+        # Ensure the output directory for markdown exists
         if not os.path.exists(config.MARKDOWN_PATH):
             os.makedirs(config.MARKDOWN_PATH)
 
         generate_markdown_from_pdf_images(pdf_file_path, md_file_path)
-        logging.info(f"PDF convertido a Markdown con éxito. Archivo guardado en: {md_file_path}")
+        logging.info(f"PDF successfully converted to Markdown. File saved at: {md_file_path}")
 
-    # --- PASO 2: Creación de Chunks ---
-    logging.info("Paso 2: Creando chunks semánticos desde el archivo Markdown...")
+    # --- STEP 2: Chunk Creation ---
+    logging.info("Step 2: Creating semantic chunks from the Markdown file...")
     with open(md_file_path, 'r', encoding='utf-8') as f:
         markdown_text = f.read()
 
-    # Extraemos y luego estandarizamos el nombre del medicamento
+    # Extract and then standardize the medicine name
     raw_medicine_name = extract_medicine_name(markdown_text, pdf_filename)
     medicine_name = standardize_medicine_name(raw_medicine_name)
-    logging.info(f"Nombre del medicamento estandarizado a: '{medicine_name}'")
+    logging.info(f"Medicine name standardized to: '{medicine_name}'")
 
     semantic_blocks = markdown_to_semantic_blocks(markdown_text)
     
-    # Cambiamos la función de chunking a nuestra nueva implementación de Sentence-Window
+    # Switch the chunking function to our new Sentence-Window implementation
     chunks = create_sentence_window_chunks(
         blocks=semantic_blocks, 
         source_file=md_filename, 
         medicine_name=medicine_name
     )
-    logging.info(f"Se crearon {len(chunks)} chunks (sentence-window) para este documento.")
+    logging.info(f"{len(chunks)} (sentence-window) chunks were created for this document.")
 
     if not chunks:
-        logging.warning("No se generaron chunks. Abortando el proceso de ingesta.")
+        logging.warning("No chunks were generated. Aborting ingestion process.")
         return
 
-    # --- PASO 3: Generación de Embeddings ---
-    logging.info("Paso 3: Generando embeddings con OpenAI...")
+    # --- STEP 3: Embedding Generation ---
+    logging.info("Step 3: Generating embeddings...")
     texts_to_embed = [doc.page_content for doc in chunks]
     try:
         embeddings_list = embeddings_model.embed_documents(texts_to_embed)
-        logging.info(f"Se generaron {len(embeddings_list)} embeddings.")
+        logging.info(f"{len(embeddings_list)} embeddings were generated.")
     except Exception as e:
-        logging.error(f"Error al generar embeddings para {md_filename}: {e}", exc_info=True)
+        logging.error(f"Error generating embeddings for {md_filename}: {e}", exc_info=True)
         return
 
-    # --- PASO 4: Limpieza de Datos Antiguos en Supabase ---
-    logging.info(f"Paso 4: Limpiando registros antiguos para '{md_filename}' en Supabase...")
+    # --- STEP 4: Clean Up Old Data in Supabase ---
+    logging.info(f"Step 4: Cleaning up old records for '{md_filename}' in Supabase...")
     try:
-        # Usamos el campo 'source' en los metadatos para identificar y borrar los chunks antiguos.
-        # El operador '->>' extrae el valor del JSON como texto para una comparación exacta.
+        # We use the 'source' field in the metadata to identify and delete old chunks.
+        # The '->>' operator extracts the JSON value as text for an exact comparison.
         supabase_client.table('documents').delete().eq('metadata->>source', md_filename).execute()
-        logging.info("Limpieza de registros antiguos completada con éxito.")
+        logging.info("Cleanup of old records completed successfully.")
     except Exception as e:
-        # No detenemos el proceso si falla, ya que podría ser la primera vez que se ingesta.
-        logging.warning(f"Advertencia durante la limpieza de datos antiguos: {e}")
+        # We do not stop the process if this fails, as it might be the first time ingesting.
+        logging.warning(f"Warning during cleanup of old data: {e}")
 
-    # --- PASO 5: Ingesta de Nuevos Datos en Supabase ---
-    logging.info(f"Paso 5: Preparando y subiendo {len(chunks)} nuevos registros a Supabase...")
+    # --- STEP 5: Ingest New Data into Supabase ---
+    logging.info(f"Step 5: Preparing and uploading {len(chunks)} new records to Supabase...")
     records_to_insert = []
     for i, chunk in enumerate(chunks):
         records_to_insert.append({
@@ -165,40 +165,40 @@ def run_pipeline(pdf_filename: str, supabase_client: Client, embeddings_model: E
 
     try:
         supabase_client.table('documents').insert(records_to_insert).execute()
-        logging.info(f"¡Éxito! Se han insertado {len(records_to_insert)} nuevos registros de {pdf_filename} en la base de datos.")
+        logging.info(f"Success! {len(records_to_insert)} new records from {pdf_filename} have been inserted into the database.")
     except Exception as e:
-        logging.error(f"Error al insertar datos para {pdf_filename}: {e}", exc_info=True)
+        logging.error(f"Error inserting data for {pdf_filename}: {e}", exc_info=True)
 
-    logging.info(f"--- Pipeline para {pdf_filename} finalizado. ---")
+    logging.info(f"--- Pipeline for {pdf_filename} finished. ---")
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Procesa e ingesta un prospecto de medicamento en formato PDF a la base de datos.")
+    parser = argparse.ArgumentParser(description="Processes and ingests a medicine leaflet in PDF format into the database.")
     parser.add_argument(
         "pdf_filename", 
         type=str, 
-        help="El nombre del archivo PDF a procesar (ej: 'nolotil_575.pdf'). Debe estar en la carpeta 'data'."
+        help="The name of the PDF file to process (e.g., 'nolotil_575.pdf'). It must be in the 'data' folder."
     )
     parser.add_argument(
         "--force-reparse",
         action="store_true",
-        help="Fuerza la re-conversión de PDF a Markdown aunque el archivo ya exista."
+        help="Forces the re-conversion from PDF to Markdown even if the file already exists."
     )
     args = parser.parse_args()
 
     try:
-        # --- Inicialización de Clientes ---
-        logging.info("Inicializando y comprobando configuración...")
-        config.check_env_vars() # Comprueba que las variables de entorno existan
+        # --- Client Initialization ---
+        logging.info("Initializing and checking configuration...")
+        config.check_env_vars() # Check that environment variables exist
         
-        logging.info("Inicializando clientes de Supabase y Embeddings...")
+        logging.info("Initializing Supabase and Embeddings clients...")
         supabase: Client = create_client(config.SUPABASE_URL, config.SUPABASE_SERVICE_KEY)
         embeddings = get_embeddings_model()
         
-        # --- Ejecución del Pipeline ---
+        # --- Run the Pipeline ---
         run_pipeline(args.pdf_filename, supabase, embeddings, args.force_reparse)
 
     except ValueError as e:
-        logging.error(f"Error de configuración: {e}")
+        logging.error(f"Configuration Error: {e}")
     except Exception as e:
-        logging.error(f"Ha ocurrido un error inesperado: {e}", exc_info=True) 
+        logging.error(f"An unexpected error occurred: {e}", exc_info=True) 
