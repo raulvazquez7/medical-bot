@@ -196,7 +196,7 @@ def run_chatbot():
                 print(f"I currently only have detailed information about the following medications: {', '.join(known_medicines)}.")
                 continue # Moves to the next question without running the RAG chain
 
-            # If the analysis is correct, we proceed with the RAG chain
+            # If the analysis is correct, we proceed with the RAG chain.
             print("\nSearching the database and generating a response...")
             result = rag_chain_with_sources.invoke(question)
             
