@@ -8,7 +8,7 @@ Lea todo el prospecto detenidamente antes de empezar a tomar este medicamento, p
 
 - Conserve este prospecto, ya que puede tener que volver a leerlo.
 - Si tiene alguna duda, consulte a su médico o farmacéutico.
-- Este medicamento se le ha recetado solamente a usted, y no debe dárselo a otras personas aunque tengan los mismos síntomas que usted, ya que puede perjudicarles.
+- Este medicamento se le ha recetado solamente a usted, y no debe dárselo a otras personas aunque tengan los mismos síntomas que usted, ya que puede perjudicarles...
 - Si  experimenta  efectos  adversos,  consulte  a  su  médico  o  farmacéutico,  incluso  si  se  trata  de  efectos adversos que no aparecen en este prospecto. Ver sección 4.
 
 ## Contenido del prospecto
