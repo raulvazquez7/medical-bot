@@ -1,10 +1,11 @@
 import logging
-from typing import List
+from typing import List, Optional
 from supabase import Client
 from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from src import config
+from pydantic import BaseModel, Field
 
 class CustomGoogleGenerativeAIEmbeddings(GoogleGenerativeAIEmbeddings):
     """
@@ -71,3 +72,15 @@ def get_embeddings_model() -> Embeddings:
         
     else:
         raise ValueError(f"Unsupported embeddings provider: {provider}")
+
+# --- Estructuras de Salida para el RAG ---
+class AnswerWithSources(BaseModel):
+    """Estructura de datos para la respuesta del LLM, incluyendo la respuesta y sus fuentes."""
+    answer: str = Field(
+        description="La respuesta generada por el LLM."
+    )
+    cited_sources: List[int] = Field(
+        description="Una lista de los NÚMEROS de las fuentes [Fuente 1], [Fuente 2], etc., que se usaron para generar la respuesta."
+    )
+
+# Las estructuras de los nodos del agente se han movido a src/graph.py para centralizar la lógica del grafo.

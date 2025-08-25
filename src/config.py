@@ -37,6 +37,9 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
+# --- Database Connection for Checkpoints ---
+POSTGRES_CONN_STR = os.getenv("POSTGRES_CONN_STR")
+
 # --- LangSmith ---
 # To enable, set LANGCHAIN_TRACING_V2="true" in the .env file
 LANGCHAIN_API_KEY = os.getenv("LANGCHAIN_API_KEY")
@@ -54,7 +57,8 @@ def check_env_vars():
         "OPENAI_API_KEY",
         "SUPABASE_URL",
         "SUPABASE_SERVICE_KEY",
-        "COHERE_API_KEY"
+        "COHERE_API_KEY",
+        "POSTGRES_CONN_STR"
     ]
     
     # If LangSmith is enabled, its variables are also mandatory

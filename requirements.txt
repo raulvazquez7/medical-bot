@@ -19,3 +19,12 @@ tqdm
 # --- Environment & Config ---
 python-dotenv
 pydantic 
+
+# --- Vector Database Client ---
+supabase
+
+# --- LangGraph Agent ---
+langgraph
+langchain-postgres
+langgraph-checkpoint-postgres
+psycopg[binary]
