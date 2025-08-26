@@ -29,11 +29,17 @@ This provides the embedding model with rich semantic context, allowing the retri
 
 The final ingestion step (`scripts/_03_ingest.py`) is designed for robustness. It first cleans any old data for the source document in Supabase, then generates embeddings for the new chunks using a specialized Google model (`gemini-embedding-001`) and uploads them.
 
-## The Chatbot Application (`src/app.py`)
+## The Agent Application (`src/graph.py`) - (Under Construction)
 
-The user-facing application demonstrates a professional-grade RAG implementation.
-1.  **Custom Retriever:** A custom `SupabaseRetriever` class directly queries the database using our purpose-built SQL function.
-2.  **Reliable Citations:** The final LLM call is the most critical part. Instead of just asking the model to include sources in the text (which is unreliable), we again use **`with_structured_output`**. We force the LLM to return a Pydantic object containing two distinct fields: `answer` (the text) and `cited_sources` (a list of numbers). This makes the citation process deterministic and robust.
+The user-facing application has evolved from a simple RAG chain into a sophisticated, stateful agent built with **LangGraph**. This architecture allows for more natural, multi-turn conversations and robust memory management.
+
+1.  **Intelligent Intent Router:** At the core of the agent is a router node. Instead of a simple keyword search, this component uses a fast and efficient LLM (like `gemini-1.5-flash`) to classify the user's intent with each message (e.g., `pregunta_medicamento`, `pregunta_general`, `saludo_despedida`). This acts as an intelligent "receptionist" that directs the conversation down the appropriate path.
+
+2.  **ReAct Agent Core:** For complex queries (like those about medications), the router passes control to the main agent. This agent uses a more powerful LLM (like `gpt-4o`) and follows the **ReAct (Reasoning and Acting)** pattern. It can reason about the user's query, use tools like the custom `SupabaseRetriever` to search for information, and formulate answers based on the retrieved context.
+
+3.  **Conversational Memory & Summarization:** The agent is designed for long conversations. It maintains both short-term and long-term memory:
+    *   **Short-Term:** The agent always has access to the immediate context of the current conversational turn.
+    *   **Long-Term:** Every three turns, a dedicated `summarizer` node activates, using an efficient LLM to condense the recent conversation into an updated summary. The agent receives this summary at the start of every turn, ensuring it never loses track of key information provided by the user (like their name, age, or medical conditions).
 
 ## Advanced Features: Observability & Safety
 
@@ -41,15 +47,15 @@ To move from a functional prototype to a reliable application, this project inco
 
 ### Observability with LangSmith
 
-The entire application is integrated with [LangSmith](https://smith.langchain.com/) for end-to-end observability. Full tracing allows for detailed debugging and performance monitoring of every component in the RAG chain.
+The entire agentic graph is integrated with [LangSmith](https://smith.langchain.com/) for end-to-end observability. Full tracing allows for detailed debugging of the agent's reasoning, tool usage, and state changes at every step of the graph.
 
 ### Multi-Layered Guardrails
 
-Given the sensitive nature of medical information, the chatbot implements three distinct layers of safety checks: a pre-processing guardrail for scope control, a prompt-level guardrail to ensure safe and factual responses, and a retrieval-level guardrail.
+Given the sensitive nature of medical information, the chatbot implements three distinct layers of safety checks.
 
-1.  **Triage Guardrail (Pre-processing):** Before attempting to answer, a preliminary LLM call analyzes the user's query to identify the mentioned medication and checks if it belongs to the knowledge base. If the medication is unknown, the bot refuses to answer and lists the medications it can discuss.
+1.  **Intent Router Guardrail:** The initial router node acts as the first line of defense. By classifying the user's intent, it can immediately identify if a question is about a known medicine or is out of scope, preventing the agent from attempting to answer questions for which it has no data.
 2.  **Prompt-Level Guardrail:** The final prompt sent to the LLM contains a critical safety rule that strictly forbids providing medical advice and forces it to base its answer exclusively on the provided context.
-3.  **Retrieval-Level Guardrail (Metadata Filtering):** To prevent context contamination between different medication leaflets, the retrieval pipeline is enhanced with strict metadata filtering. When the agent identifies the specific medication(s) relevant to a query, it forces the vector search to consider **only** the chunks belonging to those leaflets. This is a critical safety feature that prevents the model from generating answers based on information from the wrong drug.
+3.  **Retrieval-Level Guardrail (Metadata Filtering):** *[Future implementation]* To prevent context contamination, the retrieval pipeline will be enhanced with metadata filtering. When the agent identifies the relevant medication(s), it will force the vector search to consider **only** the chunks belonging to those leaflets.
 
 ## Robust Evaluation Framework
 
@@ -136,7 +142,18 @@ python scripts/_03_ingest.py nombre_del_medicamento.pdf
 ```
 
 ### Chatbot Application
-To interact with the bot, run the main application script:
+To interact with the agent, run the main graph script:
 ```bash
-python src/app.py
+python -m src.graph
 ```
+
+---
+
+### Mensaje de Commit
+
+Y aquí tienes un mensaje de `commit` que puedes usar. Sigue el estándar de "Conventional Commits", que es una excelente práctica para mantener un historial de cambios limpio y legible.
+
+**Título:**
+`feat(agent): Rearchitect chatbot from RAG chain to LangGraph agent`
+
+**Descripción (opcional, para el cuerpo del commit):**

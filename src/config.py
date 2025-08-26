@@ -11,9 +11,16 @@ MARKDOWN_PATH = os.path.join(BASE_DIR, 'data_markdown')
 
 # --- Model Parameters ---
 # Multimodal model to interpret the structure of the PDFs
-PDF_PARSE_MODEL = 'gemini-2.5-flash'
-# Language model for the RAG chatbot
-CHAT_MODEL_TO_USE = 'gemini-2.5-flash'
+PDF_PARSE_MODEL = 'gemini-1.5-flash'
+
+# [MODIFICADO] Modelo principal para el agente ReAct (razonamiento complejo)
+# Se recomienda un modelo potente como 'gpt-4o' o 'gemini-1.5-pro'
+AGENT_MODEL = os.getenv("AGENT_MODEL", "gpt-4o")
+
+# [NUEVO] Modelo rápido y económico para tareas de clasificación y resumen
+# Se recomienda un modelo rápido como 'gemini-1.5-flash'
+ROUTER_MODEL = os.getenv("ROUTER_MODEL", "gemini-2.5-flash")
+
 # Embeddings provider ("openai" or "google")
 EMBEDDINGS_PROVIDER = os.getenv("EMBEDDINGS_PROVIDER", "google")
 # Embedding model. "text-embedding-3-small" for OpenAI or "models/gemini-embedding-001" for Google.
