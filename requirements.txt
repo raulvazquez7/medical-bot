@@ -28,3 +28,4 @@ langgraph
 langchain-postgres
 langgraph-checkpoint-postgres
 psycopg[binary]
+langgraph-cli[inmem]

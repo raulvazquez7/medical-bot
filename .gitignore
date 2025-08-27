@@ -16,3 +16,9 @@ __pycache__/
 
 # macOS specific files
 .DS_Store
+
+# Jupyter Notebook files
+.ipynb
+
+# LangGraph Studio state
+.langgraph_api/

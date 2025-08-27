@@ -1,11 +1,9 @@
 import logging
-from typing import List, Optional
-from supabase import Client
+from typing import List
 from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from src import config
-from pydantic import BaseModel, Field
 
 class CustomGoogleGenerativeAIEmbeddings(GoogleGenerativeAIEmbeddings):
     """
@@ -37,18 +35,6 @@ class CustomGoogleGenerativeAIEmbeddings(GoogleGenerativeAIEmbeddings):
             **kwargs
         )
 
-def get_known_medicines(supabase_client: Client) -> List[str]:
-    """Retrieves the list of unique medicine names from the database."""
-    try:
-        response = supabase_client.table('documents').select("metadata->>medicine_name").execute()
-        if response.data:
-            # We use a set to get unique names and then convert it to a sorted list
-            unique_medicines = sorted(list(set(item['medicine_name'] for item in response.data)))
-            logging.info(f"Known medicines found in the DB: {unique_medicines}")
-            return unique_medicines
-    except Exception as e:
-        logging.error(f"Could not retrieve the list of medicines: {e}")
-        return []
 
 def get_embeddings_model() -> Embeddings:
     """
@@ -73,14 +59,4 @@ def get_embeddings_model() -> Embeddings:
     else:
         raise ValueError(f"Unsupported embeddings provider: {provider}")
 
-# --- Estructuras de Salida para el RAG ---
-class AnswerWithSources(BaseModel):
-    """Estructura de datos para la respuesta del LLM, incluyendo la respuesta y sus fuentes."""
-    answer: str = Field(
-        description="La respuesta generada por el LLM."
-    )
-    cited_sources: List[int] = Field(
-        description="Una lista de los NÚMEROS de las fuentes [Fuente 1], [Fuente 2], etc., que se usaron para generar la respuesta."
-    )
 
-# Las estructuras de los nodos del agente se han movido a src/graph.py para centralizar la lógica del grafo.

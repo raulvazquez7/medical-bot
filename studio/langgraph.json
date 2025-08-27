@@ -1,0 +1,9 @@
+{
+  "graphs": {
+    "default": "src.graph:app"
+  },
+  "dependencies": [
+    "requirements.txt"
+  ],
+  "port": 8001
+}

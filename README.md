@@ -29,17 +29,19 @@ This provides the embedding model with rich semantic context, allowing the retri
 
 The final ingestion step (`scripts/_03_ingest.py`) is designed for robustness. It first cleans any old data for the source document in Supabase, then generates embeddings for the new chunks using a specialized Google model (`gemini-embedding-001`) and uploads them.
 
-## The Agent Application (`src/graph.py`) - (Under Construction)
+## The Agent Application (`src/graph.py`)
 
-The user-facing application has evolved from a simple RAG chain into a sophisticated, stateful agent built with **LangGraph**. This architecture allows for more natural, multi-turn conversations and robust memory management.
+The user-facing application is a sophisticated, stateful agent built with **LangGraph**. This architecture allows for natural, multi-turn conversations and robust, long-term memory.
 
-1.  **Intelligent Intent Router:** At the core of the agent is a router node. Instead of a simple keyword search, this component uses a fast and efficient LLM (like `gemini-1.5-flash`) to classify the user's intent with each message (e.g., `pregunta_medicamento`, `pregunta_general`, `saludo_despedida`). This acts as an intelligent "receptionist" that directs the conversation down the appropriate path.
+![Agent Graph Architecture](graph.png)
 
-2.  **ReAct Agent Core:** For complex queries (like those about medications), the router passes control to the main agent. This agent uses a more powerful LLM (like `gpt-4o`) and follows the **ReAct (Reasoning and Acting)** pattern. It can reason about the user's query, use tools like the custom `SupabaseRetriever` to search for information, and formulate answers based on the retrieved context.
+1.  **Intelligent Intent Router:** At the core of the agent is a `router` node. This component uses a fast and efficient LLM (like `gemini-1.5-flash`) to classify the user's intent with each message (e.g., `pregunta_medicamento`, `pregunta_general`, `saludo_despedida`). It acts as an intelligent "receptionist" that directs the conversation down the appropriate path.
 
-3.  **Conversational Memory & Summarization:** The agent is designed for long conversations. It maintains both short-term and long-term memory:
-    *   **Short-Term:** The agent always has access to the immediate context of the current conversational turn.
-    *   **Long-Term:** Every three turns, a dedicated `summarizer` node activates, using an efficient LLM to condense the recent conversation into an updated summary. The agent receives this summary at the start of every turn, ensuring it never loses track of key information provided by the user (like their name, age, or medical conditions).
+2.  **ReAct Agent Core:** For complex queries (like those about medications), the router passes control to the main `agent` node. This agent uses a more powerful LLM (like `gpt-4o`) and follows the **ReAct (Reasoning and Acting)** pattern. It can reason about the user's query, use tools (via the `tools` node) like a custom retriever to search for information, and formulate answers based on the retrieved context.
+
+3.  **Robust Conversational Memory:** The agent is designed for long conversations using a powerful memory system managed by a dedicated `end_of_turn` node that acts as a "pacemaker":
+    *   **Short-Term Memory (Sliding Window):** The agent always has access to the last few turns of the conversation, ensuring it remembers the immediate context.
+    *   **Long-Term Memory (Summarization):** The `end_of_turn` node keeps track of the conversation turns. Every three turns, it routes the flow to a `summarizer` node. This node uses an efficient LLM to condense the recent conversation into an updated summary, which is then fed back to the agent. This ensures it never loses track of key information provided by the user (like their name, age, or medical conditions).
 
 ## Advanced Features: Observability & Safety
 
@@ -147,13 +149,3 @@ To interact with the agent, run the main graph script:
 python -m src.graph
 ```
 
----
-
-### Mensaje de Commit
-
-Y aquí tienes un mensaje de `commit` que puedes usar. Sigue el estándar de "Conventional Commits", que es una excelente práctica para mantener un historial de cambios limpio y legible.
-
-**Título:**
-`feat(agent): Rearchitect chatbot from RAG chain to LangGraph agent`
-
-**Descripción (opcional, para el cuerpo del commit):**

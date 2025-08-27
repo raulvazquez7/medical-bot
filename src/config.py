@@ -1,8 +1,10 @@
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env at the start
-load_dotenv()
+# [MODIFICADO] Hacemos que la carga del .env sea configurable.
+# Esto nos permite apuntar al .env de 'studio/' cuando lanzamos LangGraph Studio.
+# Si la variable DOTENV_PATH no está definida, se comporta como siempre, buscando '.env'.
+load_dotenv(dotenv_path=os.getenv("DOTENV_PATH"))
 
 # --- Directory Paths ---
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
