@@ -41,7 +41,8 @@ The user-facing application is a sophisticated, stateful agent built with **Lang
 
 3.  **Robust Conversational Memory:** The agent is designed for long conversations using a powerful memory system managed by a dedicated `end_of_turn` node that acts as a "pacemaker":
     *   **Short-Term Memory (Sliding Window):** The agent always has access to the last few turns of the conversation, ensuring it remembers the immediate context.
-    *   **Long-Term Memory (Summarization):** The `end_of_turn` node keeps track of the conversation turns. Every three turns, it routes the flow to a `summarizer` node. This node uses an efficient LLM to condense the recent conversation into an updated summary, which is then fed back to the agent. This ensures it never loses track of key information provided by the user (like their name, age, or medical conditions).
+    *   **Long-Term Memory (Summarization):** The `end_of_turn` node keeps track of the conversation turns. Every three turns, it routes the flow to a `summarizer` node. This node uses an efficient LLM to condense the recent conversation into an updated summary. Crucially, once summarized, the short-term memory is completely cleared to prevent redundant information processing.
+    *   **Immediate Pruning for Efficiency:** After the agent uses a tool, a dedicated `pruning` node immediately removes the large, raw tool outputs from the short-term memory. This keeps the conversational history clean, radically reduces token usage, and ensures that only high-level conclusions are passed to the long-term memory and future agent turns.
 
 ## Advanced Features: Observability & Safety
 

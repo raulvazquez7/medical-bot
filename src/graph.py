@@ -128,7 +128,6 @@ def router_node(state: AgentState, model: BaseChatModel, known_medicines: List[s
         
         current_medicines = state.get("current_medicines", [])
         
-        # --- [NUEVA LÓGICA DE VALIDACIÓN] ---
         # Verificamos el medicamento extraído contra nuestra lista de confianza.
         if medicine and intent == "pregunta_medicamento":
             medicine_lower = medicine.lower()
@@ -185,12 +184,14 @@ def summarize_node(state: AgentState, model: BaseChatModel):
     ]
     new_summary = model.invoke(summary_prompt).content
     
-    messages_to_remove = [RemoveMessage(id=m.id) for m in state["messages"][:-2]]
+    # [MODIFICADO] Ahora eliminamos TODOS los mensajes de la ventana de memoria a corto plazo.
+    # El 'summary' se convierte en la única fuente de verdad sobre el pasado, eliminando la redundancia.
+    messages_to_remove = [RemoveMessage(id=m.id) for m in state["messages"]]
 
-    logging.info(f"--- Nuevo resumen generado. Mensajes podados: {len(messages_to_remove)} ---")
-    # [NUEVO] Reseteamos el contador de turnos después de resumir.
+    logging.info(f"--- Nuevo resumen generado. Ventana de mensajes reseteada ({len(messages_to_remove)} mensajes eliminados). ---")
+    # Reseteamos el contador de turnos.
     return {"summary": new_summary, "messages": messages_to_remove, "turn_count": 0}
-
+    
 def end_of_turn_node(state: AgentState):
     """
     Este nodo actúa como el punto de control final de un turno
@@ -198,6 +199,36 @@ def end_of_turn_node(state: AgentState):
     """
     logging.info("--- Fin del turno, actualizando contador. ---")
     return {"turn_count": state.get("turn_count", 0) + 1}
+
+def pruning_node(state: AgentState):
+    """
+    [NUEVO] Limpia el historial de mensajes eliminando los mensajes intermedios
+    relacionados con las herramientas (AIMessage con tool_calls y el ToolMessage
+    correspondiente) después de que el agente haya producido su respuesta final.
+    """
+    logging.info("--- Poda de Memoria: Limpiando mensajes de herramientas... ---")
+    
+    messages = state['messages']
+    if not isinstance(messages[-1], AIMessage) or messages[-1].tool_calls:
+        return {}
+
+    indices_to_remove = []
+    for i in range(len(messages) - 2, -1, -1):
+        msg = messages[i]
+        if isinstance(msg, ToolMessage):
+            indices_to_remove.append(i)
+        elif isinstance(msg, AIMessage) and msg.tool_calls:
+            indices_to_remove.append(i)
+            break
+    
+    if not indices_to_remove:
+        return {}
+
+    message_ids_to_remove = [messages[i].id for i in indices_to_remove]
+    messages_to_remove = [RemoveMessage(id=msg_id) for msg_id in message_ids_to_remove]
+    
+    logging.info(f"--- Mensajes intermedios eliminados: {len(messages_to_remove)} ---")
+    return {"messages": messages_to_remove}
 
 # ==============================================================================
 # === 6. LÓGICA CONDICIONAL Y CONSTRUCCIÓN DEL GRAFO                       ===
@@ -274,7 +305,8 @@ workflow.add_node("agent", functools.partial(agent_node, model=agent_llm_with_to
 workflow.add_node("tools", tool_node)
 workflow.add_node("conversational", conversational_node)
 workflow.add_node("summarizer", functools.partial(summarize_node, model=router_llm))
-workflow.add_node("end_of_turn", end_of_turn_node) # <-- Nodo renombrado/especializado
+workflow.add_node("end_of_turn", end_of_turn_node)
+workflow.add_node("pruning", pruning_node) # <-- [NUEVO] Añadimos el nodo de poda al grafo
 
 workflow.set_entry_point("router")
 
@@ -287,7 +319,7 @@ workflow.add_conditional_edges(
 workflow.add_conditional_edges(
     "agent", 
     should_continue_react,
-    {"tools": "tools", "end_of_turn": "end_of_turn"} # El agente ahora va al contador de turnos
+    {"tools": "tools", "end_of_turn": "pruning"} # [MODIFICADO] La salida final del agente ahora va a la poda
 )
 workflow.add_conditional_edges(
     "end_of_turn",
@@ -296,7 +328,8 @@ workflow.add_conditional_edges(
 )
 
 workflow.add_edge("tools", "agent")
-workflow.add_edge("conversational", "end_of_turn") # El nodo conversacional también va al contador de turnos
+workflow.add_edge("conversational", "end_of_turn")
+workflow.add_edge("pruning", "end_of_turn") # <-- [NUEVO] Después de la poda, vamos al contador de fin de turno
 workflow.add_edge("summarizer", END)
 
 # La variable 'app' ahora es global y está compilada SIN checkpointer para LangGraph Studio.
