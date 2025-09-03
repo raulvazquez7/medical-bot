@@ -184,6 +184,68 @@ def agent_node(state: AgentState, model: BaseChatModel):
     response = model.invoke(context)
     return {"messages": [response]}
 
+QUERY_REWRITER_PROMPT = """Eres un experto en reescribir consultas de búsqueda para una base de datos vectorial de prospectos de medicamentos.
+Tu tarea es convertir una consulta de búsqueda simple en una pregunta detallada y autocontenida, utilizando el historial de la conversación como contexto.
+
+**Instrucciones:**
+1.  Analiza el historial de la conversación y la consulta de búsqueda simple.
+2.  Identifica el **tema principal de la consulta** (el medicamento y la información específica solicitada).
+3.  Incorpora **detalles relevantes del historial** (como condiciones médicas, edad, etc., del paciente) que sean pertinentes para esa consulta.
+4.  Ignora temas de preguntas anteriores que no estén relacionados con la consulta actual.
+5.  El resultado debe ser una única pregunta clara y concisa, optimizada para la búsqueda semántica.
+
+**Historial de Conversación (Resumen y últimos mensajes):**
+{conversation_history}
+
+**Consulta Simple a Reescribir:**
+{query}
+
+**Consulta Reescrita:**"""
+
+def query_rewriter_node(state: AgentState, model: BaseChatModel):
+    """
+    [NUEVO] Reescribe la consulta de búsqueda del agente para incluir contexto relevante.
+    """
+    logging.info("--- Reescribiendo consulta para búsqueda ---")
+    
+    # Extraemos la última llamada a herramienta
+    last_message = state["messages"][-1]
+    if not last_message.tool_calls:
+        return {} # No hacer nada si no hay llamada a herramienta
+
+    original_tool_call = last_message.tool_calls[0]
+    original_query = original_tool_call['args']['query']
+
+    # Construimos el historial para el prompt
+    history = state.get('summary', '') + "\n\n"
+    history += "\n".join([f"{type(m).__name__}: {m.content}" for m in state['messages'][:-1]])
+    
+    # Creamos el prompt y lo invocamos
+    rewriter_prompt = QUERY_REWRITER_PROMPT.format(
+        conversation_history=history,
+        query=original_query
+    )
+    rewritten_query = model.invoke(rewriter_prompt).content
+    
+    logging.info(f"--- Consulta Original: '{original_query}' ---")
+    logging.info(f"--- Consulta Reescrita: '{rewritten_query}' ---")
+    
+    # Modificamos la llamada a herramienta con la nueva query
+    new_tool_calls = last_message.tool_calls.copy()
+    new_tool_calls[0]['args']['query'] = rewritten_query
+    
+    # Creamos un nuevo mensaje para reemplazar el anterior
+    new_message = AIMessage(
+        content=last_message.content,
+        tool_calls=new_tool_calls,
+        id=last_message.id # Reutilizamos el ID
+    )
+    
+    # Reemplazamos el último mensaje en el estado
+    all_but_last = state['messages'][:-1]
+    return {"messages": all_but_last + [new_message]}
+
+
 def conversational_node(state: AgentState):
     """Nodo para respuestas de saludo."""
     logging.info("--- Ejecutando nodo conversacional de saludo ---")
@@ -342,10 +404,12 @@ router_with_model_and_medicines = functools.partial(
 unauthorized_node_with_medicines = functools.partial(
     unauthorized_question_node, known_medicines=known_medicines
 )
+rewriter_node_with_model = functools.partial(query_rewriter_node, model=router_llm)
 
 workflow.add_node("router", router_with_model_and_medicines)
 workflow.add_node("agent", functools.partial(agent_node, model=agent_llm_with_tools))
 workflow.add_node("tools", tool_node)
+workflow.add_node("query_rewriter", rewriter_node_with_model) # <-- [NUEVO] Añadimos el nodo de reescritura
 workflow.add_node("conversational", conversational_node)
 workflow.add_node("unauthorized", unauthorized_node_with_medicines) # <-- [NUEVO] Añadimos el nodo de guardrail
 workflow.add_node("summarizer", functools.partial(summarize_node, model=router_llm))
@@ -362,7 +426,7 @@ workflow.add_conditional_edges(
 workflow.add_conditional_edges(
     "agent", 
     should_continue_react,
-    {"tools": "tools", "end_of_turn": "pruning"} # [MODIFICADO] La salida final del agente ahora va a la poda
+    {"tools": "query_rewriter", "end_of_turn": "pruning"} # [MODIFICADO] La salida a herramientas ahora va al rewriter
 )
 workflow.add_conditional_edges(
     "end_of_turn",
@@ -370,6 +434,7 @@ workflow.add_conditional_edges(
     {"summarize": "summarizer", "end": END}
 )
 
+workflow.add_edge("query_rewriter", "tools") # <-- [NUEVO] El rewriter ahora alimenta al nodo de herramientas
 workflow.add_edge("tools", "agent")
 workflow.add_edge("conversational", "end_of_turn")
 workflow.add_edge("unauthorized", "end_of_turn") # <-- [NUEVO] Después de la respuesta, vamos al final del turno

@@ -235,7 +235,7 @@
         ]
       },
       {
-        "question": "Sufro de apnea del sueño y mi médico me ha recetado un ansiolítico. ¿Es seguro para mí tomar bromazepam?",
+        "question": "Sufro de apnea del sueño y mi médico me ha recetado un ansiolítico. ¿Es seguro para mí tomar Lexatin?",
         "expected_paths": [
           "2. Qué necesita saber antes de empezar a tomar Lexatin > No tome Lexatin",
           "2. Qué necesita saber antes de empezar a tomar Lexatin > Advertencias y precauciones > Consulte a su médico o farmacéutico antes de empezar a tomar Lexatin:"

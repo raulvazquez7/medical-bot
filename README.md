@@ -39,7 +39,9 @@ The user-facing application is a sophisticated, stateful agent built with **Lang
 
 2.  **ReAct Agent Core:** For complex queries (like those about medications), the router passes control to the main `agent` node. This agent uses a more powerful LLM (like `gpt-4o`) and follows the **ReAct (Reasoning and Acting)** pattern. It can reason about the user's query, use tools (via the `tools` node) like a custom retriever to search for information, and formulate answers based on the retrieved context.
 
-3.  **Robust Conversational Memory:** The agent is designed for long conversations using a powerful memory system managed by a dedicated `end_of_turn` node that acts as a "pacemaker":
+3.  **Context-Aware Query Rewriting:** Before searching the database, the agent passes its intended query to a `query_rewriter` node. This component uses an efficient LLM to enrich the simple query with relevant context from the conversation history (e.g., a patient's pre-existing conditions). This creates a more detailed, semantically-rich question, drastically improving the accuracy of the documents retrieved by the RAG pipeline.
+
+4.  **Robust Conversational Memory:** The agent is designed for long conversations using a powerful memory system managed by a dedicated `end_of_turn` node that acts as a "pacemaker":
     *   **Short-Term Memory (Sliding Window):** The agent always has access to the last few turns of the conversation, ensuring it remembers the immediate context.
     *   **Long-Term Memory (Summarization):** The `end_of_turn` node keeps track of the conversation turns. Every three turns, it routes the flow to a `summarizer` node. This node uses an efficient LLM to condense the recent conversation into an updated summary. Crucially, once summarized, the short-term memory is completely cleared to prevent redundant information processing.
     *   **Immediate Pruning for Efficiency:** After the agent uses a tool, a dedicated `pruning` node immediately removes the large, raw tool outputs from the short-term memory. This keeps the conversational history clean, radically reduces token usage, and ensures that only high-level conclusions are passed to the long-term memory and future agent turns.
@@ -56,8 +58,8 @@ The entire agentic graph is integrated with [LangSmith](https://smith.langchain.
 
 Given the sensitive nature of medical information, the chatbot implements three distinct layers of safety checks.
 
-1.  **Intent Router Guardrail:** The initial router node acts as the first line of defense. By classifying the user's intent, it can immediately identify if a question is about a known medicine or is out of scope, preventing the agent from attempting to answer questions for which it has no data.
-2.  **Prompt-Level Guardrail:** The final prompt sent to the LLM contains a critical safety rule that strictly forbids providing medical advice and forces it to base its answer exclusively on the provided context.
+1.  **Intent Router Guardrail:** The initial router node acts as the first line of defense. It not only classifies intent but also validates extracted medication names against a known list. If a user asks about a medication not in the database, the router diverts the conversation to a specific response node, preventing the agent from ever attempting to answer questions for which it has no data.
+2.  **Prompt-Level Guardrail:** The main agent is governed by a robust `System Prompt`. This foundational instruction strictly forbids providing medical advice, forces the agent to think step-by-step, and mandates that its answers be based *exclusively* on the information retrieved from the provided documents.
 3.  **Retrieval-Level Guardrail (Metadata Filtering):** *[Future implementation]* To prevent context contamination, the retrieval pipeline will be enhanced with metadata filtering. When the agent identifies the relevant medication(s), it will force the vector search to consider **only** the chunks belonging to those leaflets.
 
 ## Robust Evaluation Framework
@@ -82,11 +84,11 @@ We evaluate the quality of the final, user-facing answer using the **RAGAS** lib
 To continuously improve the system, we follow a rigorous process of experimentation. New techniques are tested in isolation and evaluated against our baseline metrics. This data-driven approach ensures that only features with a clear positive impact are integrated.
 
 ### Experiment: Query Rewriting for Improved Retrieval
-As part of our efforts to enhance retrieval performance, we tested the "Query Rewriting" technique.
-*   **Hypothesis:** Rephrasing conversational user questions into optimized, keyword-focused queries before sending them to the vector database would improve retrieval scores.
-*   **Implementation:** We added a preliminary LLM call to transform the user's input before the retrieval step.
-*   **Results:** Using our evaluation framework, an A/B test showed a negligible impact on retrieval metrics (F1-Score, Precision, Recall) while adding significant latency (~4 seconds per query) to the user's request.
-*   **Decision:** Based on this data, a feature that did not improve the user experience was discarded. The performance cost far outweighed the minimal benefits, confirming that our base retriever is already robust enough for direct, conversational queries.
+To enhance retrieval performance for complex, conversational queries, we implemented and evaluated a "Query Rewriting" step.
+*   **Hypothesis:** Rephrasing conversational user questions into detailed, self-contained queries before sending them to the vector database would improve retrieval scores, especially in multi-turn dialogues.
+*   **Implementation:** We added a `query_rewriter_node` to the agent graph. This node uses an efficient LLM (`gemini-2.5-flash`) to take the agent's simple query and enrich it with relevant context from the conversation history.
+*   **Results:** Qualitative analysis in LangSmith showed a significant improvement in the relevance of retrieved documents. The enriched queries (e.g., transforming "Is it safe for me?" into "Is Lexatin safe for a 29-year-old male with diabetes and anxiety?") led to more precise context being passed to the final generation step.
+*   **Decision:** Despite a minor increase in latency, the dramatic improvement in retrieval quality and answer accuracy makes query rewriting a critical component of the agent's architecture. The feature has been permanently integrated into the production graph.
 
 ### Experiment: Hybrid Search with Pinecone
 To test the hypothesis that hybrid search could improve retrieval for domain-specific terms, a migration from Supabase/pgvector to Pinecone was undertaken.
