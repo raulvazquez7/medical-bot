@@ -1,6 +1,7 @@
 import logging
 import uuid
 import functools
+import re
 from typing import TypedDict, Annotated, List, Literal, Optional
 
 # LangChain & LangGraph specific imports
@@ -131,16 +132,24 @@ def router_node(state: AgentState, model: BaseChatModel, known_medicines: List[s
         # Verificamos el medicamento extraído contra nuestra lista de confianza.
         if medicine and intent == "pregunta_medicamento":
             medicine_lower = medicine.lower()
-            if any(known_med in medicine_lower for known_med in known_medicines):
+            
+            # [NUEVO] Lógica de validación más estricta para evitar falsos positivos.
+            # Buscamos una coincidencia de palabra completa (ej: 'nolotil' y no 'nolotilazo').
+            matched_medicine = None
+            for known_med in known_medicines:
+                if re.search(r'\b' + re.escape(known_med) + r'\b', medicine_lower):
+                    matched_medicine = known_med
+                    break 
+
+            if matched_medicine:
                 # Si es un medicamento conocido, lo añadimos al estado si no estaba ya.
-                logging.info(f"--- Medicamento '{medicine_lower}' validado. ---")
-                if medicine_lower not in current_medicines:
-                    current_medicines.append(medicine_lower)
+                logging.info(f"--- Medicamento '{matched_medicine}' validado. ---")
+                if matched_medicine not in current_medicines:
+                    current_medicines.append(matched_medicine)
             else:
-                # Si el LLM extrajo algo pero no lo conocemos, lo tratamos como
-                # una pregunta general por seguridad.
-                logging.warning(f"--- Medicamento '{medicine_lower}' no es conocido. Re-enrutando a pregunta_general. ---")
-                intent = "pregunta_general"
+                # Si el LLM extrajo algo pero no lo conocemos, cambiamos la intención.
+                logging.warning(f"--- Medicamento '{medicine_lower}' no es conocido. Re-enrutando a pregunta_no_autorizada. ---")
+                intent = "pregunta_no_autorizada"
         
         return {"intent": intent, "current_medicines": current_medicines}
 
@@ -166,6 +175,21 @@ def conversational_node(state: AgentState):
     """Nodo para respuestas de saludo."""
     logging.info("--- Ejecutando nodo conversacional de saludo ---")
     return {"messages": [AIMessage(content="¡Hola! Soy un asistente médico virtual. ¿En qué puedo ayudarte?")]}
+
+def unauthorized_question_node(state: AgentState, known_medicines: List[str]):
+    """
+    [NUEVO] Nodo para gestionar preguntas sobre medicamentos no conocidos.
+    Informa al usuario y lista los medicamentos disponibles.
+    """
+    logging.info("--- Ejecutando nodo de pregunta no autorizada ---")
+    
+    known_medicines_str = ", ".join(med.title() for med in known_medicines)
+    content = (
+        f"Lo siento, no tengo información sobre el medicamento que mencionas. "
+        f"Actualmente, solo puedo responder preguntas sobre: {known_medicines_str}."
+    )
+    
+    return {"messages": [AIMessage(content=content)]}
 
 def summarize_node(state: AgentState, model: BaseChatModel):
     """
@@ -238,6 +262,9 @@ def route_after_router(state: AgentState) -> str:
     intent = state.get("intent")
     if intent == "saludo_despedida":
         return "conversational"
+    # [NUEVO] Añadimos la nueva ruta para el guardrail.
+    if intent == "pregunta_no_autorizada":
+        return "unauthorized"
     # Todas las demás intenciones ahora son manejadas por el agente principal
     return "agent"
 
@@ -299,22 +326,25 @@ workflow = StateGraph(AgentState)
 router_with_model_and_medicines = functools.partial(
     router_node, model=router_llm_with_intent, known_medicines=known_medicines
 )
+unauthorized_node_with_medicines = functools.partial(
+    unauthorized_question_node, known_medicines=known_medicines
+)
 
 workflow.add_node("router", router_with_model_and_medicines)
 workflow.add_node("agent", functools.partial(agent_node, model=agent_llm_with_tools))
 workflow.add_node("tools", tool_node)
 workflow.add_node("conversational", conversational_node)
+workflow.add_node("unauthorized", unauthorized_node_with_medicines) # <-- [NUEVO] Añadimos el nodo de guardrail
 workflow.add_node("summarizer", functools.partial(summarize_node, model=router_llm))
 workflow.add_node("end_of_turn", end_of_turn_node)
-workflow.add_node("pruning", pruning_node) # <-- [NUEVO] Añadimos el nodo de poda al grafo
-
+workflow.add_node("pruning", pruning_node)
 workflow.set_entry_point("router")
 
 # --- Flujo de Grafo Actualizado ---
 workflow.add_conditional_edges(
     "router", 
     route_after_router,
-    {"agent": "agent", "conversational": "conversational"}
+    {"agent": "agent", "conversational": "conversational", "unauthorized": "unauthorized"}
 )
 workflow.add_conditional_edges(
     "agent", 
@@ -329,7 +359,8 @@ workflow.add_conditional_edges(
 
 workflow.add_edge("tools", "agent")
 workflow.add_edge("conversational", "end_of_turn")
-workflow.add_edge("pruning", "end_of_turn") # <-- [NUEVO] Después de la poda, vamos al contador de fin de turno
+workflow.add_edge("unauthorized", "end_of_turn") # <-- [NUEVO] Después de la respuesta, vamos al final del turno
+workflow.add_edge("pruning", "end_of_turn")
 workflow.add_edge("summarizer", END)
 
 # La variable 'app' ahora es global y está compilada SIN checkpointer para LangGraph Studio.

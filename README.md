@@ -35,7 +35,7 @@ The user-facing application is a sophisticated, stateful agent built with **Lang
 
 ![Agent Graph Architecture](graph.png)
 
-1.  **Intelligent Intent Router:** At the core of the agent is a `router` node. This component uses a fast and efficient LLM (like `gemini-1.5-flash`) to classify the user's intent with each message (e.g., `pregunta_medicamento`, `pregunta_general`, `saludo_despedida`). It acts as an intelligent "receptionist" that directs the conversation down the appropriate path.
+1.  **Intelligent Intent Router:** At the core of the agent is a `router` node. This component uses a fast and efficient LLM (like `gemini-2.5-flash`) to classify the user's intent with each message (e.g., `pregunta_medicamento`, `pregunta_general`, `saludo_despedida`). It acts as an intelligent "receptionist" that directs the conversation down the appropriate path.
 
 2.  **ReAct Agent Core:** For complex queries (like those about medications), the router passes control to the main `agent` node. This agent uses a more powerful LLM (like `gpt-4o`) and follows the **ReAct (Reasoning and Acting)** pattern. It can reason about the user's query, use tools (via the `tools` node) like a custom retriever to search for information, and formulate answers based on the retrieved context.
 
