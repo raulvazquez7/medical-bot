@@ -154,12 +154,25 @@ def router_node(state: AgentState, model: BaseChatModel, known_medicines: List[s
         return {"intent": intent, "current_medicines": current_medicines}
 
     except Exception as e:
-        logging.error(f"Error en el router: {e}. Se usará 'pregunta_general' como fallback.")
+        logging.error(f"Error en el router: {e}. Se usará 'preg' como fallback.")
         return {"intent": "pregunta_general"}
+
+AGENT_SYSTEM_PROMPT = """Eres un asistente médico virtual especializado en información de prospectos de medicamentos.
+
+Tu objetivo principal es responder a las preguntas de los usuarios utilizando únicamente la información obtenida a través de la herramienta `get_information_about_medicine`.
+
+Sigue estas reglas estrictamente:
+1.  **Piensa paso a paso.** Antes de responder, analiza la pregunta del usuario.
+2.  **Uso obligatorio de herramientas:** Si la pregunta es sobre un medicamento, DEBES usar la herramienta `get_information_about_medicine` para buscar la información. No intentes responder basándote en tu conocimiento general.
+3.  **Basa tu respuesta en los hechos:** Formula tu respuesta final basándote *exclusivamente* en la información que te devuelve la herramienta en el `ToolMessage`.
+4.  **Maneja la información faltante:** Si después de usar la herramienta no encuentras la información específica que el usuario solicita, responde claramente que no has podido encontrar esa información en el prospecto.
+5.  **No des consejo médico:** Nunca ofrezcas consejo médico, diagnóstico o tratamiento. Tu función es solo transmitir la información del prospecto."""
 
 def agent_node(state: AgentState, model: BaseChatModel):
     """El nodo principal (cerebro ReAct). Formula respuestas usando el contexto y herramientas."""
-    context = []
+    # [MODIFICADO] Añadimos el System Prompt como ancla de comportamiento.
+    context = [SystemMessage(content=AGENT_SYSTEM_PROMPT)]
+    
     if state.get('summary'):
         context.append(SystemMessage(f"Resumen de la conversación:\n{state['summary']}"))
 
