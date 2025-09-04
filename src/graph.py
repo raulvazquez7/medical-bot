@@ -56,13 +56,16 @@ class AgentState(TypedDict):
 class MedicineToolInput(BaseModel):
     query: str = Field(description="La pregunta específica sobre el medicamento a buscar.")
 
+# [NUEVO] Constante para identificar de forma fiable un fallo en la recuperación.
+RETRIEVAL_FAILURE_MESSAGE = "No se encontró información relevante en la base de datos para esa consulta."
+
 # [MODIFICADO] Eliminamos el decorador @tool y cambiamos la firma de la función.
 def get_information_about_medicine(query: str, retriever: SupabaseRetriever) -> str:
     """Busca en la BBDD de prospectos información sobre un medicamento."""
     logging.info(f"--- Ejecutando Herramienta de Búsqueda para: '{query}' ---")
     docs = retriever.invoke(query)
     if not docs:
-        return "No se encontró información relevante en la base de datos para esa consulta."
+        return RETRIEVAL_FAILURE_MESSAGE
     return format_docs_with_sources(docs)
 
 class UserIntent(BaseModel):
@@ -266,6 +269,21 @@ def unauthorized_question_node(state: AgentState, known_medicines: List[str]):
     
     return {"messages": [AIMessage(content=content)]}
 
+def handle_retrieval_failure_node(state: AgentState):
+    """
+    [NUEVO] Nodo para gestionar el caso en que la búsqueda no devuelve documentos.
+    """
+    logging.info("--- Ejecutando nodo de fallo de recuperación ---")
+    
+    last_known_medicine = state.get("current_medicines", [])[-1] if state.get("current_medicines") else "el medicamento"
+    
+    content = (
+        f"He buscado en la información de '{last_known_medicine.title()}', pero no he podido encontrar una respuesta a tu pregunta específica. "
+        "¿Hay algo más sobre este medicamento en lo que pueda ayudarte o quieres que intentemos con una pregunta diferente?"
+    )
+    
+    return {"messages": [AIMessage(content=content)]}
+
 def summarize_node(state: AgentState, model: BaseChatModel):
     """
     Este nodo actualiza el resumen y, crucialmente, resetea el contador de turnos.
@@ -352,6 +370,20 @@ def should_continue_react(state: AgentState) -> str:
         return "tools"
     return "end_of_turn"
 
+def route_after_tools(state: AgentState) -> str:
+    """
+    [NUEVO] Decide la ruta después de la ejecución de herramientas.
+    Si la búsqueda no devolvió documentos, va a un nodo de fallo.
+    De lo contrario, vuelve al agente para que sintetice la respuesta.
+    """
+    last_message = state['messages'][-1]
+    if isinstance(last_message, ToolMessage) and last_message.content == RETRIEVAL_FAILURE_MESSAGE:
+        logging.info("--- Fallo de recuperación detectado. Re-enrutando al manejador de fallos. ---")
+        return "failure"
+    
+    logging.info("--- Recuperación exitosa. Volviendo al agente. ---")
+    return "success"
+
 def should_summarize_or_end(state: AgentState) -> str:
     """
     [MODIFICADO] Decide si han pasado suficientes turnos para necesitar un resumen,
@@ -409,9 +441,10 @@ rewriter_node_with_model = functools.partial(query_rewriter_node, model=router_l
 workflow.add_node("router", router_with_model_and_medicines)
 workflow.add_node("agent", functools.partial(agent_node, model=agent_llm_with_tools))
 workflow.add_node("tools", tool_node)
-workflow.add_node("query_rewriter", rewriter_node_with_model) # <-- [NUEVO] Añadimos el nodo de reescritura
+workflow.add_node("query_rewriter", rewriter_node_with_model)
 workflow.add_node("conversational", conversational_node)
-workflow.add_node("unauthorized", unauthorized_node_with_medicines) # <-- [NUEVO] Añadimos el nodo de guardrail
+workflow.add_node("unauthorized", unauthorized_node_with_medicines)
+workflow.add_node("handle_retrieval_failure", handle_retrieval_failure_node) # <-- [NUEVO]
 workflow.add_node("summarizer", functools.partial(summarize_node, model=router_llm))
 workflow.add_node("end_of_turn", end_of_turn_node)
 workflow.add_node("pruning", pruning_node)
@@ -434,10 +467,20 @@ workflow.add_conditional_edges(
     {"summarize": "summarizer", "end": END}
 )
 
-workflow.add_edge("query_rewriter", "tools") # <-- [NUEVO] El rewriter ahora alimenta al nodo de herramientas
-workflow.add_edge("tools", "agent")
+# [NUEVO] Flujo condicional después de la ejecución de herramientas.
+workflow.add_conditional_edges(
+    "tools",
+    route_after_tools,
+    {
+        "success": "agent",
+        "failure": "handle_retrieval_failure"
+    }
+)
+
+workflow.add_edge("query_rewriter", "tools")
 workflow.add_edge("conversational", "end_of_turn")
-workflow.add_edge("unauthorized", "end_of_turn") # <-- [NUEVO] Después de la respuesta, vamos al final del turno
+workflow.add_edge("unauthorized", "end_of_turn")
+workflow.add_edge("handle_retrieval_failure", "end_of_turn") # <-- [NUEVO]
 workflow.add_edge("pruning", "end_of_turn")
 workflow.add_edge("summarizer", END)
 
@@ -459,8 +502,8 @@ if __name__ == '__main__':
 
     print("\nGenerando visualización del grafo...")
     try:
-        # Usamos la versión de consola para generar la imagen, ya que es la misma estructura.
-        png_bytes = console_app.get_graph().draw_mermaid_png()
+        # Render local con Graphviz (robusto y sin red)
+        png_bytes = console_app.get_graph().draw_png()
         with open("graph.png", "wb") as f: f.write(png_bytes)
         print("¡Imagen del grafo guardada como 'graph.png'!")
     except Exception as e:
