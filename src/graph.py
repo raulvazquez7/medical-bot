@@ -1,3 +1,8 @@
+"""
+This script defines and compiles the stateful, multi-actor agent using LangGraph.
+It orchestrates the entire conversational flow, from intent classification to
+tool use, memory management, and guardrails.
+"""
 import logging
 import uuid
 import functools
@@ -9,7 +14,6 @@ from langchain_core.messages import (
     BaseMessage, HumanMessage, AIMessage, SystemMessage, ToolMessage, RemoveMessage
 )
 from langchain_core.language_models.chat_models import BaseChatModel
-# [NUEVO] Importamos RunnableConfig
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
@@ -24,24 +28,23 @@ from src import config
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from supabase import create_client, Client as SupabaseClient
-# [MODIFICADO] Las importaciones ahora apuntan a los nuevos módulos.
 from src.database import SupabaseRetriever, get_known_medicines
 from src.utils import format_docs_with_sources
 from src.models import get_embeddings_model
 
 # ==============================================================================
-# === 1. DEFINICIÓN DEL ESTADO DEL AGENTE                                    ===
+# === 1. AGENT STATE DEFINITION                                              ===
 # ==============================================================================
 class AgentState(TypedDict):
     """
-    Representa el estado de nuestro agente.
+    Represents the state of our agent.
 
     Attributes:
-        messages: Una ventana deslizante de los mensajes más recientes.
-        summary: El resumen de la conversación a largo plazo.
-        turn_count: Un contador explícito de los turnos de conversación.
-        current_medicines: Lista de medicamentos identificados.
-        intent: La intención clasificada del último mensaje.
+        messages: A sliding window of the most recent messages.
+        summary: The long-term summary of the conversation.
+        turn_count: An explicit counter for conversation turns.
+        current_medicines: A list of identified medications.
+        intent: The classified intent of the last message.
     """
     messages: Annotated[list[BaseMessage], add_messages]
     summary: str
@@ -50,46 +53,44 @@ class AgentState(TypedDict):
     intent: str
 
 # ==============================================================================
-# === 2. DEFINICIÓN DE HERRAMIENTAS (AGENTE Y ROUTER)                        ===
+# === 2. TOOL AND INTENT DEFINITIONS                                         ===
 # ==============================================================================
 
 class MedicineToolInput(BaseModel):
-    query: str = Field(description="La pregunta específica sobre el medicamento a buscar.")
+    """Input schema for the medicine information retrieval tool."""
+    query: str = Field(description="The specific question about the medicine to search for.")
 
-# [NUEVO] Constante para identificar de forma fiable un fallo en la recuperación.
+# A constant to reliably identify a retrieval failure.
 RETRIEVAL_FAILURE_MESSAGE = "No se encontró información relevante en la base de datos para esa consulta."
 
-# [MODIFICADO] Eliminamos el decorador @tool y cambiamos la firma de la función.
 def get_information_about_medicine(query: str, retriever: SupabaseRetriever) -> str:
-    """Busca en la BBDD de prospectos información sobre un medicamento."""
-    logging.info(f"--- Ejecutando Herramienta de Búsqueda para: '{query}' ---")
+    """Searches the leaflet database for information about a medicine."""
+    logging.info(f"--- Executing Search Tool for: '{query}' ---")
     docs = retriever.invoke(query)
     if not docs:
         return RETRIEVAL_FAILURE_MESSAGE
     return format_docs_with_sources(docs)
 
 class UserIntent(BaseModel):
-    """Clasifica la intención del usuario para enrutar la conversación."""
+    """Classifies the user's intent to route the conversation."""
     intent: Literal[
         "pregunta_medicamento", 
         "pregunta_general", 
         "saludo_despedida"
-    ] = Field(description="La intención principal del mensaje del usuario.")
+    ] = Field(description="The main intent of the user's message.")
     
     medicine_name: Optional[str] = Field(
-        description="El nombre del medicamento identificado en la pregunta, si lo hay."
+        description="The name of the medicine identified in the question, if any."
     )
 
-# [ELIMINADO] La función 'get_known_medicines' se ha movido a 'src/database.py'.
-
 # ==============================================================================
-# === 4. HELPER PARA CREACIÓN DE MODELOS                                     ===
+# === 3. MODEL CREATION HELPER                                               ===
 # ==============================================================================
 
 def create_llm(model_name: str) -> BaseChatModel:
     """
-    [NUEVO] Crea una instancia del modelo de chat basándose en el nombre del config,
-    centralizando la lógica de selección de proveedor (OpenAI vs. Google).
+    Factory function to create a chat model instance based on the config name,
+    centralizing the provider selection logic (OpenAI vs. Google).
     """
     if "gemini" in model_name:
         return ChatGoogleGenerativeAI(
@@ -100,16 +101,16 @@ def create_llm(model_name: str) -> BaseChatModel:
             api_key=config.OPENAI_API_KEY, model=model_name, temperature=0
         )
     else:
-        raise ValueError(f"Modelo no soportado: {model_name}")
+        raise ValueError(f"Unsupported model: {model_name}")
 
 # ==============================================================================
-# === 5. DEFINICIÓN DE LOS NODOS DEL GRAFO                                   ===
+# === 4. GRAPH NODE DEFINITIONS                                              ===
 # ==============================================================================
 SUMMARIZATION_TURN_THRESHOLD = 3
 
 def router_node(state: AgentState, model: BaseChatModel, known_medicines: List[str]):
-    """El punto de entrada. Clasifica la intención y valida el medicamento contra una lista conocida."""
-    logging.info("--- Router: Clasificando intención del usuario ---")
+    """The entry point. Classifies intent and validates the medicine against a known list."""
+    logging.info("--- Router: Classifying user intent ---")
     last_message = state['messages'][-1].content
     
     prompt = (
@@ -122,22 +123,21 @@ def router_node(state: AgentState, model: BaseChatModel, known_medicines: List[s
     try:
         structured_response = model.invoke(prompt, tools=[UserIntent])
         if not structured_response.tool_calls:
-            raise ValueError("El modelo no ha devuelto una intención estructurada.")
+            raise ValueError("Model did not return a structured intent.")
             
         intent_tool_call = structured_response.tool_calls[0]
         intent = intent_tool_call['args']['intent']
         medicine = intent_tool_call['args'].get('medicine_name', None)
         
-        logging.info(f"--- Intención clasificada por LLM: {intent} | Medicamento extraído: {medicine} ---")
+        logging.info(f"--- LLM-classified intent: {intent} | Extracted medicine: {medicine} ---")
         
         current_medicines = state.get("current_medicines", [])
         
-        # Verificamos el medicamento extraído contra nuestra lista de confianza.
+        # We check the extracted medicine against our trusted list.
         if medicine and intent == "pregunta_medicamento":
             medicine_lower = medicine.lower()
             
-            # [NUEVO] Lógica de validación más estricta para evitar falsos positivos.
-            # Buscamos una coincidencia de palabra completa (ej: 'nolotil' y no 'nolotilazo').
+            # Stricter validation logic to avoid false positives (e.g., 'nolotil' vs 'nolotilazo').
             matched_medicine = None
             for known_med in known_medicines:
                 if re.search(r'\b' + re.escape(known_med) + r'\b', medicine_lower):
@@ -145,21 +145,22 @@ def router_node(state: AgentState, model: BaseChatModel, known_medicines: List[s
                     break 
 
             if matched_medicine:
-                # Si es un medicamento conocido, lo añadimos al estado si no estaba ya.
-                logging.info(f"--- Medicamento '{matched_medicine}' validado. ---")
+                # If it's a known medicine, add it to the state if it's not already there.
+                logging.info(f"--- Medicine '{matched_medicine}' validated. ---")
                 if matched_medicine not in current_medicines:
                     current_medicines.append(matched_medicine)
             else:
-                # Si el LLM extrajo algo pero no lo conocemos, cambiamos la intención.
-                logging.warning(f"--- Medicamento '{medicine_lower}' no es conocido. Re-enrutando a pregunta_no_autorizada. ---")
+                # If the LLM extracted something but we don't know it, change the intent.
+                logging.warning(f"--- Medicine '{medicine_lower}' is not known. Rerouting to unauthorized_question. ---")
                 intent = "pregunta_no_autorizada"
         
         return {"intent": intent, "current_medicines": current_medicines}
 
     except Exception as e:
-        logging.error(f"Error en el router: {e}. Se usará 'preg' como fallback.")
+        logging.error(f"Error in router: {e}. Defaulting to 'pregunta_general'.")
         return {"intent": "pregunta_general"}
 
+# This system prompt acts as the agent's constitution, guiding its behavior.
 AGENT_SYSTEM_PROMPT = """Eres un asistente médico virtual especializado en información de prospectos de medicamentos.
 
 Tu objetivo principal es responder a las preguntas de los usuarios utilizando únicamente la información obtenida a través de la herramienta `get_information_about_medicine`.
@@ -172,21 +173,21 @@ Sigue estas reglas estrictamente:
 5.  **No des consejo médico:** Nunca ofrezcas consejo médico, diagnóstico o tratamiento. Tu función es solo transmitir la información del prospecto."""
 
 def agent_node(state: AgentState, model: BaseChatModel):
-    """El nodo principal (cerebro ReAct). Formula respuestas usando el contexto y herramientas."""
-    # [MODIFICADO] Añadimos el System Prompt como ancla de comportamiento.
+    """The main ReAct brain. Formulates responses using context and tools."""
+    # The System Prompt is added as a behavioral anchor.
     context = [SystemMessage(content=AGENT_SYSTEM_PROMPT)]
     
     if state.get('summary'):
         context.append(SystemMessage(f"Resumen de la conversación:\n{state['summary']}"))
 
-    # [CLAVE] Ahora 'state['messages']' es una ventana de los últimos N mensajes,
-    # por lo que podemos pasarla entera sin preocuparnos por el tamaño.
+    # The sliding window of recent messages is passed without size concerns.
     context.extend(state['messages'])
     
-    logging.info(f"--- Contexto enviado al Agente ---:\n{context}\n--------------------")
+    logging.info(f"--- Context sent to Agent ---:\n{context}\n--------------------")
     response = model.invoke(context)
     return {"messages": [response]}
 
+# This prompt instructs the LLM on how to rewrite search queries for better retrieval.
 QUERY_REWRITER_PROMPT = """Eres un experto en reescribir consultas de búsqueda para una base de datos vectorial de prospectos de medicamentos.
 Tu tarea es convertir una consulta de búsqueda simple en una pregunta detallada y autocontenida, utilizando el historial de la conversación como contexto.
 
@@ -207,59 +208,59 @@ Tu tarea es convertir una consulta de búsqueda simple en una pregunta detallada
 
 def query_rewriter_node(state: AgentState, model: BaseChatModel):
     """
-    [NUEVO] Reescribe la consulta de búsqueda del agente para incluir contexto relevante.
+    Rewrites the agent's search query to include relevant context from the conversation.
     """
-    logging.info("--- Reescribiendo consulta para búsqueda ---")
+    logging.info("--- Rewriting query for search ---")
     
-    # Extraemos la última llamada a herramienta
+    # Extract the last tool call
     last_message = state["messages"][-1]
     if not last_message.tool_calls:
-        return {} # No hacer nada si no hay llamada a herramienta
+        return {} # Do nothing if there's no tool call
 
     original_tool_call = last_message.tool_calls[0]
     original_query = original_tool_call['args']['query']
 
-    # Construimos el historial para el prompt
+    # Build the history for the prompt
     history = state.get('summary', '') + "\n\n"
     history += "\n".join([f"{type(m).__name__}: {m.content}" for m in state['messages'][:-1]])
     
-    # Creamos el prompt y lo invocamos
+    # Create and invoke the prompt
     rewriter_prompt = QUERY_REWRITER_PROMPT.format(
         conversation_history=history,
         query=original_query
     )
     rewritten_query = model.invoke(rewriter_prompt).content
     
-    logging.info(f"--- Consulta Original: '{original_query}' ---")
-    logging.info(f"--- Consulta Reescrita: '{rewritten_query}' ---")
+    logging.info(f"--- Original Query: '{original_query}' ---")
+    logging.info(f"--- Rewritten Query: '{rewritten_query}' ---")
     
-    # Modificamos la llamada a herramienta con la nueva query
+    # Modify the tool call with the new query
     new_tool_calls = last_message.tool_calls.copy()
     new_tool_calls[0]['args']['query'] = rewritten_query
     
-    # Creamos un nuevo mensaje para reemplazar el anterior
+    # Create a new message to replace the old one
     new_message = AIMessage(
         content=last_message.content,
         tool_calls=new_tool_calls,
-        id=last_message.id # Reutilizamos el ID
+        id=last_message.id # Reuse the ID
     )
     
-    # Reemplazamos el último mensaje en el estado
+    # Replace the last message in the state
     all_but_last = state['messages'][:-1]
     return {"messages": all_but_last + [new_message]}
 
 
 def conversational_node(state: AgentState):
-    """Nodo para respuestas de saludo."""
-    logging.info("--- Ejecutando nodo conversacional de saludo ---")
+    """Node for handling simple greetings and farewells."""
+    logging.info("--- Executing conversational greeting node ---")
     return {"messages": [AIMessage(content="¡Hola! Soy un asistente médico virtual. ¿En qué puedo ayudarte?")]}
 
 def unauthorized_question_node(state: AgentState, known_medicines: List[str]):
     """
-    [NUEVO] Nodo para gestionar preguntas sobre medicamentos no conocidos.
-    Informa al usuario y lista los medicamentos disponibles.
+    Node to handle questions about unknown medications.
+    It informs the user and lists the available medicines.
     """
-    logging.info("--- Ejecutando nodo de pregunta no autorizada ---")
+    logging.info("--- Executing unauthorized question node ---")
     
     known_medicines_str = ", ".join(med.title() for med in known_medicines)
     content = (
@@ -271,9 +272,9 @@ def unauthorized_question_node(state: AgentState, known_medicines: List[str]):
 
 def handle_retrieval_failure_node(state: AgentState):
     """
-    [NUEVO] Nodo para gestionar el caso en que la búsqueda no devuelve documentos.
+    Node to handle cases where the database search returns no documents.
     """
-    logging.info("--- Ejecutando nodo de fallo de recuperación ---")
+    logging.info("--- Executing retrieval failure node ---")
     
     last_known_medicine = state.get("current_medicines", [])[-1] if state.get("current_medicines") else "el medicamento"
     
@@ -286,9 +287,9 @@ def handle_retrieval_failure_node(state: AgentState):
 
 def summarize_node(state: AgentState, model: BaseChatModel):
     """
-    Este nodo actualiza el resumen y, crucialmente, resetea el contador de turnos.
+    This node updates the summary and, crucially, resets the turn counter.
     """
-    logging.info("--- Resumiendo y podando la ventana de mensajes... ---")
+    logging.info("--- Summarizing and pruning message window... ---")
     conversation_to_summarize = state['messages']
     
     summary_prompt = [
@@ -301,29 +302,29 @@ def summarize_node(state: AgentState, model: BaseChatModel):
     ]
     new_summary = model.invoke(summary_prompt).content
     
-    # [MODIFICADO] Ahora eliminamos TODOS los mensajes de la ventana de memoria a corto plazo.
-    # El 'summary' se convierte en la única fuente de verdad sobre el pasado, eliminando la redundancia.
+    # We now remove ALL messages from the short-term memory window.
+    # The 'summary' becomes the single source of truth about the past, removing redundancy.
     messages_to_remove = [RemoveMessage(id=m.id) for m in state["messages"]]
 
-    logging.info(f"--- Nuevo resumen generado. Ventana de mensajes reseteada ({len(messages_to_remove)} mensajes eliminados). ---")
-    # Reseteamos el contador de turnos.
+    logging.info(f"--- New summary generated. Message window reset ({len(messages_to_remove)} messages removed). ---")
+    # Reset the turn counter.
     return {"summary": new_summary, "messages": messages_to_remove, "turn_count": 0}
     
 def end_of_turn_node(state: AgentState):
     """
-    Este nodo actúa como el punto de control final de un turno
-    y es responsable de incrementar el contador de turnos.
+    This node acts as the final checkpoint of a turn
+    and is responsible for incrementing the turn counter.
     """
-    logging.info("--- Fin del turno, actualizando contador. ---")
+    logging.info("--- End of turn, updating counter. ---")
     return {"turn_count": state.get("turn_count", 0) + 1}
 
 def pruning_node(state: AgentState):
     """
-    [NUEVO] Limpia el historial de mensajes eliminando los mensajes intermedios
-    relacionados con las herramientas (AIMessage con tool_calls y el ToolMessage
-    correspondiente) después de que el agente haya producido su respuesta final.
+    Cleans the message history by removing intermediate tool-related messages
+    (AIMessage with tool_calls and the corresponding ToolMessage) after the
+    agent has produced its final response.
     """
-    logging.info("--- Poda de Memoria: Limpiando mensajes de herramientas... ---")
+    logging.info("--- Memory Pruning: Cleaning tool messages... ---")
     
     messages = state['messages']
     if not isinstance(messages[-1], AIMessage) or messages[-1].tool_calls:
@@ -344,27 +345,25 @@ def pruning_node(state: AgentState):
     message_ids_to_remove = [messages[i].id for i in indices_to_remove]
     messages_to_remove = [RemoveMessage(id=msg_id) for msg_id in message_ids_to_remove]
     
-    logging.info(f"--- Mensajes intermedios eliminados: {len(messages_to_remove)} ---")
+    logging.info(f"--- Intermediate messages removed: {len(messages_to_remove)} ---")
     return {"messages": messages_to_remove}
 
 # ==============================================================================
-# === 6. LÓGICA CONDICIONAL Y CONSTRUCCIÓN DEL GRAFO                       ===
+# === 5. CONDITIONAL LOGIC AND GRAPH CONSTRUCTION                            ===
 # ==============================================================================
 def route_after_router(state: AgentState) -> str:
-    """Decide la ruta basándose en la intención. La mayoría irán al agente."""
+    """Decides the path based on the intent. Most will go to the agent."""
     intent = state.get("intent")
     if intent == "saludo_despedida":
         return "conversational"
-    # [NUEVO] Añadimos la nueva ruta para el guardrail.
     if intent == "pregunta_no_autorizada":
         return "unauthorized"
-    # Todas las demás intenciones ahora son manejadas por el agente principal
     return "agent"
 
 def should_continue_react(state: AgentState) -> str:
     """
-    Decide si el agente debe usar una herramienta o si ha terminado de razonar
-    y debe pasar al punto de control final (end_of_turn).
+    Decides if the agent should use a tool or if it has finished reasoning
+    and should proceed to the final checkpoint (end_of_turn).
     """
     if isinstance(state['messages'][-1], AIMessage) and state['messages'][-1].tool_calls:
         return "tools"
@@ -372,34 +371,34 @@ def should_continue_react(state: AgentState) -> str:
 
 def route_after_tools(state: AgentState) -> str:
     """
-    [NUEVO] Decide la ruta después de la ejecución de herramientas.
-    Si la búsqueda no devolvió documentos, va a un nodo de fallo.
-    De lo contrario, vuelve al agente para que sintetice la respuesta.
+    Decides the path after tool execution.
+    If the search failed, it goes to a failure node.
+    Otherwise, it returns to the agent to synthesize the response.
     """
     last_message = state['messages'][-1]
     if isinstance(last_message, ToolMessage) and last_message.content == RETRIEVAL_FAILURE_MESSAGE:
-        logging.info("--- Fallo de recuperación detectado. Re-enrutando al manejador de fallos. ---")
+        logging.info("--- Retrieval failure detected. Rerouting to failure handler. ---")
         return "failure"
     
-    logging.info("--- Recuperación exitosa. Volviendo al agente. ---")
+    logging.info("--- Retrieval successful. Returning to agent. ---")
     return "success"
 
 def should_summarize_or_end(state: AgentState) -> str:
     """
-    [MODIFICADO] Decide si han pasado suficientes turnos para necesitar un resumen,
-    basándose en el 'turn_count' explícito.
+    Decides if enough turns have passed to require a summary,
+    based on the explicit 'turn_count'.
     """
     turn_count = state.get("turn_count", 0)
-    logging.info(f"--- Chequeo de resumen: Turno actual {turn_count} ---")
+    logging.info(f"--- Summary check: Current turn {turn_count} ---")
     return "summarize" if turn_count >= SUMMARIZATION_TURN_THRESHOLD else "end"
 
 # ==============================================================================
-# === 7. COMPILACIÓN Y EJECUCIÓN DEL GRAFO                                   ===
+# === 6. GRAPH COMPILATION AND EXECUTION                                     ===
 # ==============================================================================
 
-# --- Construcción e Instanciación del Grafo ---
-# Movemos toda la lógica de construcción aquí para que la variable 'app'
-# sea importable por LangGraph Studio.
+# --- Graph Construction and Instantiation ---
+# We move all the construction logic here so that the 'app' variable
+# can be imported by LangGraph Studio and other UIs.
 memory = MemorySaver()
 
 print("Initializing clients and models...")
@@ -409,8 +408,8 @@ known_medicines = get_known_medicines(supabase)
 embeddings = get_embeddings_model()
 supabase_retriever = SupabaseRetriever(supabase_client=supabase, embeddings_model=embeddings)
 
-# [CORREGIDO] Volvemos al patrón de 'lambda' para la inyección de dependencias.
-# Es la solución más robusta para que funcione tanto en consola como en el Studio.
+# Using a lambda for dependency injection is the most robust solution
+# for it to work in both the console and LangGraph Studio.
 medicine_tool = Tool(
     name="get_information_about_medicine",
     description="Busca en la BBDD de prospectos información sobre un medicamento.",
@@ -427,9 +426,10 @@ router_llm_with_intent = router_llm.bind_tools([UserIntent])
 tools = [medicine_tool]
 tool_node = ToolNode(tools)
 
-# [MODIFICADO] Grafo reestructurado para la nueva lógica de memoria
+# --- Workflow Definition ---
 workflow = StateGraph(AgentState)
 
+# Partial function application to inject dependencies into the nodes
 router_with_model_and_medicines = functools.partial(
     router_node, model=router_llm_with_intent, known_medicines=known_medicines
 )
@@ -438,19 +438,20 @@ unauthorized_node_with_medicines = functools.partial(
 )
 rewriter_node_with_model = functools.partial(query_rewriter_node, model=router_llm)
 
+# Add nodes to the graph
 workflow.add_node("router", router_with_model_and_medicines)
 workflow.add_node("agent", functools.partial(agent_node, model=agent_llm_with_tools))
 workflow.add_node("tools", tool_node)
 workflow.add_node("query_rewriter", rewriter_node_with_model)
 workflow.add_node("conversational", conversational_node)
 workflow.add_node("unauthorized", unauthorized_node_with_medicines)
-workflow.add_node("handle_retrieval_failure", handle_retrieval_failure_node) # <-- [NUEVO]
+workflow.add_node("handle_retrieval_failure", handle_retrieval_failure_node)
 workflow.add_node("summarizer", functools.partial(summarize_node, model=router_llm))
 workflow.add_node("end_of_turn", end_of_turn_node)
 workflow.add_node("pruning", pruning_node)
 workflow.set_entry_point("router")
 
-# --- Flujo de Grafo Actualizado ---
+# --- Graph Edges ---
 workflow.add_conditional_edges(
     "router", 
     route_after_router,
@@ -459,15 +460,13 @@ workflow.add_conditional_edges(
 workflow.add_conditional_edges(
     "agent", 
     should_continue_react,
-    {"tools": "query_rewriter", "end_of_turn": "pruning"} # [MODIFICADO] La salida a herramientas ahora va al rewriter
+    {"tools": "query_rewriter", "end_of_turn": "pruning"}
 )
 workflow.add_conditional_edges(
     "end_of_turn",
-    should_summarize_or_end, # La decisión final se toma desde el contador de turnos
+    should_summarize_or_end,
     {"summarize": "summarizer", "end": END}
 )
-
-# [NUEVO] Flujo condicional después de la ejecución de herramientas.
 workflow.add_conditional_edges(
     "tools",
     route_after_tools,
@@ -480,40 +479,38 @@ workflow.add_conditional_edges(
 workflow.add_edge("query_rewriter", "tools")
 workflow.add_edge("conversational", "end_of_turn")
 workflow.add_edge("unauthorized", "end_of_turn")
-workflow.add_edge("handle_retrieval_failure", "end_of_turn") # <-- [NUEVO]
+workflow.add_edge("handle_retrieval_failure", "end_of_turn")
 workflow.add_edge("pruning", "end_of_turn")
 workflow.add_edge("summarizer", END)
 
-# La variable 'app' ahora es global y está compilada SIN checkpointer para LangGraph Studio.
+# This version is compiled WITHOUT a checkpointer for LangGraph Studio.
 app = workflow.compile()
 print("Graph compiled successfully for LangGraph Studio.")
 
+# This version is compiled WITH a memory checkpointer for use in the console or UI.
+console_app = workflow.compile(checkpointer=memory)
+print("Graph re-compiled with in-memory checkpointer for console and UI.")
+
 
 if __name__ == '__main__':
-    # El bloque __main__ ahora solo se encarga de la interfaz de consola.
+    # This block is only executed when the script is run directly.
+    # It handles the console interface.
     print("Checking environment variables...")
     config.check_env_vars()
 
-    # [CORREGIDO] En lugar de usar '.with_checkpointer()', que ya no existe,
-    # compilamos el 'workflow' original una segunda vez, ahora sí,
-    # añadiendo el checkpointer de memoria para la consola.
-    console_app = workflow.compile(checkpointer=memory)
-    print("Graph re-compiled with in-memory checkpointer for console.")
-
-    print("\nGenerando visualización del grafo...")
+    print("\nGenerating graph visualization...")
     try:
-        # Render local con Graphviz (robusto y sin red)
+        # Render locally with Graphviz (robust and network-independent)
         png_bytes = console_app.get_graph().draw_png()
         with open("graph.png", "wb") as f: f.write(png_bytes)
-        print("¡Imagen del grafo guardada como 'graph.png'!")
+        print("Graph image saved as 'graph.png'!")
     except Exception as e:
-        print(f"\nNo se pudo generar la imagen del grafo: {e}")
+        print(f"\nCould not generate graph image: {e}")
 
     print("\n--- Medical Bot Initialized (V5 - Turn-Count Memory) ---")
     thread_id = str(uuid.uuid4())
     print(f"Starting new conversation with Thread ID: {thread_id}")
     
-    # [MODIFICADO] El retriever ya no necesita pasarse en el config.
     run_config = {
         "configurable": {
             "thread_id": thread_id,
@@ -527,19 +524,19 @@ if __name__ == '__main__':
 
             inputs = {"messages": [HumanMessage(content=question)]}
             
-            print("\n--- Pensando... ---")
-            # Usamos la versión de consola para el bucle interactivo.
+            print("\n--- Thinking... ---")
+            # Use the console version for the interactive loop.
             for event in console_app.stream(inputs, config=run_config, stream_mode="values"):
                 if "intent" in event and event["intent"]:
-                    print(f"-> Intención: {event['intent']}")
+                    print(f"-> Intent: {event['intent']}")
                 
                 last_message = event["messages"][-1]
                 if isinstance(last_message, AIMessage) and not last_message.tool_calls:
-                     print(f"\nRespuesta del Bot:\n{last_message.content}")
+                     print(f"\nBot Response:\n{last_message.content}")
 
         except KeyboardInterrupt: break
         except Exception as e:
             logging.error(f"Error: {e}", exc_info=True)
             break
     
-    print("\nAdiós. ¡Cuídate!")
+    print("\nGoodbye. Take care!")
