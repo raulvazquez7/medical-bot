@@ -46,6 +46,31 @@ The user-facing application is a sophisticated, stateful agent built with **Lang
     *   **Long-Term Memory (Summarization):** The `end_of_turn` node keeps track of the conversation turns. Every three turns, it routes the flow to a `summarizer` node. This node uses an efficient LLM to condense the recent conversation into an updated summary. Crucially, once summarized, the short-term memory is completely cleared to prevent redundant information processing.
     *   **Immediate Pruning for Efficiency:** After the agent uses a tool, a dedicated `pruning` node immediately removes the large, raw tool outputs from the short-term memory. This keeps the conversational history clean, radically reduces token usage, and ensures that only high-level conclusions are passed to the long-term memory and future agent turns.
 
+### Detailed Graph Architecture
+
+The agent's logic is orchestrated by a state graph where each node represents a specific capability. This modular design allows for clear, maintainable, and robust conversational flows.
+
+| Node | Responsibility | Logic / Example of Functioning |
+| :--- | :--- | :--- |
+| `router` | **Classify & Protect.** | Analyzes user input. Is it a greeting, a query about a known medicine, or an unknown one? Acts as the first line of defense. |
+| `agent` | **Reason & Plan.** | The core ReAct brain. Guided by its System Prompt, it plans the steps and tools needed to answer a user's question. |
+| `query_rewriter` | **Optimize Search.** | Enriches the agent's query with conversational context (e.g., patient conditions) to make the database search maximally relevant. |
+| `tools` | **Act & Retrieve.** | Executes actions planned by the agent—primarily, searching for information in the Supabase vector database. |
+| `handle_retrieval_failure`| **Manage Retrieval Failures.** | If `tools` finds no documents, this node provides a safe, predefined response, preventing the agent from hallucinating. |
+| `unauthorized` | **Block Out-of-Scope Questions.** | If the `router` detects a medication not in our database, this node informs the user, acting as a critical guardrail. |
+| `pruning` & `summarizer`| **Manage Memory.** | These nodes maintain long-term memory, pruning raw tool outputs and summarizing turns to keep the context efficient and focused. |
+
+#### Handling Complex Queries
+
+The agent's true power is revealed when faced with multi-step questions (e.g., "Compare Nolotil and Ibuprofen"). It leverages the ReAct pattern to solve them iteratively:
+
+1.  The **agent** decides to tackle one medicine first and calls the `tools` node for "Nolotil".
+2.  The information returns to the **agent**. It recognizes its task is incomplete.
+3.  It calls the `tools` node again, this time for "Ibuprofen".
+4.  With information for both medicines in its context, the **agent** synthesizes a final, comprehensive answer.
+
+This `Agent -> Tool -> Agent` loop is what enables the chatbot to break down and solve complex problems.
+
 ## Advanced Features: Observability & Safety
 
 To move from a functional prototype to a reliable application, this project incorporates crucial features for monitoring and safety.
@@ -56,11 +81,12 @@ The entire agentic graph is integrated with [LangSmith](https://smith.langchain.
 
 ### Multi-Layered Guardrails
 
-Given the sensitive nature of medical information, the chatbot implements three distinct layers of safety checks.
+Given the sensitive nature of medical information, the chatbot implements several distinct layers of safety checks to ensure robust and predictable behavior.
 
-1.  **Intent Router Guardrail:** The initial router node acts as the first line of defense. It not only classifies intent but also validates extracted medication names against a known list. If a user asks about a medication not in the database, the router diverts the conversation to a specific response node, preventing the agent from ever attempting to answer questions for which it has no data.
-2.  **Prompt-Level Guardrail:** The main agent is governed by a robust `System Prompt`. This foundational instruction strictly forbids providing medical advice, forces the agent to think step-by-step, and mandates that its answers be based *exclusively* on the information retrieved from the provided documents.
-3.  **Retrieval-Level Guardrail (Metadata Filtering):** *[Future implementation]* To prevent context contamination, the retrieval pipeline will be enhanced with metadata filtering. When the agent identifies the relevant medication(s), it will force the vector search to consider **only** the chunks belonging to those leaflets.
+1.  **Router Guardrail (Known vs. Unknown Medicine):** The initial `router` node validates medication names against a known list. If a user asks about an unknown medication, the flow is diverted to a specific `unauthorized` node, preventing any attempt to answer.
+2.  **Retrieval Failure Guardrail (No Documents Found):** If a search for a *known* medication yields no relevant documents (for a very specific query), the graph diverts the flow to a `handle_retrieval_failure` node. This provides a safe, canned response instead of letting the agent guess or hallucinate an answer.
+3.  **Prompt-Level Guardrail (Behavioral Constraints):** The main agent is governed by a robust `System Prompt`. This foundational instruction strictly forbids providing medical advice and mandates that its answers be based *exclusively* on the retrieved information.
+4.  **Retrieval-Level Guardrail (Metadata Filtering):** *[Future implementation]* To prevent context contamination, the retrieval pipeline will be enhanced with metadata filtering. When the agent identifies the relevant medication(s), it will force the vector search to consider **only** the chunks belonging to those leaflets.
 
 ## Robust Evaluation Framework
 
