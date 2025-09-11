@@ -6,7 +6,7 @@ A specialized RAG-based chatbot for answering questions about medications using 
 
 The average patient in Spain spends significant time trying to find specific information, such as contraindications or dosage, within poorly formatted and dense PDF leaflets (`prospectos`). Medical-Bot aims to solve this problem by providing a simple conversational interface to query this information.
 
-**The promise:** "Ask anything about your medication and receive an answer with an exact quote from the official leaflet in < 3 seconds."
+**The promise:** "Ask anything about your medication and receive an answer with an exact quote from the official leaflet in few seconds."
 
 This project is built on a knowledge base of common Spanish medications and serves as a case study in building robust, data-driven, and production-ready RAG systems.
 
