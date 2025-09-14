@@ -196,7 +196,7 @@ Las reacciones alérgicas más leves (p. ej. reacciones en piel y mucosas como p
 - reacciones alérgicas que suelen presentarse durante o justo después de la administración pero también horas más tarde,
 - erupciones y aparición de habones en la piel,
 - disminución del número de glóbulos blancos en sangre (leucopenia),
-- asma.
+- aparcición de asma.
 
 #### Muy raros (pueden afectar hasta 1 de cada 10.000 personas):
 
