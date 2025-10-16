@@ -35,7 +35,7 @@ from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 
 from src.app import SupabaseRetriever, format_docs_with_sources, AnswerWithSources, rag_prompt_template
 from src import config
-from src.models import get_embeddings_model # <-- Standardized import
+from src.models.embeddings import get_embeddings_model
 
 # --- Logging Configuration ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

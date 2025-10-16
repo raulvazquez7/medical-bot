@@ -16,9 +16,18 @@ ragas
 datasets
 tqdm
 
+# --- Testing ---
+pytest
+pytest-asyncio
+pytest-cov
+pytest-mock
+
 # --- Environment & Config ---
 python-dotenv
-pydantic 
+pydantic
+pydantic-settings
+pyyaml
+tenacity 
 
 # --- Vector Database Client ---
 supabase

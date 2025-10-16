@@ -16,7 +16,8 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 from src.app import SupabaseRetriever
 from src import config
-from src.models import get_embeddings_model, get_known_medicines
+from src.models.embeddings import get_embeddings_model
+from src.database.supabase import get_known_medicines
 
 # --- Logging Configuration ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

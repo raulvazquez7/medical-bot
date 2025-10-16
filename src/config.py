@@ -1,82 +1,204 @@
 import os
-from dotenv import load_dotenv
+from pydantic_settings import BaseSettings
+from pydantic import Field
 
-# [MODIFICADO] Hacemos que la carga del .env sea configurable.
-# Esto nos permite apuntar al .env de 'studio/' cuando lanzamos LangGraph Studio.
-# Si la variable DOTENV_PATH no está definida, se comporta como siempre, buscando '.env'.
-load_dotenv(dotenv_path=os.getenv("DOTENV_PATH"))
 
-# --- Directory Paths ---
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_PATH = os.path.join(BASE_DIR, 'data')
-MARKDOWN_PATH = os.path.join(BASE_DIR, 'data_markdown')
 
-# --- Model Parameters ---
-# Multimodal model to interpret the structure of the PDFs
-PDF_PARSE_MODEL = 'gemini-1.5-flash'
+class Settings(BaseSettings):
+    """
+    Application settings with validation.
+    Uses Pydantic Settings for automatic env var loading and type validation.
+    """
 
-# [MODIFICADO] Modelo principal para el agente ReAct (razonamiento complejo)
-# Se recomienda un modelo potente como 'gpt-4o' o 'gemini-1.5-pro'
-AGENT_MODEL = os.getenv("AGENT_MODEL", "gpt-4o")
+    # --- Directory Paths ---
+    base_dir: str = Field(
+        default_factory=lambda: os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        description="Base directory of the project",
+    )
 
-# [NUEVO] Modelo rápido y económico para tareas de clasificación y resumen
-# Se recomienda un modelo rápido como 'gemini-1.5-flash'
-ROUTER_MODEL = os.getenv("ROUTER_MODEL", "gemini-2.5-flash")
+    @property
+    def data_path(self) -> str:
+        """Path to data directory."""
+        return os.path.join(self.base_dir, "data")
 
-# Embeddings provider ("openai" or "google")
-EMBEDDINGS_PROVIDER = os.getenv("EMBEDDINGS_PROVIDER", "google")
-# Embedding model. "text-embedding-3-small" for OpenAI or "models/gemini-embedding-001" for Google.
-EMBEDDINGS_MODEL = os.getenv("EMBEDDINGS_MODEL", "models/gemini-embedding-001")
+    @property
+    def markdown_path(self) -> str:
+        """Path to markdown data directory."""
+        return os.path.join(self.base_dir, "data_markdown")
 
-# --- Chunking Parameters ---
-CHUNK_SIZE = 800
-CHUNK_OVERLAP = 100
+    # --- Model Configuration ---
+    pdf_parse_model: str = Field(
+        default="gemini-2.5-flash",
+        description="Multimodal model for PDF parsing",
+    )
 
-# --- Evaluation Parameters ---
-# Enable or disable the re-ranking step during evaluation
-EVAL_USE_RERANKER = os.getenv("EVAL_USE_RERANKER", "True").lower() in ('true', '1', 't')
-# Number of documents to retrieve initially before re-ranking
-EVAL_INITIAL_K = int(os.getenv("EVAL_INITIAL_K", "20"))
-# Final number of documents to consider after re-ranking
-EVAL_FINAL_K = int(os.getenv("EVAL_FINAL_K", "5"))
+    agent_model: str = Field(
+        default="gpt-4o",
+        description="Main agent LLM (ReAct reasoning)",
+    )
 
-# --- Credentials (read from .env) ---
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    router_model: str = Field(
+        default="gemini-2.5-flash",
+        description="Fast LLM for classification and summarization",
+    )
 
-# --- Database Connection for Checkpoints ---
-POSTGRES_CONN_STR = os.getenv("POSTGRES_CONN_STR")
+    embeddings_provider: str = Field(
+        default="google",
+        description="Embeddings provider (openai or google)",
+    )
 
-# --- LangSmith ---
-# To enable, set LANGCHAIN_TRACING_V2="true" in the .env file
-LANGCHAIN_API_KEY = os.getenv("LANGCHAIN_API_KEY")
-LANGCHAIN_PROJECT = os.getenv("LANGCHAIN_PROJECT")
+    embeddings_model: str = Field(
+        default="models/gemini-embedding-001",
+        description="Embeddings model name",
+    )
 
-# --- Cohere API Key ---
-COHERE_API_KEY = os.getenv("COHERE_API_KEY")
+    # --- LLM Service Configuration ---
+    llm_timeout: int = Field(
+        default=30,
+        description="Timeout in seconds for LLM calls",
+        ge=5,
+        le=120,
+    )
+    llm_max_retries: int = Field(
+        default=3,
+        description="Maximum retry attempts for failed LLM calls",
+        ge=1,
+        le=5,
+    )
+    llm_rate_limit: int = Field(
+        default=3,
+        description="Maximum concurrent LLM requests (rate limiting)",
+        ge=1,
+        le=10,
+    )
+    embeddings_cache_size: int = Field(
+        default=100,
+        description="LRU cache size for embeddings queries",
+        ge=0,
+        le=1000,
+    )
+
+    # --- Agent Configuration ---
+    max_react_iterations: int = Field(
+        default=10,
+        description="Maximum ReAct agent iterations to prevent infinite loops",
+        ge=1,
+        le=20,
+    )
+
+    # --- Chunking Parameters ---
+    chunk_size: int = Field(default=800, description="Chunk size for text splitting")
+    chunk_overlap: int = Field(default=100, description="Overlap between chunks")
+
+    # --- Evaluation Parameters ---
+    eval_use_reranker: bool = Field(
+        default=True, description="Enable re-ranking in evaluation"
+    )
+    eval_initial_k: int = Field(
+        default=20, description="Initial documents to retrieve"
+    )
+    eval_final_k: int = Field(default=5, description="Final documents after re-ranking")
+
+    # --- API Keys (Required) ---
+    google_api_key: str = Field(..., description="Google API key for Gemini")
+    openai_api_key: str = Field(..., description="OpenAI API key")
+    supabase_url: str = Field(..., description="Supabase project URL")
+    supabase_service_key: str = Field(..., description="Supabase service key")
+    cohere_api_key: str = Field(..., description="Cohere API key for re-ranking")
+    postgres_conn_str: str = Field(
+        ..., description="PostgreSQL connection string for checkpoints"
+    )
+
+    # --- LangSmith (Optional) ---
+    langchain_tracing_v2: str = Field(
+        default="false", description="Enable LangSmith tracing"
+    )
+    langchain_api_key: str | None = Field(
+        default=None, description="LangSmith API key"
+    )
+    langchain_project: str | None = Field(
+        default=None, description="LangSmith project name"
+    )
+
+    class Config:
+        """Pydantic config."""
+
+        env_file = os.getenv("DOTENV_PATH", ".env")
+        case_sensitive = False
+        extra = "ignore"
+
+
+# Global settings instance
+_settings: Settings | None = None
+
+
+def get_settings() -> Settings:
+    """
+    Get or create settings instance.
+    Singleton pattern for consistent configuration.
+
+    Returns:
+        Settings instance
+
+    Raises:
+        ValidationError: If required env vars are missing or invalid
+    """
+    global _settings
+    if _settings is None:
+        _settings = Settings()
+    return _settings
+
+
+# Expose settings as module-level variables for backward compatibility
+# Only expose non-sensitive configuration values
+settings = get_settings()
+
+# Directory paths
+BASE_DIR = settings.base_dir
+DATA_PATH = settings.data_path
+MARKDOWN_PATH = settings.markdown_path
+
+# Model parameters
+PDF_PARSE_MODEL = settings.pdf_parse_model
+AGENT_MODEL = settings.agent_model
+ROUTER_MODEL = settings.router_model
+EMBEDDINGS_PROVIDER = settings.embeddings_provider
+EMBEDDINGS_MODEL = settings.embeddings_model
+
+# LLM Service parameters
+LLM_TIMEOUT = settings.llm_timeout
+LLM_MAX_RETRIES = settings.llm_max_retries
+LLM_RATE_LIMIT = settings.llm_rate_limit
+EMBEDDINGS_CACHE_SIZE = settings.embeddings_cache_size
+MAX_REACT_ITERATIONS = settings.max_react_iterations
+
+# Chunking parameters
+CHUNK_SIZE = settings.chunk_size
+CHUNK_OVERLAP = settings.chunk_overlap
+
+# Evaluation parameters
+EVAL_USE_RERANKER = settings.eval_use_reranker
+EVAL_INITIAL_K = settings.eval_initial_k
+EVAL_FINAL_K = settings.eval_final_k
+
+# NOTE: API keys and credentials are NOT exposed globally for security.
+# Access them via get_settings() when needed:
+#   from src.config import get_settings
+#   settings = get_settings()
+#   api_key = settings.openai_api_key
+
 
 def check_env_vars():
-    """Checks that all necessary environment variables for the project are loaded."""
-    
-    # List of required variables for the current project architecture
-    required_vars = [
-        "GOOGLE_API_KEY",
-        "OPENAI_API_KEY",
-        "SUPABASE_URL",
-        "SUPABASE_SERVICE_KEY",
-        "COHERE_API_KEY",
-        "POSTGRES_CONN_STR"
-    ]
-    
-    # If LangSmith is enabled, its variables are also mandatory
-    if os.getenv("LANGCHAIN_TRACING_V2") == "true":
-        required_vars.extend(["LANGCHAIN_API_KEY", "LANGCHAIN_PROJECT", "LANGCHAIN_ENDPOINT"])
+    """
+    Validates that all necessary environment variables are loaded.
+    Now handled automatically by Pydantic Settings.
 
-    missing_vars = [var for var in required_vars if not os.getenv(var)]
-    
-    if missing_vars:
-        raise ValueError(f"The following environment variables are missing from your .env file: {', '.join(missing_vars)}")
-    
-    print("All necessary environment variables are loaded.") 
+    Raises:
+        ValidationError: If required variables are missing
+    """
+    try:
+        get_settings()
+        print("✅ All necessary environment variables are loaded and validated.")
+    except Exception as e:
+        print(f"❌ Configuration error: {e}")
+        raise 
